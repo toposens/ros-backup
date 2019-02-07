@@ -1,0 +1,20 @@
+<launch>
+	<arg name="dev_id" default="/dev/ttyUSB0"/>
+	<arg name="frame_id" default="toposens"/>
+	<arg name="nWave" default="CnWave00008"/>
+	<arg name="filtr" default="Cfiltr00005"/>
+	<arg name="dThre" default="CdThre00002"/>
+	<arg name="goLim" default="CgoLim-200002000-0500050000020002000"/>
+
+	<node pkg="toposens_driver" type="toposens_node" name="toposens_node" output="screen">
+		<param name="dev_id" value="$(arg dev_id)" />
+		<param name="frame_id" value="$(arg frame_id)" />
+		<param name="nWave" value="$(arg nWave)" />
+		<param name="filtr" value="$(arg filtr)" />
+		<param name="dThre" value="$(arg dThre)" />
+		<param name="goLim" value="$(arg goLim)" />
+	<!--
+		<param name="alpha_goLim" value="CgoLim-200002000-0100020000020002000" />
+	-->
+	</node>
+</launch>

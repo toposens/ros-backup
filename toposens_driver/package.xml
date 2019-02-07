@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>toposens_driver</name>
+  <version>1.0.0</version>
+  <description>ROS device driver for Toposens 3D Ultrasound sensors.</description>
+  
+  <maintainer email="singh@toposens.com">Adi Singh</maintainer>
+  <author email="dengler@toposens.com">Sebastian Dengler</author>
+  <author email="singh@toposens.com">Adi Singh</author>
+
+  <license>BSD</license>
+  <url type="website">TBD</url>
+  <url type="repository">TBD</url>
+  <url type="bugtracker">TBD</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>visualization_msgs</depend>
+	<depend>tf</depend>
+  <depend>toposens_msgs</depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+</package>

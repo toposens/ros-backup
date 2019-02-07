@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>toposens</name>
+  <version>1.0.0</version>
+  <description>ROS support for Toposens 3D Ultrasound sensors.</description>
+
+  <maintainer email="singh@toposens.com">Adi Singh</maintainer>
+  <author email="dengler@toposens.com">Sebastian Dengler</author>
+  <author email="singh@toposens.com">Adi Singh</author>
+
+  <license>BSD</license>
+  <url type="website">TBD</url>
+  <url type="repository">TBD</url>
+  <url type="bugtracker">TBD</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+	<exec_depend>toposens_driver</exec_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

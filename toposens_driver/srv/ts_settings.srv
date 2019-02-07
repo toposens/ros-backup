@@ -1,0 +1,4 @@
+string param
+string value 	#TODO change to int8
+---
+bool success
