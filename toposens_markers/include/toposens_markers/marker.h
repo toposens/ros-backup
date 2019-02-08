@@ -1,5 +1,5 @@
-#ifndef MARKERS_PUBLISHER_H
-#define MARKERS_PUBLISHER_H
+#ifndef MARKER_H
+#define MARKER_H
 
 #include <iostream>
 #include <unistd.h>
@@ -17,6 +17,8 @@
 #include <toposens_msgs/TsScan.h>
 
 
+namespace toposens_markers
+{
 
 struct Point {
 	float x;
@@ -54,5 +56,7 @@ public:
 	std_msgs::ColorRGBA colorRainbow(float i);
 	bool newFrame;
 };
+
+} // namespace toposens_markers
 
 #endif

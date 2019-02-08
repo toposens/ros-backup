@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>toposens_driver</name>
+  <name>toposens_markers</name>
   <version>1.0.0</version>
   <description>ROS device driver for Toposens 3D Ultrasound sensors.</description>
   

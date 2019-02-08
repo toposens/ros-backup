@@ -10,9 +10,9 @@ project(toposens_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  visualization_msgs
-  message_generation
 	tf
+  dynamic_reconfigure
+  message_generation
   toposens_msgs
 )
 
@@ -25,49 +25,6 @@ find_package(catkin REQUIRED COMPONENTS
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 # catkin_python_setup()
 
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
-
-
-## Generate services in the 'srv' folder
-add_service_files(
-  FILES
-  ts_settings.srv
-)
-
-## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  visualization_msgs
-)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -84,10 +41,9 @@ generate_messages(
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/TsConfig.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -101,7 +57,13 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES toposens
-  CATKIN_DEPENDS roscpp rospy message_runtime visualization_msgs tf toposens_msgs
+  CATKIN_DEPENDS
+  roscpp
+  rospy
+  tf
+  dynamic_reconfigure
+  message_runtime
+  toposens_msgs
 #  DEPENDS system_lib
 )
 
@@ -125,10 +87,6 @@ include_directories(
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/toposens_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -180,15 +138,11 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-add_executable(markers_publisher src/markers_publisher.cpp)
-target_link_libraries(markers_publisher ${catkin_LIBRARIES})
-add_dependencies(markers_publisher toposens_driver_generate_messages_cpp)
+add_executable(driver src/driver_node src/sensor src/serial)
+add_dependencies(driver ${PROJECT_NAME}_gencfg)
+target_link_libraries(driver ${catkin_LIBRARIES})
 
-add_executable(toposens_node src/toposens_node.cpp src/ts_driver.cpp src/ts_serial.cpp)
-target_link_libraries(toposens_node ${catkin_LIBRARIES})
-add_dependencies(toposens_node toposens_driver_generate_messages_cpp)
-
-install(TARGETS toposens_node
+install(TARGETS driver
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         COMPONENT main
 )
@@ -205,18 +159,4 @@ install(TARGETS toposens_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-
-#add_executable(toposens_driver src/toposens_driver.cpp)
-#target_link_libraries(toposens_driver ${catkin_LIBRARIES})
-#add_dependencies(toposens_driver toposens_generate_messages_cpp)
-
-#add_executable(toposens_node src/toposens_node.cpp)
-#target_link_libraries(toposens_node ${catkin_LIBRARIES})
-#add_dependencies(toposens_node toposens_generate_messages_cpp)
-
-#install(TARGETS toposens_node
-#        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#        COMPONENT main
-#)
 

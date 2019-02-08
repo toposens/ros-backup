@@ -1,4 +1,4 @@
-# Parsed Toposens data packet
+# An echo point with location XYZ and intensity V
 
 float32 x
 float32 y

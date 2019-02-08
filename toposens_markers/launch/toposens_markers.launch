@@ -1,0 +1,20 @@
+<launch>
+	<include file="$(find toposens_driver)/launch/driver.launch" />
+
+	<node pkg="toposens_markers" type="markers" name="markers_node" output="screen">
+		<param name="frame_id" value="toposens" />
+		<param name="lifetime" value="0.5" />
+		<param name="volume_thresh" value="40.0" />
+		<param name="min_dist" value="0.15" />
+		<param name="volume_divider" value="2500.0" />
+		<param name="max_volume" value="200.0" />
+		<param name="volume_offset" value="0.0" />
+		<param name="color_direction" value="x" />
+		<param name="color_min" value="0.0" />
+		<param name="color_max" value="1.0" />
+	</node>
+
+	
+	<node pkg="tf" type="static_transform_publisher" name="alpha_link_broadcaster" args="0.049 0 0.112 0 0 0 1 base_link toposens 100" />
+	<node pkg="rviz" type="rviz" name="grid_visualization" output="screen" args="-d $(find toposens_markers)/rviz/toposens_markers.rviz" />
+</launch>

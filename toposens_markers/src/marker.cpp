@@ -1,19 +1,26 @@
-#include <toposens_driver/markers_publisher.h>
+#include "toposens_markers/marker.h"
 
 #include <toposens_msgs/TsScan.h>
+
+namespace toposens_markers
+{
+
+float _sensingRange = 0;
 
 MarkersPublisher::MarkersPublisher()
 {
 	ros::NodeHandle private_nh("~");
 
 	// Get/Set parameters
-	private_nh.param<std::string>("frame_id", frame, "alpha_sensor");		//Frame for tf
+	private_nh.param<std::string>("frame_id", frame, "toposens");		//Frame for tf
 	private_nh.param<float>("lifetime", lifetime, 0.5); 								//Period of time for PCL
-	private_nh.param<float>("volume_thresh", volume_thresh, 80.0);			//Minimum volume a point needs to be processed
-	private_nh.param<float>("min_dist", min_dist, 0.15);
+//	private_nh.param<float>("volume_thresh", volume_thresh, 80.0);			//Minimum volume a point needs to be processed
+//	private_nh.param<float>("min_dist", min_dist, 0.15);
 	private_nh.param<float>("volume_divider", volume_divider, 100.0);
 	private_nh.param<float>("max_volume", max_volume, 20.0);
 	private_nh.param<float>("volume_offset", volume_offset, 5.0);
+
+
 	private_nh.param<std::string>("color_direction", color_direction, "z");
 	private_nh.param<float>("color_min", color_min, 0.0);
 	private_nh.param<float>("color_max", color_max, 0.3);
@@ -55,6 +62,9 @@ void MarkersPublisher::updatePoints() // Update vector of points
 		// ROS_INFO("%f", newPoints[i].x);
 	//	if (newPoints[i].x >= min_dist && newPoints[i].v >= volume_thresh) {
 			points.push_back(newPoints[i]);
+      if (newPoints[i].x > _sensingRange) {
+        _sensingRange = newPoints[i].x;
+      }
 	//	}
 	//	else {
 	//		ROS_WARN("x = %f, v = %f", newPoints[i].x, newPoints[i].v);
@@ -110,7 +120,7 @@ void MarkersPublisher::publishMarkers() // Publish vector of points as Marker Ar
     	marker.scale.y = (points[i].v + volume_offset)/volume_divider;
     	marker.scale.z = (points[i].v + volume_offset)/volume_divider;
 
-      ROS_WARN("%f", marker.scale.x);
+  //    ROS_WARN("%f", marker.scale.x);
 		}
 		else
 		{
@@ -118,7 +128,7 @@ void MarkersPublisher::publishMarkers() // Publish vector of points as Marker Ar
     	marker.scale.y = (max_volume + volume_offset)/volume_divider;
     	marker.scale.z = (max_volume + volume_offset)/volume_divider;
 
-      ROS_ERROR("%f", marker.scale.x);
+   //   ROS_ERROR("%f", marker.scale.x);
 		}
 
 		if (color_direction == "x") {
@@ -144,49 +154,36 @@ void MarkersPublisher::publishMarkers() // Publish vector of points as Marker Ar
 
 
 std_msgs::ColorRGBA MarkersPublisher::colorRainbow(float i) {
+  int nZones = 5;       // divide sensing range into n equal zones
+  float compressor = 2; // compresses the color ranges closer to origin
+  int zone = nZones * i/(_sensingRange) * compressor; // ignore decimal value
+
   std_msgs::ColorRGBA color;
+  switch (zone) {
+    case 0:     // red zone
+      color.r = 1.0f;
+      color.g = color.b = 0.0f;
+      break;
+    case 1:     // yellow zone
+      color.r = color.g = 1.0f;
+      color.b = 0.0f;
+      break;
+    case 2:     // green zone
+      color.g = 1.0f;
+      color.r = color.b = 0.0f;
+      break;
+    case 3:     // cyan zone
+      color.g = color.b = 1.0f;
+      color.r = 0.0f;
+      break;
+    default:     // blue zone
+      color.b = 1.0f;
+      color.g = color.r = 0.0f;
+      break;
+   }
   color.a = 1.0f;
-  if (i <= 0.25) {
-    color.r = 0.0f;
-    color.g = i*4.0f;
-    color.b = 1.0f;
-  }
-  else if (i <= 0.5) {
-    color.r = 0.0f;
-    color.g = 1.0f;
-    color.b = 1.0f - ((i-0.25f) * 4.0f);
-  }
-  else if (i <= 0.75) {
-    color.r = (i-0.5f) * 4;
-    color.g = 1.0f;
-    color.b = 0.0f;
-  }
-  else {
-    color.r = 1.0f;
-    color.g = 1.0f - ((i-0.75f) * 4.0f);
-    color.b = 0.0f;
-  }
   return color;
 }
 
+} // namespace toposens_markers
 
-int main(int argc, char **argv)
-{
-	ros::init(argc, argv, "ts_alpha_markers");
-
-	MarkersPublisher markers_publisher;
-
-	ros::Rate loop_rate(20);
-
-	while (ros::ok()) {
-
-		if (markers_publisher.newFrame == true) {
-			markers_publisher.updatePoints();
-			markers_publisher.publishMarkers();
-		}
-		ros::spinOnce();
-		loop_rate.sleep();
-	}
-
-	return 0;
-}

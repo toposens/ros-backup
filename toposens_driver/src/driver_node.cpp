@@ -2,8 +2,7 @@
 #include <signal.h>
 #include <ros/xmlrpc_manager.h>
 
-#include <toposens_driver/ts_driver.h>
-
+#include <toposens_driver/sensor.h>
 
 // Signal-safe flag for whether shutdown is requested
 volatile sig_atomic_t g_shutdown = 0;
@@ -33,7 +32,7 @@ void onShutdown(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "toposens_node", ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, "toposens_driver_node", ros::init_options::NoSigintHandler);
   signal(SIGINT, onSigint); // Override SIGINT handler
 
   // Override XMLRPC shutdown
@@ -42,12 +41,11 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-
   ros::Rate loop_rate(10); // 20 Hz
 
-  // TODO: There should be an exception raised here
+  // TODO: Exception should raise better message
   try {
-    ts_driver::TsDriver ts(nh, private_nh);
+    toposens_driver::Sensor ts(nh, private_nh);
 
     while (!g_shutdown && ts.poll()) {
       ros::spinOnce();
@@ -55,7 +53,6 @@ int main(int argc, char** argv)
     }
 
     ts.shutdown();
-    
   } catch (const char *msg) {
     ROS_ERROR("%s", msg);
   }
