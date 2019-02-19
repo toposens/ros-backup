@@ -1,6 +1,9 @@
-# An echo point with location XYZ and intensity V
+# An echo received from a 3D location with certain intensity
 
-float32 x
-float32 y
-float32 z
-float32 v
+geometry_msgs/Point location
+float32 intensity
+
+#float32 x
+#float32 y
+#float32 z
+#float32 v

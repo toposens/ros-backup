@@ -13,7 +13,10 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   dynamic_reconfigure
   toposens_msgs
+  toposens_driver
+  rviz_visual_tools
 )
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -41,13 +44,13 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
-  cfg/TsConfig.cfg
+ cfg/TsMarkers.cfg
 )
 
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES toposens
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
   roscpp
   rospy
@@ -55,18 +58,28 @@ catkin_package(
   message_runtime
   tf
   toposens_msgs
-#  DEPENDS system_lib
+  toposens_driver
+  rviz_visual_tools
 )
 
 include_directories(
   include ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(markers src/markers_node src/marker)
-add_dependencies(markers ${PROJECT_NAME}_gencfg)
-target_link_libraries(markers ${catkin_LIBRARIES})
 
-install(TARGETS markers
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        COMPONENT main
+add_library(${PROJECT_NAME} src/marker.cpp)
+add_executable(${PROJECT_NAME}_node src/ts_markers_node.cpp)
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
+target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+
+
+install(
+  TARGETS ${PROJECT_NAME}_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  COMPONENT main
+)
+
+install(
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )

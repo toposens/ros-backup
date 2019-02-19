@@ -1,62 +1,45 @@
 #ifndef MARKER_H
 #define MARKER_H
 
-#include <iostream>
-#include <unistd.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <sstream>
-#include <stdlib.h>
+#include <deque>
 #include <ros/ros.h>
-#include <std_msgs/String.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/point_cloud2_iterator.h>
-#include <visualization_msgs/Marker.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <dynamic_reconfigure/server.h>
+#include <rviz_visual_tools/rviz_visual_tools.h>
 
 #include <toposens_msgs/TsScan.h>
+#include <toposens_markers/TsMarkersConfig.h>
 
 
 namespace toposens_markers
 {
-
-struct Point {
-	float x;
-	float y;
-	float z;
-	float v;
-	ros::Time stamp;
-};
+const std::string kRvizTopic  = "ts_markers";
+const auto _baseScale         = rviz_visual_tools::scales::LARGE;
+const std::string kPointsNs   = "TsPoints";
+const std::string kMeshNs     = "TsSensor";
 
 
-class MarkersPublisher
+class Marker
 {
-protected:
-	ros::NodeHandle nh;
-	ros::Publisher markers_pub;
-	ros::Subscriber points_sub;
-	std::vector<Point> newPoints;
-	std::vector<Point> points;
-	std::string frame;
-	float lifetime;
-	float volume_thresh;
-	float min_dist;
-	float volume_divider;
-	float max_volume;
-	float volume_offset;
-	std::string color_direction;
-	float color_min;
-	float color_max;
+  public:
+    Marker(ros::NodeHandle nh, ros::NodeHandle private_nh);
+    ~Marker() {}
 
-public:
-	MarkersPublisher();
-	void pointsSubCallback(const toposens_msgs::TsScan::ConstPtr& msg);
-	void updatePoints();
-	void publishMarkers();
-	std_msgs::ColorRGBA colorRainbow(float i);
-	bool newFrame;
+  private:
+    void _reconfig(TsMarkersConfig &cfg, uint32_t level);
+    void _sanitize(const toposens_msgs::TsScan::ConstPtr& msg);
+    void _plot(void);
+    void _addSensorMesh(void);
+
+  	std::string _frame;
+    float _sensingRange;
+    TsMarkersConfig _cfg;            // dynamic reconfigure params
+    std::unique_ptr<dynamic_reconfigure::Server<TsMarkersConfig>> _srv;
+
+    ros::Subscriber _sub;
+    // deque to support queue function + iteration
+    std::deque<toposens_msgs::TsScan> _scans;
+    rviz_visual_tools::RvizVisualToolsPtr _rviz;
 };
-
 } // namespace toposens_markers
 
 #endif

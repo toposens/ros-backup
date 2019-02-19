@@ -15,7 +15,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <exec_depend>toposens_msgs</exec_depend>
 	<exec_depend>toposens_driver</exec_depend>
+  <exec_depend>toposens_markers</exec_depend>
 
   <export>
     <metapackage/>

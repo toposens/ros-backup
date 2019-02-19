@@ -1,0 +1,7 @@
+<launch>
+	<arg name="port" default="/dev/ttyUSB5" />
+
+	<node pkg="toposens_driver" type="toposens_driver_node" name="ts_driver_node" output="screen">
+		<param name="port" value="$(arg port)" />
+	</node>
+</launch>

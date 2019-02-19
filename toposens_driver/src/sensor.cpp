@@ -3,18 +3,6 @@
 
 namespace toposens_driver
 {
-const char kCmdPrefix           = 'C';
-const int  kCmdBufferSize       = 100;
-const char kCmdSigStrength[6]   = "nWave";
-const char kCmdFilterSize[6]    = "filtr";  
-const char kCmdNoiseThresh[6]   = "dThre";
-const char kCmdVoxelLimits[6]   = "goLim";
-const char kCmdBoostShortR[6]   = "slop1"; 
-const char kCmdBoostMidR[6]     = "slop2";   
-const char kCmdBoostLongR[6]    = "slop3";
-const std::string kPubChannel   = "ts_points";
-const int  kChannelQueue         = 100;
-
 
 Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
@@ -23,17 +11,23 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
 	_serial = std::make_unique<Serial>(private_nh, _port);
 	if (!_serial->isAlive()) throw "WTF Exception";
 
+  // Check if sensor is busy self calibrating (every power on)
+  if (_serial->isCalibrating()) {
+    ROS_INFO("Auto calibration in progress...");
+    while(_serial->isCalibrating()) continue;
+    ROS_INFO("Sensor calibration successful");
+  } else ROS_INFO("Sensor already calibrated");
+
   // Set up dynamic reconfigure to change sensor settings
-  _srv = std::make_unique<dynamic_reconfigure::Server<TsConfig> >(private_nh);
-  dynamic_reconfigure::Server<TsConfig>::CallbackType f;
-  f = boost::bind(&Sensor::_cfgCallback, this, _1, _2);
+  _srv = std::make_unique<dynamic_reconfigure::Server<TsDriverConfig> >(private_nh);
+  dynamic_reconfigure::Server<TsDriverConfig>::CallbackType f;
+  f = boost::bind(&Sensor::_reconfig, this, _1, _2);
   _srv->setCallback(f);
 
   // Advertise topic for Pointcloud-Messages
-  _pub = nh.advertise<toposens_msgs::TsScan>(kPubChannel, kChannelQueue);
-  ROS_INFO("Publishing toposens data to /%s", kPubChannel.c_str());
+  _pub = nh.advertise<toposens_msgs::TsScan>(kPointsTopic, kTopicQueueSize);
+  ROS_INFO("Publishing toposens data to /%s", kPointsTopic.c_str());
 }
-
 
 
 void Sensor::_init(void) {
@@ -52,26 +46,23 @@ void Sensor::_init(void) {
 }
 
 
-
-
-void Sensor::_cfgCallback(TsConfig &cfg, uint32_t level)
+void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
 {
   if ((int)level > 11) {
-    ROS_INFO("Update skipped: Settings parameter not recognized");
+    ROS_INFO("Update skipped: Parameter not recognized");
     return;
   }
 
   _cfg = cfg;
   if (level == -1) {
-    ROS_INFO("Transmitting initial settings to toposens device");
     Sensor::_init();
     return;
   }
 
-  ROS_INFO("Processing toposens reconfiguration");
-  ROS_DEBUG("Updating parameter TS%d", level);
+//  ROS_INFO("Processing toposens reconfiguration");
+  ROS_DEBUG("Updating parameter TSDriver %d", level);
   char cmd[kCmdBufferSize];
-  TsConfig::DEFAULT::BOOSTER bst = _cfg.groups.booster;
+  TsDriverConfig::DEFAULT::BOOSTER bst = _cfg.groups.booster;
 
   switch(level) {
     case 0:
@@ -109,9 +100,9 @@ void Sensor::_cmd(char* out, const char* param, int val) {
     return;
   }
   // at this point we know it is a voxel update
-  // getting values directly from TsConfig instead of passing 6 params
+  // getting values directly from TsDriverConfig instead of passing 6 params
   format = "%c%s%05d%05d%05d%05d%05d%05d\r";
-  TsConfig::DEFAULT::VOXEL vxl = _cfg.groups.voxel;
+  TsDriverConfig::DEFAULT::VOXEL vxl = _cfg.groups.voxel;
   std::sprintf(out, format.c_str(), kCmdPrefix, param,
                 vxl.y_max * -10, vxl.y_min * -10,
                 vxl.z_min * 10, vxl.z_max * 10,
@@ -123,24 +114,15 @@ void Sensor::_cmd(char* out, const char* param, int val) {
 
 bool Sensor::poll(void)
 {
-
-	//scan->packets.resize(config_.npackets);
-	// why resize packets queue?
-	// what is velodyne time offset option?
-
 	if (!_serial->isAlive()) throw "WTF Exception";
-	if (!_serial->get(_data)) return false;
+  _serial->getFrame(_data);
 
 	toposens_msgs::TsScan scan;
 	scan.header.stamp = ros::Time::now();
 
 	Sensor::_parse(scan);
-
-//		ROS_WARN("%zu", scan.points.size());
-//		for (int j = 0; j < scan.points.size(); j++) {
-//	  		ROS_ERROR("%f %f %f %f", scan.points[j].x, scan.points[j].y, scan.points[j].z, scan.points[j].v);
-//	  }
-
+  if (!scan.points.size()) return false;
+  
 	_pub.publish(scan);
 	return true;
 }
@@ -171,6 +153,8 @@ void Sensor::_parse(toposens_msgs::TsScan &scan)
 	//std::string strData = "S000016P0000X-0415Y00010Z00257V00061P0000X-0235Y00019Z00718V00055P0000X-0507Y00043Z00727V00075P0000X00142Y00360Z01555V00052E";
 	std::string strData = _data.str();
 
+  //  ROS_INFO_STREAM(strData);
+
 	while (1) {
 		index = strData.find('X', index);
 		if (index == std::string::npos) break;
@@ -182,17 +166,17 @@ void Sensor::_parse(toposens_msgs::TsScan &scan)
 		std::string z_val = strData.substr(index + 1, val_length);	
 		index = strData.find('V', index);
 		std::string v_val = strData.substr(index + 1, val_length);
-		pt.v = std::stof(v_val);
+		pt.intensity = std::stof(v_val)/100; // reduces points to normal size
 
 
 	// Transforming from TS coordinate frame to ROS coordinate frame
 	// TS frame: up is y+; right is x+; forward is z+
 	// ROS frame: up is z+; right is y-; forward is x+
 	// Therefore: ros_x = ts_z, ros_y = -ts_x; ros_z = ts_x
-		if (pt.v > 0) {
-			pt.x = std::stof(z_val)/1000;	// z becomes x
-			pt.y = -std::stof(x_val)/1000;	// -x becomes y
-			pt.z = std::stof(y_val)/1000;	// y becomes z
+		if (pt.intensity > 0) {
+			pt.location.x = std::stof(z_val)/1000;	// z becomes x
+			pt.location.y = -std::stof(x_val)/1000;	// -x becomes y
+			pt.location.z = std::stof(y_val)/1000;	// y becomes z
 			scan.points.push_back(pt);
 			pt = {};
 		}
