@@ -31,7 +31,7 @@ void onShutdown(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result)
 
 
 int main(int argc, char** argv)
-{
+{ 
   ros::init(argc, argv, "ts_driver_node", ros::init_options::NoSigintHandler);
   signal(SIGINT, onSigint); // Override SIGINT handler
 
@@ -43,12 +43,12 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
   ros::Rate loop_rate(10); // 10 Hz
 
-
   // TODO: Exception should raise better message
   try {
     toposens_driver::Sensor d(nh, private_nh);
 
-    while (!g_shutdown && d.poll()) {
+    while (!g_shutdown) {
+      d.poll();
       ros::spinOnce();
       loop_rate.sleep();
     }

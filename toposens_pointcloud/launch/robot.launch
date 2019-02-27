@@ -1,0 +1,11 @@
+<launch>
+	<arg name="multi_robot_name" default=""/>
+	<include file="$(find turtlebot3_bringup)/launch/turtlebot3_core.launch">
+		<arg name="multi_robot_name" value="$(arg multi_robot_name)"/>
+	</include>
+
+	<node pkg="turtlebot3_bringup" type="turtlebot3_diagnostics" name="turtlebot3_diagnostics" output="screen"/>
+	<node pkg="tf" type="static_transform_publisher" name="toposens_link" args="0.049 0 0.112 0 0 0 1 base_footprint toposens 100" />
+
+	<include file="$(find toposens_driver)/launch/toposens_driver.launch"/>
+</launch>

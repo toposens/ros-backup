@@ -8,7 +8,6 @@ project(toposens_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-	tf
   dynamic_reconfigure
   message_generation
   toposens_msgs
@@ -17,11 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-
 generate_dynamic_reconfigure_options(
   cfg/TsDriver.cfg
 )
-
 
 ###################################
 ## catkin specific configuration ##
@@ -34,11 +31,10 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
+  # LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
   roscpp
   rospy
-  tf
   dynamic_reconfigure
   message_runtime
   toposens_msgs
@@ -56,12 +52,10 @@ include_directories(
 )
 
 
-
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -90,11 +84,15 @@ install(
   COMPONENT main
 )
 
-install(
-  DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  PATTERN ".git" EXCLUDE
 )
 
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".git" EXCLUDE
+)
 
 
 #############
@@ -109,4 +107,3 @@ install(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-

@@ -8,9 +8,9 @@ namespace toposens_markers
 
 Marker::Marker(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
-	private_nh.param<std::string>("frame", _frame, "toposens");		//Frame for tf
+  private_nh.param<std::string>("frame", _frame, "toposens");   //Frame for tf
 
-  _rviz.reset(new rviz_visual_tools::RvizVisualTools(_frame,"/" + kRvizTopic));
+  _rviz.reset(new rviz_visual_tools::RvizVisualTools(_frame,"/" + kMarkersTopic));
   _rviz->enableBatchPublishing();
 
   // Set up dynamic reconfigure to change sensor settings
@@ -19,8 +19,8 @@ Marker::Marker(ros::NodeHandle nh, ros::NodeHandle private_nh)
   f = boost::bind(&Marker::_reconfig, this, _1, _2);
   _srv->setCallback(f);
 
-	// Subscribe to topic with ts points
-	_sub = nh.subscribe(toposens_driver::kPointsTopic, 100, &Marker::_sanitize, this);
+  // Subscribe to topic with ts points
+  _sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Marker::_sanitize, this);
   _sensingRange = 0;
 }
 

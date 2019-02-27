@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(toposens_markers)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -10,23 +8,11 @@ project(toposens_markers)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  tf
   dynamic_reconfigure
   toposens_msgs
   toposens_driver
   rviz_visual_tools
 )
-
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
-
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -56,7 +42,6 @@ catkin_package(
   rospy
   dynamic_reconfigure
   message_runtime
-  tf
   toposens_msgs
   toposens_driver
   rviz_visual_tools
@@ -65,7 +50,6 @@ catkin_package(
 include_directories(
   include ${catkin_INCLUDE_DIRS}
 )
-
 
 add_library(${PROJECT_NAME} src/marker.cpp)
 add_executable(${PROJECT_NAME}_node src/ts_markers_node.cpp)
@@ -79,7 +63,12 @@ install(
   COMPONENT main
 )
 
-install(
-  DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  PATTERN ".git" EXCLUDE
+)
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  PATTERN ".git" EXCLUDE
 )

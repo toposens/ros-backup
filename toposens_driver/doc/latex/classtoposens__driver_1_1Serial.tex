@@ -1,0 +1,138 @@
+\hypertarget{classtoposens__driver_1_1Serial}{}\section{toposens\+\_\+driver\+:\+:Serial Class Reference}
+\label{classtoposens__driver_1_1Serial}\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+
+
+{\ttfamily \#include $<$serial.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classtoposens__driver_1_1Serial_ab66b3b0aba714ac8332d7453833f4294}{Serial} (std\+::string port)
+\item 
+\hyperlink{classtoposens__driver_1_1Serial_a7970e34fd2b626baa989a7a08e3b2e7f}{$\sim$\+Serial} ()
+\item 
+bool \hyperlink{classtoposens__driver_1_1Serial_a43c68993fde1277eff277428d17b47c0}{is\+Alive} ()
+\item 
+bool \hyperlink{classtoposens__driver_1_1Serial_a4837c845aedc74cc1b9a62acb71b0cef}{is\+Calibrating} ()
+\item 
+void \hyperlink{classtoposens__driver_1_1Serial_a7e1ba7bccecbc978f6e16104ec459e29}{get\+Frame} (std\+::stringstream \&data)
+\item 
+bool \hyperlink{classtoposens__driver_1_1Serial_aea7a45dbb1d2edb0b5e60b1cae10584b}{send} (char $\ast$bytes)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classtoposens__driver_1_1Serial_a7b3cfddd56ba457aa617737249e197fa}{\+\_\+fd}
+\item 
+std\+::string \hyperlink{classtoposens__driver_1_1Serial_a7625dc8f63340fc4ea3e076331c5552c}{\+\_\+port}
+\item 
+const unsigned int \hyperlink{classtoposens__driver_1_1Serial_a383754d17418659020d9f7c221457f5f}{k\+Baud} = B921600
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Low level manager for serial I/O operations. Sets up a U\+A\+RT bridge to access raw data packets from a TS device. Maintains simple read-\/write access at the given baud rate. 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classtoposens__driver_1_1Serial_ab66b3b0aba714ac8332d7453833f4294}\label{classtoposens__driver_1_1Serial_ab66b3b0aba714ac8332d7453833f4294}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!Serial@{Serial}}
+\index{Serial@{Serial}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{Serial()}{Serial()}}
+{\footnotesize\ttfamily toposens\+\_\+driver\+::\+Serial\+::\+Serial (\begin{DoxyParamCaption}\item[{std\+::string}]{port }\end{DoxyParamCaption})}
+
+Opens a persistent serial connection at the given port. 
+\begin{DoxyParams}{Parameters}
+{\em port} & Device endpoint usually of the form /dev/tty\+U\+S\+B$\ast$.\\
+\hline
+\end{DoxyParams}
+Various termios struct flags are optimized for a connection that works best with the TS firmware. Any intrinsic flow control or bit processing is disabled.
+
+Connection is a non-\/blocking thread that returns when at least 1 byte is received or 0.\+1s has passed since the last read operation. \mbox{\Hypertarget{classtoposens__driver_1_1Serial_a7970e34fd2b626baa989a7a08e3b2e7f}\label{classtoposens__driver_1_1Serial_a7970e34fd2b626baa989a7a08e3b2e7f}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!````~Serial@{$\sim$\+Serial}}
+\index{````~Serial@{$\sim$\+Serial}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{$\sim$\+Serial()}{~Serial()}}
+{\footnotesize\ttfamily toposens\+\_\+driver\+::\+Serial\+::$\sim$\+Serial (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Flushes out bits from the serial pipe and closes its corresponding linux file desciptor. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classtoposens__driver_1_1Serial_a7e1ba7bccecbc978f6e16104ec459e29}\label{classtoposens__driver_1_1Serial_a7e1ba7bccecbc978f6e16104ec459e29}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!get\+Frame@{get\+Frame}}
+\index{get\+Frame@{get\+Frame}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{get\+Frame()}{getFrame()}}
+{\footnotesize\ttfamily void toposens\+\_\+driver\+::\+Serial\+::get\+Frame (\begin{DoxyParamCaption}\item[{std\+::stringstream \&}]{data }\end{DoxyParamCaption})}
+
+Extracts a single TS data frame into the given iostream. 
+\begin{DoxyParams}{Parameters}
+{\em data} & Points to a string stream expecting a sensor frame.\\
+\hline
+\end{DoxyParams}
+Reads incoming bytes to the string stream pointer till the firmware-\/defined frame terminator \textquotesingle{}E\textquotesingle{} is reached. \mbox{\Hypertarget{classtoposens__driver_1_1Serial_a43c68993fde1277eff277428d17b47c0}\label{classtoposens__driver_1_1Serial_a43c68993fde1277eff277428d17b47c0}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!is\+Alive@{is\+Alive}}
+\index{is\+Alive@{is\+Alive}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{is\+Alive()}{isAlive()}}
+{\footnotesize\ttfamily bool toposens\+\_\+driver\+::\+Serial\+::is\+Alive (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Checks whether or not serial connection is still open. \begin{DoxyReturn}{Returns}
+True if connection is open, false otherwise.
+\end{DoxyReturn}
+Uses the fact that open(3) returns -\/1 if it errors out while opening a serial stream.
+
+\begin{DoxyRefDesc}{Todo}
+\item[\hyperlink{todo__todo000001}{Todo}]Since fd is never changed after setup, is there another way to probe? Is this function even useful? \end{DoxyRefDesc}
+\mbox{\Hypertarget{classtoposens__driver_1_1Serial_a4837c845aedc74cc1b9a62acb71b0cef}\label{classtoposens__driver_1_1Serial_a4837c845aedc74cc1b9a62acb71b0cef}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!is\+Calibrating@{is\+Calibrating}}
+\index{is\+Calibrating@{is\+Calibrating}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{is\+Calibrating()}{isCalibrating()}}
+{\footnotesize\ttfamily bool toposens\+\_\+driver\+::\+Serial\+::is\+Calibrating (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Checks the calibration bit of incoming raw data. \begin{DoxyReturn}{Returns}
+True if calibration bit is set, false otherwise.
+\end{DoxyReturn}
+\begin{DoxyRefDesc}{Todo}
+\item[\hyperlink{todo__todo000002}{Todo}]consider if this is even needed \end{DoxyRefDesc}
+\mbox{\Hypertarget{classtoposens__driver_1_1Serial_aea7a45dbb1d2edb0b5e60b1cae10584b}\label{classtoposens__driver_1_1Serial_aea7a45dbb1d2edb0b5e60b1cae10584b}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!send@{send}}
+\index{send@{send}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{send()}{send()}}
+{\footnotesize\ttfamily bool toposens\+\_\+driver\+::\+Serial\+::send (\begin{DoxyParamCaption}\item[{char $\ast$}]{bytes }\end{DoxyParamCaption})}
+
+Writes the given bytes to the serial stream. Usually used for updating sensor settings during runtime. 
+\begin{DoxyParams}{Parameters}
+{\em bytes} & Data in a T\+S-\/specific command format (Cxxxxx00000). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if data was transmitted without error. No sensor handshake is received to confirm settings update.
+\end{DoxyReturn}
+Note that this returns true as long as data is written to the serial stream without error. A success handshake from the sensor confirming the settings update is not currently checked for.
+
+\begin{DoxyRefDesc}{Todo}
+\item[\hyperlink{todo__todo000003}{Todo}]Use a bit in the header payload to confirm settings update \end{DoxyRefDesc}
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classtoposens__driver_1_1Serial_a7b3cfddd56ba457aa617737249e197fa}\label{classtoposens__driver_1_1Serial_a7b3cfddd56ba457aa617737249e197fa}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!\+\_\+fd@{\+\_\+fd}}
+\index{\+\_\+fd@{\+\_\+fd}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{\+\_\+fd}{\_fd}}
+{\footnotesize\ttfamily int toposens\+\_\+driver\+::\+Serial\+::\+\_\+fd\hspace{0.3cm}{\ttfamily [private]}}
+
+Linux file descriptor pointing to TS device port. \mbox{\Hypertarget{classtoposens__driver_1_1Serial_a7625dc8f63340fc4ea3e076331c5552c}\label{classtoposens__driver_1_1Serial_a7625dc8f63340fc4ea3e076331c5552c}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!\+\_\+port@{\+\_\+port}}
+\index{\+\_\+port@{\+\_\+port}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{\+\_\+port}{\_port}}
+{\footnotesize\ttfamily std\+::string toposens\+\_\+driver\+::\+Serial\+::\+\_\+port\hspace{0.3cm}{\ttfamily [private]}}
+
+Stored device port for future access. \mbox{\Hypertarget{classtoposens__driver_1_1Serial_a383754d17418659020d9f7c221457f5f}\label{classtoposens__driver_1_1Serial_a383754d17418659020d9f7c221457f5f}} 
+\index{toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}!k\+Baud@{k\+Baud}}
+\index{k\+Baud@{k\+Baud}!toposens\+\_\+driver\+::\+Serial@{toposens\+\_\+driver\+::\+Serial}}
+\subsubsection{\texorpdfstring{k\+Baud}{kBaud}}
+{\footnotesize\ttfamily const unsigned int toposens\+\_\+driver\+::\+Serial\+::k\+Baud = B921600\hspace{0.3cm}{\ttfamily [private]}}
+
+Baud rate needed for TS device comms. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/toposens\+\_\+driver/\hyperlink{serial_8h}{serial.\+h}\item 
+src/\hyperlink{serial_8cpp}{serial.\+cpp}\end{DoxyCompactItemize}

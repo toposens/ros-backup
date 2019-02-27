@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>toposens_pointcloud</name>
+  <version>0.9.2</version>
+  <description>PCL integration for TS sensors mounted on Turtlebot3.</description>
+  
+  <maintainer email="singh@toposens.com">Adi Singh</maintainer>
+  <author email="dengler@toposens.com">Sebastian Dengler</author>
+  <author email="singh@toposens.com">Adi Singh</author>
+
+  <license>BSD</license>
+  <url type="website">TBD</url>
+  <url type="repository">TBD</url>
+  <url type="bugtracker">TBD</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>tf</depend>
+  <depend>pcl_ros</depend>
+  <depend>pcl_conversions</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>toposens_msgs</depend>
+  <depend>toposens_driver</depend>
+  <exec_depend>message_runtime</exec_depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+</package>

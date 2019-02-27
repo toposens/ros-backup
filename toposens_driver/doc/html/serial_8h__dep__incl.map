@@ -1,0 +1,4 @@
+<map id="include/toposens_driver/serial.h" name="include/toposens_driver/serial.h">
+<area shape="rect" id="node2" href="$sensor_8h.html" title="Converts raw sensor data to ROS friendly structures. Parses a TsScan from a single input data frame b..." alt="" coords="5,95,164,136"/>
+<area shape="rect" id="node3" href="$serial_8cpp.html" title="Implements serial interface to a TS sensor using native Unix command structures. " alt="" coords="188,102,288,129"/>
+</map>

@@ -2,8 +2,3 @@
 
 geometry_msgs/Point location
 float32 intensity
-
-#float32 x
-#float32 y
-#float32 z
-#float32 v

@@ -1,0 +1,7 @@
+<launch>
+	<include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch"/>
+  <!-- <include file="$(find n64_joy)/launch/n64_teleop.launch"/> -->
+  
+  <include file="$(find toposens_pointcloud)/launch/toposens_cloud.launch"/>
+  
+</launch>

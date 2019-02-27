@@ -5,6 +5,5 @@
 		<param name="frame" value="toposens" />
 	</node>
 	
-	<node pkg="tf" type="static_transform_publisher" name="ts_broadcaster" args="0 0 0 0 0 0 1 world toposens 100" />
-	<node pkg="rviz" type="rviz" name="grid_visualization" output="screen" args="-d $(find toposens_markers)/rviz/toposens_markers.rviz" />
+	<node pkg="rviz" type="rviz" name="markers_visualization" output="screen" args="-d $(find toposens_markers)/rviz/toposens_markers.rviz" />
 </launch>

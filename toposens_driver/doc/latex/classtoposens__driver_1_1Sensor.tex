@@ -1,0 +1,203 @@
+\hypertarget{classtoposens__driver_1_1Sensor}{}\section{toposens\+\_\+driver\+:\+:Sensor Class Reference}
+\label{classtoposens__driver_1_1Sensor}\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+
+
+{\ttfamily \#include $<$sensor.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classtoposens__driver_1_1Sensor_ab14040539bf943fcfb95d613ace04f80}{Sensor} (ros\+::\+Node\+Handle nh, ros\+::\+Node\+Handle private\+\_\+nh)
+\item 
+bool \hyperlink{classtoposens__driver_1_1Sensor_a926de2fe6169b81fb456d2a8d726cebe}{poll} (void)
+\item 
+void \hyperlink{classtoposens__driver_1_1Sensor_a1a568d4c7946731b20c3f81a3c67a566}{shutdown} (void)
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classtoposens__driver_1_1Sensor_a6ba202a85c681960ce9b31498a942826}{\+\_\+init} (void)
+\item 
+void \hyperlink{classtoposens__driver_1_1Sensor_a662f061f7fd3181f0ca5527d6f244b6d}{\+\_\+parse} (toposens\+\_\+msgs\+::\+Ts\+Scan \&scan)
+\item 
+void \hyperlink{classtoposens__driver_1_1Sensor_af20095b07e82801d7827e34622fd604f}{\+\_\+cmd} (char $\ast$out, const char $\ast$key, int val)
+\item 
+void \hyperlink{classtoposens__driver_1_1Sensor_ab60154cabae56a4ab05230b4fd6222dd}{\+\_\+reconfig} (Ts\+Driver\+Config \&cfg, uint32\+\_\+t level)
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{classtoposens__driver_1_1Sensor_ae860cfd52f61f29d80bc086aa722a749}{\+\_\+frame}
+\item 
+Ts\+Driver\+Config \hyperlink{classtoposens__driver_1_1Sensor_a9542d24036f53f0aebc872554a3802af}{\+\_\+cfg}
+\item 
+std\+::unique\+\_\+ptr$<$ Cfg $>$ \hyperlink{classtoposens__driver_1_1Sensor_a02f9c1b78374f7958c14260e9fecac70}{\+\_\+srv}
+\item 
+ros\+::\+Publisher \hyperlink{classtoposens__driver_1_1Sensor_ac18f0d9e465c022a615d526207ff84f3}{\+\_\+pub}
+\item 
+std\+::unique\+\_\+ptr$<$ \hyperlink{classtoposens__driver_1_1Serial}{Serial} $>$ \hyperlink{classtoposens__driver_1_1Sensor_a202083580774286223129fd84ead26af}{\+\_\+serial}
+\item 
+std\+::stringstream \hyperlink{classtoposens__driver_1_1Sensor_ad0906c5d74c1da808d26b62d03c54f8d}{\+\_\+data}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Manages conversion of a single sensor data frame into a Ts\+Scan message. Also provides an interface for configuring sensor performance parameters.
+
+A Ts\+Scan contains timestamped header information followed by a vector of Ts\+Points. A single Ts\+Point has a 3D location (x, y, z) and an associated intenstiy. 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classtoposens__driver_1_1Sensor_ab14040539bf943fcfb95d613ace04f80}\label{classtoposens__driver_1_1Sensor_ab14040539bf943fcfb95d613ace04f80}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!Sensor@{Sensor}}
+\index{Sensor@{Sensor}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{Sensor()}{Sensor()}}
+{\footnotesize\ttfamily toposens\+\_\+driver\+::\+Sensor\+::\+Sensor (\begin{DoxyParamCaption}\item[{ros\+::\+Node\+Handle}]{nh,  }\item[{ros\+::\+Node\+Handle}]{private\+\_\+nh }\end{DoxyParamCaption})}
+
+Initiates a serial connection and transmits default settings to sensor. 
+\begin{DoxyParams}{Parameters}
+{\em nh} & Public nodehandle for pub-\/sub to R\+OS topics. \\
+\hline
+{\em private\+\_\+nh} & Private nodehandle for retrieving launch parameters.\\
+\hline
+\end{DoxyParams}
+A dynamic reconfigure server is set up to change sensor settings during runtime. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classtoposens__driver_1_1Sensor_af20095b07e82801d7827e34622fd604f}\label{classtoposens__driver_1_1Sensor_af20095b07e82801d7827e34622fd604f}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+cmd@{\+\_\+cmd}}
+\index{\+\_\+cmd@{\+\_\+cmd}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+cmd()}{\_cmd()}}
+{\footnotesize\ttfamily void toposens\+\_\+driver\+::\+Sensor\+::\+\_\+cmd (\begin{DoxyParamCaption}\item[{char $\ast$}]{out,  }\item[{const char $\ast$}]{key,  }\item[{int}]{val }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+Constructs a well-\/formed T\+S-\/defined settings command using the passed arguments. 
+\begin{DoxyParams}{Parameters}
+{\em out} & Pointer to a char buffer where the result will be stored. \\
+\hline
+{\em key} & Setting name from the k\+Cmd$\ast$ list defined in this class. \\
+\hline
+{\em val} & Desired value of the setting. Ranges defined in .cfg file. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a6ba202a85c681960ce9b31498a942826}\label{classtoposens__driver_1_1Sensor_a6ba202a85c681960ce9b31498a942826}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+init@{\+\_\+init}}
+\index{\+\_\+init@{\+\_\+init}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+init()}{\_init()}}
+{\footnotesize\ttfamily void toposens\+\_\+driver\+::\+Sensor\+::\+\_\+init (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+Transmits settings commands on startup with initial data from the config server.
+
+Only parameters within the root group of cfg Parameter\+Generator broadcast their default values on initialization, so this method only transmits them to the sensor.
+
+Parameters in any sub-\/groups broadcast their value as 0 on startup. It is also possible that sub-\/group params do not broadcast their value on startup, so polling the cfg server returns 0. This is likely a bug with the R\+OS dynamic reconfigure library. \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a662f061f7fd3181f0ca5527d6f244b6d}\label{classtoposens__driver_1_1Sensor_a662f061f7fd3181f0ca5527d6f244b6d}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+parse@{\+\_\+parse}}
+\index{\+\_\+parse@{\+\_\+parse}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+parse()}{\_parse()}}
+{\footnotesize\ttfamily void toposens\+\_\+driver\+::\+Sensor\+::\+\_\+parse (\begin{DoxyParamCaption}\item[{toposens\+\_\+msgs\+::\+Ts\+Scan \&}]{scan }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+Extracts Ts\+Points from the current data frame and reads them into the referenced Ts\+Scan object. 
+\begin{DoxyParams}{Parameters}
+{\em scan} & Pointer to a Ts\+Scan for storing parsed data.\\
+\hline
+\end{DoxyParams}
+This O(log n) algorithm only works when the input data frame is exactly in the expected format. Char-\/by-\/char error checks are not implemented so as to increase parsing throughput.
+
+A data frame corresponds to a single scan and has the following format\+: ~\newline
+ -\/ Starts with char \textquotesingle{}S\textquotesingle{} ~\newline
+ -\/ 6 bytes of frame header info ~\newline
+ -\/ Char \textquotesingle{}P\textquotesingle{}, indicates a measured point ~\newline
+ -\/ 5 bytes of point header info ~\newline
+ -\/ Char \textquotesingle{}X\textquotesingle{}, indicates x-\/coordinate of point ~\newline
+ -\/ 5 bytes with measurement of x-\/coordinate ~\newline
+ -\/ Char \textquotesingle{}Y\textquotesingle{}, indicates y-\/coordinate of point ~\newline
+ -\/ 5 bytes with measurement of y-\/coordinate ~\newline
+ -\/ Char \textquotesingle{}Z\textquotesingle{}, indicates z-\/coordinate of point ~\newline
+ -\/ 5 bytes with measurement of z-\/coordinate ~\newline
+ -\/ Char \textquotesingle{}V\textquotesingle{}, indicates intensity of signal ~\newline
+ -\/ 5 bytes with measurement of signal intensity ~\newline
+ -\/ ... Additional points in this scan ... ~\newline
+ -\/ Ends with char \textquotesingle{}E\textquotesingle{}
+
+In the 6-\/byte long frame header\+: ~\newline
+ -\/ First byte is set to 1 when measurements are taken in a noisy ambient environment (hence, likely inaccurate). ~\newline
+ -\/ Second byte is currently unused. ~\newline
+ -\/ Third byte is set to 1 while sensor calibration is in progress. ~\newline
+ -\/ Fourth, fifth and sixth bytes show device address for I2C mode.
+
+The 5-\/byte long pointer header is currently not used. The x-\/, y-\/, z-\/coordinates are calculated in mm relative to the sensor transducer. Signal intensity of the point is mapped to a scale of 0 to 255.
+
+Sample frame\+: S000016\+P0000\+X-\/0415\+Y00010\+Z00257\+V00061\+P0000\+X-\/0235\+Y00019 Z00718\+V00055\+P0000\+X-\/0507\+Y00043\+Z00727\+V00075\+P0000\+X00142\+Y00360\+Z01555\+V00052E ~\newline
+ Four points extracted\+: P1(-\/415, 10, 257, 61); P2(-\/235, 19, 718, 55); P3(-\/507, 43, 727, 75); P4(142, 360, 1555, 52) \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_ab60154cabae56a4ab05230b4fd6222dd}\label{classtoposens__driver_1_1Sensor_ab60154cabae56a4ab05230b4fd6222dd}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+reconfig@{\+\_\+reconfig}}
+\index{\+\_\+reconfig@{\+\_\+reconfig}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+reconfig()}{\_reconfig()}}
+{\footnotesize\ttfamily void toposens\+\_\+driver\+::\+Sensor\+::\+\_\+reconfig (\begin{DoxyParamCaption}\item[{Ts\+Driver\+Config \&}]{cfg,  }\item[{uint32\+\_\+t}]{level }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+Callback triggered when a parameter is altered on the dynamic reconfigure server. Determines which setting has changed and transmits the associated (well-\/formed) settings command to the serial stream. 
+\begin{DoxyParams}{Parameters}
+{\em cfg} & Structure holding updated values of all parameters on server. \\
+\hline
+{\em level} & Indicates parameter that triggered the callback. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a926de2fe6169b81fb456d2a8d726cebe}\label{classtoposens__driver_1_1Sensor_a926de2fe6169b81fb456d2a8d726cebe}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!poll@{poll}}
+\index{poll@{poll}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{poll()}{poll()}}
+{\footnotesize\ttfamily bool toposens\+\_\+driver\+::\+Sensor\+::poll (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Retrieves raw sensor data frames and publishes Ts\+Scans extracted from them. \begin{DoxyReturn}{Returns}
+True if scan contains any valid data points. False for an empty scan. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a1a568d4c7946731b20c3f81a3c67a566}\label{classtoposens__driver_1_1Sensor_a1a568d4c7946731b20c3f81a3c67a566}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!shutdown@{shutdown}}
+\index{shutdown@{shutdown}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{shutdown()}{shutdown()}}
+{\footnotesize\ttfamily void toposens\+\_\+driver\+::\+Sensor\+::shutdown (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Shuts down serial connection to the sensor.
+
+Deletes underlying serial and config server objects managed by class pointers. 
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a9542d24036f53f0aebc872554a3802af}\label{classtoposens__driver_1_1Sensor_a9542d24036f53f0aebc872554a3802af}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+cfg@{\+\_\+cfg}}
+\index{\+\_\+cfg@{\+\_\+cfg}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+cfg}{\_cfg}}
+{\footnotesize\ttfamily Ts\+Driver\+Config toposens\+\_\+driver\+::\+Sensor\+::\+\_\+cfg\hspace{0.3cm}{\ttfamily [private]}}
+
+Maintains current values of all config params. \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_ad0906c5d74c1da808d26b62d03c54f8d}\label{classtoposens__driver_1_1Sensor_ad0906c5d74c1da808d26b62d03c54f8d}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+data@{\+\_\+data}}
+\index{\+\_\+data@{\+\_\+data}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+data}{\_data}}
+{\footnotesize\ttfamily std\+::stringstream toposens\+\_\+driver\+::\+Sensor\+::\+\_\+data\hspace{0.3cm}{\ttfamily [private]}}
+
+Buffer for storing a raw data frame. \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_ae860cfd52f61f29d80bc086aa722a749}\label{classtoposens__driver_1_1Sensor_ae860cfd52f61f29d80bc086aa722a749}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+frame@{\+\_\+frame}}
+\index{\+\_\+frame@{\+\_\+frame}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+frame}{\_frame}}
+{\footnotesize\ttfamily std\+::string toposens\+\_\+driver\+::\+Sensor\+::\+\_\+frame\hspace{0.3cm}{\ttfamily [private]}}
+
+Frame ID assigned to Ts\+Scan messages. \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_ac18f0d9e465c022a615d526207ff84f3}\label{classtoposens__driver_1_1Sensor_ac18f0d9e465c022a615d526207ff84f3}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+pub@{\+\_\+pub}}
+\index{\+\_\+pub@{\+\_\+pub}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+pub}{\_pub}}
+{\footnotesize\ttfamily ros\+::\+Publisher toposens\+\_\+driver\+::\+Sensor\+::\+\_\+pub\hspace{0.3cm}{\ttfamily [private]}}
+
+Topic for publishing Ts\+Scans. \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a202083580774286223129fd84ead26af}\label{classtoposens__driver_1_1Sensor_a202083580774286223129fd84ead26af}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+serial@{\+\_\+serial}}
+\index{\+\_\+serial@{\+\_\+serial}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+serial}{\_serial}}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$\hyperlink{classtoposens__driver_1_1Serial}{Serial}$>$ toposens\+\_\+driver\+::\+Sensor\+::\+\_\+serial\hspace{0.3cm}{\ttfamily [private]}}
+
+Pointer for accessing serial functions. \mbox{\Hypertarget{classtoposens__driver_1_1Sensor_a02f9c1b78374f7958c14260e9fecac70}\label{classtoposens__driver_1_1Sensor_a02f9c1b78374f7958c14260e9fecac70}} 
+\index{toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}!\+\_\+srv@{\+\_\+srv}}
+\index{\+\_\+srv@{\+\_\+srv}!toposens\+\_\+driver\+::\+Sensor@{toposens\+\_\+driver\+::\+Sensor}}
+\subsubsection{\texorpdfstring{\+\_\+srv}{\_srv}}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$Cfg$>$ toposens\+\_\+driver\+::\+Sensor\+::\+\_\+srv\hspace{0.3cm}{\ttfamily [private]}}
+
+Pointer to config server 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/toposens\+\_\+driver/\hyperlink{sensor_8h}{sensor.\+h}\item 
+src/sensor.\+cpp\end{DoxyCompactItemize}
