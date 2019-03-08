@@ -23,10 +23,18 @@ namespace toposens_driver
 static const char kScansTopic[] = "ts_scans";
 /** Maximum number of messages held in buffer for #kScansTopic. */
 static const int kQueueSize = 100;
+<<<<<<< HEAD
 
 /** @brief  Converts raw sensor data to ROS friendly message structures.
  *  @details  Parses a TsScan from a single input data frame by extracting
  *  its header information and the vector of TsPoints contained in its payload.
+
+=======
+
+/** @brief  Converts raw sensor data to ROS friendly message structures.
+ *  @details  Parses a TsScan from a single input data frame by extracting
+ *  its header information and the vector of TsPoints contained in its payload.
+>>>>>>> 9bf110b... Finished marker docs.
  *  A TsScan contains timestamped header information followed by a vector
  *  of TsPoints. A single TsPoint has a 3D location (x, y, z) and an
  *  associated intenstiy. Messages are published to topic #kScansTopic.
@@ -60,7 +68,7 @@ class Sensor
   private:
     /** Structure generated from cfg file for storing local copy of sensor parameters.*/
     typedef dynamic_reconfigure::Server<TsDriverConfig> Cfg;
-    
+
     /** Transmits settings commands on startup with initial data
     *  from the config server.
     */
@@ -89,11 +97,14 @@ class Sensor
      */
     void _reconfig(TsDriverConfig &cfg, uint32_t level);
 
+<<<<<<< HEAD
   	/** Listens port whether sensor is in calibration mode.
   	*	 @returns True if sensor is calibrating.
   	*/
   	bool _isCalibrating();
 	
+=======
+>>>>>>> 9bf110b... Finished marker docs.
     /** Efficiently converts a char array representing a signed integer to
      *  its numerical value.
      *  @param s C-string representing an integer value.
@@ -102,8 +113,13 @@ class Sensor
      */
     float _toNum(const char *s);
 
+<<<<<<< HEAD
+    std::string _frame;         /**< Frame ID assigned to TsScan messages.*/
+    TsDriverConfig _cfg;        /**< Maintains current values of all config params.*/
+=======
     std::string _frame;     /**< Frame ID assigned to TsScan messages.*/
     TsDriverConfig _cfg;    /**< Maintains current values of all config params.*/
+>>>>>>> 9bf110b... Finished marker docs.
     std::unique_ptr<Cfg> _srv;  /**< Pointer to config server*/
 
     ros::Publisher _pub;    /**< Handler for publishing TsScans.*/
@@ -111,6 +127,7 @@ class Sensor
     std::stringstream _data;  /**< Buffer for storing a raw data frame.*/
 
     float _calibTempC; /**< Temperature the sensor is calibrated on */
+    
 };
 } // namespace toposens_driver
 

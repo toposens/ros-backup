@@ -1,15 +1,14 @@
+/** @file     command.cpp
+ *  @author   Adi Singh, Christopher Lang
+ *  @date     March 2019
+ */
+
 #include <toposens_driver/command.h>
 
 namespace toposens_driver
 {
-
-  const char Command::SigStrength[6]   = "nWave"; //<
-  const char Command::FilterSize[6]    = "filtr"; //<
-  const char Command::NoiseThresh[6]   = "dThre"; //<
-  const char Command::VoxelLimits[6]   = "goLim"; //< min/max ranges for cuboid's limits
-  const char Command::BoostShortR[6]   = "slop1"; //<
-  const char Command::BoostMidR[6]     = "slop2"; //<
-  const char Command::BoostLongR[6]    = "slop3"; //<
+  /** add relevant comment here. index refers to enum order/Cfg level 
+  /** should retain order as it corresponds to enum */
 
 /** Generates a singular command message for a one-dimensional value space.
  *
@@ -18,52 +17,56 @@ namespace toposens_driver
  *  sign: 0 for positive values, - for negative values.
  *
  *  Singular format:
- *  @n - Starts with char 'C'
+ *  @n - Starts with #kPrefix
  *  @n - 5 bytes defining firmware parameter to update
  *  @n - 5 bytes with desired parameter value
- *  @n - Terminating char '\r'
- *
+ *  @n - Terminating carriage return
  */
-bool Command::generate(const char* param, int val)
+<<<<<<< toposens_driver/src/command.cpp
+bool Command::generate(Parameter param, int value)
 {
   std::string format = "%c%s%05d\r";
-  return (std::sprintf( _bytes, format.c_str(), _prefix, param, val) > 0);
+  return (std::sprintf( _bytes, format.c_str(), kPrefix, _getKey(param), value) > 0);
 }
 
 /** Generates a dimensional command message for a voxel update.
-  *
-  * Dimensional parameter values should be transformed to the TS-frame
-  * before transmission. The transform from TS- to ROS-frame is
-  * given by T(rt) = [(0, 0, 1), (-1, 0, 0), (0, 1, 0)].
-  *
-  * Note that all desired values are transmitted as zero-padded 5-byte
-  * strings, and the first byte is always reserved for the arithmetic
-  * sign: 0 for positive values, - for negative values.
-
-  * Dimensional format:
-  *  @n - Starts with char 'C'
-  *  @n - 5 bytes defining firmware parameter to update
-  *  @n - 5 bytes with cuboid's lower X-limit
-  *  @n - 5 bytes with cuboid's upper X-limit
-  *  @n - 5 bytes with cuboid's lower Y-limit
-  *  @n - 5 bytes with cuboid's upper Y-limit
-  *  @n - 5 bytes with cuboid's lower Z-limit
-  *  @n - 5 bytes with cuboid's upper Z-limit
-  *  @n - Terminating char '\r'
-  */
-bool Command::generate(const char* param, TsVoxel vxl)
+ *
+ * All desired values are transmitted as zero-padded 5-byte strings.
+ * The first byte is always reserved for the arithmetic sign: 0 for
+ * positive values, and - for negative values.
+ *
+ * Dimensional format:
+ *  @n - Starts with #kPrefix
+ *  @n - 5 bytes defining firmware parameter to update
+ *  @n - 5 bytes with cuboid's lower X-limit
+ *  @n - 5 bytes with cuboid's upper X-limit
+ *  @n - 5 bytes with cuboid's lower Y-limit
+ *  @n - 5 bytes with cuboid's upper Y-limit
+ *  @n - 5 bytes with cuboid's lower Z-limit
+ *  @n - 5 bytes with cuboid's upper Z-limit
+ *  @n - Terminating carriage return
+ */
+bool Command::generate(Parameter param, TsVoxel voxel)
 {
   std::string format = "%c%s%05d%05d%05d%05d%05d%05d\r";
-  return (std::sprintf(_bytes, format.c_str(), _prefix, param,
-                      vxl.y_max * -10, vxl.y_min * -10,
-                      vxl.z_min * 10, vxl.z_max * 10,
-                      vxl.x_min * 10, vxl.x_max * 10 ) > 0);   // ros --> ts :: x,y,z --> -y,z,x
+  return (std::sprintf(_bytes, format.c_str(), kPrefix, _getKey(param),
+                        voxel.x_min * 10, voxel.x_min * 10,
+                        voxel.y_min * 10, voxel.y_max * 10,
+                        voxel.z_min * 10, voxel.z_max * 10
+                      ) > 0);
 }
 
-/** Creates well-formed TS-defined settings command and returns pointer to it.
-  */
-char* Command::getBytes(){
-  return _bytes;
+/**
+ * Looks up key defined by the TS firmware for every parameter
+ */
+char* Command::_getKey(Parameter param){
+  if     (param == Parameter::SigStrength)return "nWave";
+  else if(param == Parameter::FilterSize) return "filtr";
+  else if(param == Parameter::NoiseThresh)return "dThre";
+  else if(param == Parameter::BoostShortR)return "slop1";
+  else if(param == Parameter::BoostMidR)  return "slop2";
+  else if(param == Parameter::BoostLongR) return "slop3";
+  else /*VoxelLimit*/ return "goLim";
 }
 
 } // namespace toposens_driver

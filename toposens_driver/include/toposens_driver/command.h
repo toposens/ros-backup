@@ -97,6 +97,7 @@ class Command
     * @return TS firmware defined parameter key
     */
   std::string _getKey(Parameter param);
+
 };
 
 } // namespace toposens_driver

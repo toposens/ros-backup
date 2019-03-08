@@ -62,7 +62,7 @@ bool Sensor::poll(void)
 
   Sensor::_parse(scan);
   if (!scan.points.size()) return false;
-
+  
   _pub.publish(scan);
   return true;
 }
@@ -118,7 +118,6 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
   if (level == -1) return Sensor::_init();
 
   Command cmd;
-
   if      (level == 0) cmd.generate(Command::SigStrength,  _cfg.sig_strength);
   else if (level == 1) cmd.generate(Command::FilterSize,   _cfg.filter_size);
   else if (level == 2) cmd.generate(Command::NoiseThresh,  _cfg.noise_thresh);
@@ -150,7 +149,6 @@ bool Sensor::poll(void)
   _pub.publish(scan);
   return true;
 }
-
 
 /** This O(log n) algorithm only works when the input data frame is
  *  exactly in the expected format. Char-by-char error checks are not
@@ -267,6 +265,23 @@ void Sensor::_parse(toposens_msgs::TsScan &scan)
     ROS_INFO("TS sensor calibration done.");
   }
 
+
+/** Char is a valid number if its decimal range from ASCII value '0'
+ *  falls between 0 and 9. Number is iteratively constructed through
+ *  base-10 multiplication of valid digits and adding them together.
+ *  The resulting number is cast to a float before returning.
+ */
+float Sensor::_toNum(const char* s){
+  int abs = 0, factor = 1;
+  if (*s == '-') factor = -1;
+
+  for(s++; *s; s++){
+    int d = *s - '0';
+    if (d >= 0 && d <= 9) abs = abs*10 + d;
+    else throw std::bad_cast();
+  }
+  return (float)(factor * abs);
+};
 
 /** Char is a valid number if its decimal range from ASCII value '0'
  *  falls between 0 and 9. Number is iteratively constructed through
