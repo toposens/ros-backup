@@ -8,14 +8,14 @@ project(toposens_pointcloud)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
+  pcl_conversions
+  pcl_ros
   roscpp
   rospy
   tf
-  pcl_ros
-  pcl_conversions
-  dynamic_reconfigure
-  toposens_msgs
   toposens_driver
+  toposens_msgs
 )
 
 
@@ -48,30 +48,34 @@ find_package(catkin REQUIRED COMPONENTS
 # cfg/TsMarkers.cfg
 #)
 
-
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
+  dynamic_reconfigure
+  message_runtime
+  pcl_conversions
+  pcl_ros
   roscpp
   rospy
   tf
-  pcl_ros
-  pcl_conversions
-  dynamic_reconfigure
-  message_runtime
-  toposens_msgs
   toposens_driver
+  toposens_msgs
 )
 
 include_directories(
   include ${catkin_INCLUDE_DIRS}
 )
 
-add_library(${PROJECT_NAME} src/cloud.cpp)
-add_executable(${PROJECT_NAME}_node src/ts_cloud_node.cpp)
-#add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
-target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_executable(
+  ${PROJECT_NAME}_node
+  src/cloud.cpp
+  src/ts_cloud_node.cpp)
+
+target_link_libraries(
+  ${PROJECT_NAME}_node 
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+)
 
 
 install(

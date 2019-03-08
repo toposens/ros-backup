@@ -2,31 +2,27 @@
 Changelog for package toposens_pointcloud
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.9.2 (2019-03-01)
+0.9.3 (2019-03-25)
 ------------------
-
-0.9.1 (2019-03-01)
-------------------
+* Enumerated command class.
+* Added finishing touches to doxygen comments.
+* Added docs to pointcloud implementation.
+* Fixed transform bug.
+* Fixed transform bug.
+* Added header docs for pointcloud.
+* Implemented save PCD on terminate.
+* Finished marker docs.
+* Hard code command buffer size.
+* Completed sensor documentation.
+* adapted topic and parameter names
+* Updated package descriptions
+* Reworded package file
+* Testing version bumping
+* Updated version tags
+* Updated package descriptions
+* Generated changelogs
 * Added pcd saving function
 * Removed dependency on custom octree
-* Contributors: Adi Singh
-
-0.9.0 (2019-02-27)
-------------------
+* fixed build
 * Added native pcl integration
-* Contributors: Adi Singh
-
-0.8.1 (2019-02-20)
-------------------
-
-0.8.0 (2019-02-19)
-------------------
-
-0.7.1 (2019-02-13)
-------------------
-
-0.7.0 (2019-02-08)
-------------------
-
-0.5.0 (2019-02-07)
-------------------
+* Contributors: Adi Singh, Christopher Lang, n.seckel

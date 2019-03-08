@@ -1,9 +1,14 @@
-#include "toposens_driver/sensor.h"
+/** @file     sensor.cpp
+ *  @author   Adi Singh, Sebastian Dengler
+ *  @date     January 2019
+ */
+
+ #include "toposens_driver/sensor.h"
 
 namespace toposens_driver
 {
-/** A dynamic reconfigure server is set up to change sensor
- *  settings during runtime.
+/** A dynamic reconfigure server is set up to configure sensor
+ *  performance parameters during runtime.
  */
 Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
@@ -11,17 +16,15 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
   private_nh.getParam("port", port);
   private_nh.getParam("frame", _frame);
 
+  float t_celsius;
+  private_nh.getParam("t_celsius", t_celsius);
+
   // Set up serial connection to sensor
   _serial = std::make_unique<Serial>(port);
   if (!_serial->isAlive()) throw "WTF Exception";
 
-  // @todo change this according to new firmware
-  // Check if sensor is busy self calibrating (every power on)
-//  if (_serial->isCalibrating()) {
-//    ROS_INFO("Auto calibration in progress...");
-//    while(_serial->isCalibrating()) continue;
- //   ROS_INFO("Sensor calibration successful");
-//  } else ROS_INFO("Sensor already calibrated");
+  _calibTempC = NOT_CALIBRATED;
+  calibrate(t_celsius);
 
   // Check if sensor is busy self calibrating (every power on)
   if (_serial->isCalibrating()) {
@@ -36,8 +39,41 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
   _srv->setCallback(f);
 
   // Publishing topic for TsScans
-  _pub = nh.advertise<toposens_msgs::TsScan>(kScansTopic, kTopicQueueSize);
-  ROS_INFO("Publishing toposens data to /%s", kScansTopic.c_str());
+  _pub = nh.advertise<toposens_msgs::TsScan>(kScansTopic, kQueueSize);
+  ROS_INFO("Publishing toposens data to /%s", kScansTopic);
+}
+
+
+/** Reads datastream into a private class variable to avoid creating
+ *  a buffer object on each poll. Assumes serial connection is alive
+ *  when function is called. The high frequency at which we poll
+ *  necessitates that we dispense with edge-case checks.
+ */
+bool Sensor::poll(void)
+{
+  // @todo implement better exception
+  // @todo no need for this consistent check... save on space
+  if (!_serial->isAlive()) throw "WTF Exception";
+  _serial->getFrame(_data);
+
+  toposens_msgs::TsScan scan;
+  scan.header.stamp = ros::Time::now();
+  scan.header.frame_id = _frame;
+
+  Sensor::_parse(scan);
+  if (!scan.points.size()) return false;
+
+  _pub.publish(scan);
+  return true;
+}
+
+/** Deletes underlying serial and config server objects
+ *  managed by class pointers.
+ */
+void Sensor::shutdown() 
+{
+  _serial.reset();
+  _srv.reset();
 }
 
 /** Only parameters within the root group of cfg ParameterGenerator
@@ -48,119 +84,53 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
  *  It is also possible that sub-group params do not broadcast their
  *  value on startup, so polling the cfg server returns 0.
  *  This is likely a bug with the ROS dynamic reconfigure library.
-*/
+ */
 void Sensor::_init(void) {
   bool success = true;
-  char cmd[kCmdBufferSize];
 
-  Sensor::_getCmd(cmd, kCmdSigStrength, _cfg.sig_strength);
-  if (!_serial->send(cmd)) success = false;
-  Sensor::_getCmd(cmd, kCmdFilterSize, _cfg.filter_size);
-  if (!_serial->send(cmd)) success = false;
-  Sensor::_getCmd(cmd, kCmdNoiseThresh, _cfg.noise_thresh);
-  if (!_serial->send(cmd)) success = false;
+  Command cSig(Command::SigStrength, _cfg.sig_strength);
+  if (!_serial->send(cSig.getBytes())) success = false;
+
+  Command cFilter(Command::FilterSize, _cfg.filter_size);
+  if (!_serial->send(cFilter.getBytes())) success = false;
+
+  Command cNoise(Command::NoiseThresh, _cfg.noise_thresh);
+  if (!_serial->send(cNoise.getBytes())) success = false;
 
   if (success) ROS_INFO("Sensor settings initialized");
   else ROS_WARN("One or more settings failed to initialize");
 }
 
-
+/** Determines which setting has changed and transmits the associated
+ *  (well-formed) settings command to the serial stream. A unique level
+ *  is assigned to each settings parameter in the cfg file. Current
+ *  implementation defines 12 sensor performance parameters, indexed in
+ *  cfg from 0 to 11. Config server triggers this method upon initialization
+ *  with a special level of -1.
+ */
 void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
 {
   if ((int)level > 11) {
     ROS_INFO("Update skipped: Parameter not recognized");
     return;
   }
-
   _cfg = cfg;
-  if (level == -1) {
-    Sensor::_init();
-    return;
-  }
+  if (level == -1) return Sensor::_init();
 
-//  ROS_INFO("Processing toposens reconfiguration");
-  ROS_DEBUG("Updating parameter TSDriver %d", level);
-  char cmd[kCmdBufferSize];
-  TsDriverConfig::DEFAULT::BOOSTER bst = _cfg.groups.booster;
+  Command cmd;
 
-  switch(level) {
-    case 0:
-      Sensor::_getCmd(cmd, kCmdSigStrength, _cfg.sig_strength);
-      break;
-    case 1:
-      Sensor::_getCmd(cmd, kCmdFilterSize, _cfg.filter_size);
-      break;
-    case 2:
-      Sensor::_getCmd(cmd, kCmdNoiseThresh, _cfg.noise_thresh);
-      break;
-    case 3:
-      Sensor::_getCmd(cmd, kCmdBoostShortR, bst.short_range);
-      break;
-    case 4:
-      Sensor::_getCmd(cmd, kCmdBoostMidR, bst.mid_range);
-      break;
-    case 5:
-      Sensor::_getCmd(cmd, kCmdBoostLongR, bst.long_range);
-      break;
-    default:  // if function reaches here, then level is betwen 7 and 11
-      Sensor::_getCmd(cmd, kCmdVoxelLimits, 0);
-  }
+  if      (level == 0) cmd.generate(Command::SigStrength,  _cfg.sig_strength);
+  else if (level == 1) cmd.generate(Command::FilterSize,   _cfg.filter_size);
+  else if (level == 2) cmd.generate(Command::NoiseThresh,  _cfg.noise_thresh);
+  else if (level == 3) cmd.generate(Command::BoostShortR,  _cfg.short_range);
+  else if (level == 4) cmd.generate(Command::BoostMidR,    _cfg.mid_range);
+  else if (level == 5) cmd.generate(Command::BoostLongR,   _cfg.long_range);
+  else                 cmd.generate(Command::VoxelLimits,  _cfg.groups.voxel);
+  // at else statement, level is 6-11 which indicates change in a voxel limit
 
-  if (_serial->send(cmd)) ROS_INFO("Sensor setting updated");
+  if (_serial->send(cmd.getBytes())) ROS_INFO("Sensor setting updated");
   else ROS_WARN("Settings update failed");
 }
-
-/** Necessary step to ensure commands are accepted by the firmware and
- *  settings are successfully updated.
- *
- *  Firmware defines commands in two formats, singular and dimensional.
- *  Singular commands expect one parameter value, dimensional commands
- *  expect XYZ limits defining a spatial cuboid. Currently, only the
- *  voxel filtering command is dimensionally formatted.
- *
- *  Note that all desired values are transmitted as zero-padded 5-byte
- *  strings, and the first byte is always reserved for the arithmetic
- *  sign: 0 for positive values, - for negative values.
- *
- *  Dimensional parameter values should be transformed to the TS-frame
- *  before transmission. The transform from TS- to ROS-frame is
- *  given by T(rt) = [(0, 0, 1), (-1, 0, 0), (0, 1, 0)].
- *
- *  Singular format:
- *  @n - Starts with char 'C'
- *  @n - 5 bytes defining firmware parameter to update
- *  @n - 5 bytes with desired parameter value
- *  @n - Terminating char '\r'
- *
- *  Dimensional format:
- *  @n - Starts with char 'C'
- *  @n - 5 bytes defining firmware parameter to update
- *  @n - 5 bytes with cuboid's lower X-limit
- *  @n - 5 bytes with cuboid's upper X-limit
- *  @n - 5 bytes with cuboid's lower Y-limit
- *  @n - 5 bytes with cuboid's upper Y-limit
- *  @n - 5 bytes with cuboid's lower Z-limit
- *  @n - 5 bytes with cuboid's upper Z-limit
- *  @n - Terminating char '\r'
- */
-void Sensor::_getCmd(char* result, const char* param, int val) {
-  memset(result, 0, kCmdBufferSize);
-  std::string format = "%c%s%05d\r";
-  if (strcmp(param, kCmdVoxelLimits) != 0) {
-    std::sprintf(result, format.c_str(), kCmdPrefix, param, val);
-    return;
-  }
-  // At this point we know it is a voxel update; getting values
-  // directly from TsDriverConfig instead of passing six separate params
-  format = "%c%s%05d%05d%05d%05d%05d%05d\r";
-  TsDriverConfig::DEFAULT::VOXEL vxl = _cfg.groups.voxel;
-  std::sprintf(result, format.c_str(), kCmdPrefix, param,
-                vxl.y_max * -10, vxl.y_min * -10,
-                vxl.z_min * 10, vxl.z_max * 10,
-                vxl.x_min * 10, vxl.x_max * 10
-              );  // ros --> ts :: x,y,z --> -y,z,x
-}
-
 
 // Reads into a private member datastream to avoid creating a buffer object on each poll
 bool Sensor::poll(void)
@@ -176,7 +146,7 @@ bool Sensor::poll(void)
 
   Sensor::_parse(scan);
   if (!scan.points.size()) return false;
-  
+
   _pub.publish(scan);
   return true;
 }
@@ -220,61 +190,99 @@ bool Sensor::poll(void)
  */
 void Sensor::_parse(toposens_msgs::TsScan &scan)
 {
+  // x, y, z, v data is always 5 bytes long
   const int val_length = 5;
   std::size_t index = 0;
-  toposens_msgs::TsPoint pt;
 
-  //std::string strData = "S000016P0000X-0415Y00010Z00257V00061P0000X-0235Y00019Z00718V00055P0000X-0507Y00043Z00727V00075P0000X00142Y00360Z01555V00052E";
   std::string strData = _data.str();
-
-  //  ROS_INFO_STREAM(strData);
+  // ROS_INFO_STREAM(strData);
 
   while (1) {
     index = strData.find('X', index);
     if (index == std::string::npos) break;
     std::string x_val, y_val, z_val, v_val;
 
+    x_val = strData.substr(index + 1, val_length);
+    index = strData.find('Y', index);
+    y_val = strData.substr(index + 1, val_length);
+    index = strData.find('Z', index);
+    z_val = strData.substr(index + 1, val_length);
+    index = strData.find('V', index);
+    v_val = strData.substr(index + 1, val_length);
+
     try {
-      x_val = strData.substr(index + 1, val_length);
-    
-      index = strData.find('Y', index);
-      y_val = strData.substr(index + 1, val_length);    
-      index = strData.find('Z', index);
-      z_val = strData.substr(index + 1, val_length);  
-      index = strData.find('V', index);
-      v_val = strData.substr(index + 1, val_length);
-      pt.intensity = std::stof(v_val)/100; // reduces points to normal size
+      toposens_msgs::TsPoint pt;
+      pt.intensity = _toNum(v_val.c_str()) / 100; // reduces points to normal size
+      if (pt.intensity <= 0) continue;
 
-
-    // Transforming from TS coordinate frame to ROS coordinate frame
-    // TS frame: up is y+; right is x+; forward is z+
-    // ROS frame: up is z+; right is y-; forward is x+
-    // Therefore: ros_x = ts_z, ros_y = -ts_x; ros_z = ts_x
-      if (pt.intensity > 0) {
-        pt.location.x = std::stof(z_val)/1000;  // z becomes x
-        pt.location.y = -std::stof(x_val)/1000; // -x becomes y
-        pt.location.z = std::stof(y_val)/1000;  // y becomes z
-        scan.points.push_back(pt);
-        pt = {};
-      }
+      pt.location.x = _toNum(x_val.c_str()) / 1000.0;
+      pt.location.y = _toNum(y_val.c_str()) / 1000.0;
+      pt.location.z = _toNum(z_val.c_str()) / 1000.0;
+      scan.points.push_back(pt);
     } catch (const std::exception& e) {
-      ROS_INFO_STREAM(strData);
-      ROS_ERROR_STREAM(x_val);
-      ROS_ERROR_STREAM(y_val);
-      ROS_ERROR_STREAM(z_val);
-      ROS_ERROR_STREAM(v_val);
-      exit(EXIT_FAILURE);
+      ROS_WARN("Error: %s", e.what());
+      ROS_DEBUG("Unexpected non-numerical characters in data stream");
+      ROS_DEBUG_STREAM(strData);
     }
   }
-  _data.str(std::string());
 }
 
-/** Deletes underlying serial and config server objects
- *  managed by class pointers. */
-void Sensor::shutdown()
-{
-  _serial.reset();
-  _srv.reset();
-}
+/** Checks the calibration process indication bit in the data frame.
+    S001020E => Calibration Empty Frame
+    S000020E => Normal Empty Frame
+  */
+  bool Sensor::_isCalibrating()
+  {
+    _data.str(std::string());
+    _data.clear();
+
+    _serial->getFrame(_data);
+
+    std::string data = _data.str().c_str();
+    
+    return (data[3] == '1');
+  }
+
+/** Performs sensor calibration for the given temperature.
+  */
+  bool Sensor::calibrate(float ambientTempC)
+  {
+    ROS_INFO("TS sensor calibrating for %3.1f C ...", ambientTempC);
+
+    if(_calibTempC != ambientTempC){
+      _calibTempC = NOT_CALIBRATED;
+      Command cCalib(Command::CalibTemp, (int)(ambientTempC*10));
+      _serial->send(cCalib.getBytes());
+    }
+
+    while(true){
+      if(_isCalibrating())
+        _calibTempC = ambientTempC;
+      else if(_calibTempC != NOT_CALIBRATED)
+        break;
+
+      ros::Duration(0.1).sleep();
+    }
+
+    ROS_INFO("TS sensor calibration done.");
+  }
+
+
+/** Char is a valid number if its decimal range from ASCII value '0'
+ *  falls between 0 and 9. Number is iteratively constructed through
+ *  base-10 multiplication of valid digits and adding them together.
+ *  The resulting number is cast to a float before returning.
+ */
+float Sensor::_toNum(const char* s){
+  int abs = 0, factor = 1;
+  if (*s == '-') factor = -1;
+
+  for(s++; *s; s++){
+    int d = *s - '0';
+    if (d >= 0 && d <= 9) abs = abs*10 + d;
+    else throw std::bad_cast();
+  }
+  return (float)(factor * abs);
+};
 
 } // namespace toposens_driver

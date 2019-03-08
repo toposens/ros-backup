@@ -1,10 +1,6 @@
 /** @file     serial.cpp
  *  @author   Adi Singh, Sebastian Dengler
  *  @date     January 2019
- *  @brief    Implements serial interface to a TS sensor using
- *  native Unix command structures.
- *  @details  Uses ros/console.h for outputting ROS-style string
- *  messages to terminal.
  */
 
 #include "toposens_driver/serial.h"
@@ -15,7 +11,7 @@
 
 namespace toposens_driver
 {
-/** Various termios struct flags are optimized for a connection 
+/** Various termios struct flags are optimized for a connection
  *  that works best with the TS firmware. Any intrinsic flow
  *  control or bit processing is disabled.
  *
@@ -46,13 +42,13 @@ Serial::Serial(std::string port)
     ROS_WARN("Error retrieving attributes at %s: %s", _port.c_str(), strerror (errno));
     return;
   }
-  
+
   // set I/O baud rate
   cfsetispeed(&tty, kBaud);
   cfsetospeed(&tty, kBaud);
 
   // enable reading, ignore ctrl lines, 8 bits per byte
-  tty.c_cflag |= CREAD | CLOCAL | CS8;  
+  tty.c_cflag |= CREAD | CLOCAL | CS8;
   // turn off parity, use one stop bit, disable HW flow control
   tty.c_cflag &= ~(PARENB | CSTOPB | CRTSCTS);
 
@@ -69,8 +65,9 @@ Serial::Serial(std::string port)
   // disable special data post-processing
   tty.c_oflag &= ~(OPOST | ONLCR);
 
-  // wait for at least 1 byte to be received
-  tty.c_cc[VMIN] = 1;
+  // wait for at least 8 bytes to be received
+  // length of a valid empty data frame
+  tty.c_cc[VMIN] = 8;
   // wait for 0.1s till data received
   tty.c_cc[VTIME] = 1;
 
@@ -90,7 +87,7 @@ Serial::Serial(std::string port)
  *  corresponding linux file desciptor.
  */
 Serial::~Serial(void)
-{ 
+{
   ROS_INFO("Closing serial connection...");
 
   if (tcflush(_fd, TCIOFLUSH) | close(_fd) == -1) {
@@ -108,13 +105,6 @@ Serial::~Serial(void)
  */
 bool Serial::isAlive() {
   return (_fd != -1);
-}
-
-/** @todo consider if this is even needed */
-bool Serial::isCalibrating() {
-  char buffer = '\0';
-  while (!buffer) read(_fd, &buffer, 1);
-  return (buffer == '?');
 }
 
 /** Reads incoming bytes to the string stream pointer till

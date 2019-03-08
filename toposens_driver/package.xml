@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>toposens_driver</name>
-  <version>0.9.2</version>
+  <version>0.9.3</version>
   <description>ROS device driver for communication with TS sensors.</description>
   
   <maintainer email="singh@toposens.com">Adi Singh</maintainer>
   <author email="dengler@toposens.com">Sebastian Dengler</author>
   <author email="singh@toposens.com">Adi Singh</author>
+  <author email="lang@toposens.com">Christopher Lang</author>
+
 
   <license>BSD</license>
   <url type="website">TBD</url>

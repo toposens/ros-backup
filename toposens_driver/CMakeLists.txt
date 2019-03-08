@@ -1,21 +1,19 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(toposens_driver)
 
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED
+  COMPONENTS
+  dynamic_reconfigure
   roscpp
   rospy
-  dynamic_reconfigure
-  message_generation
   toposens_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 generate_dynamic_reconfigure_options(
   cfg/TsDriver.cfg
 )
@@ -33,10 +31,10 @@ catkin_package(
   INCLUDE_DIRS include
   # LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  roscpp
-  rospy
   dynamic_reconfigure
   message_runtime
+  roscpp
+  rospy
   toposens_msgs
 )
 
@@ -67,15 +65,25 @@ include_directories(
 # )
 
 
-add_library(${PROJECT_NAME} src/sensor.cpp src/serial.cpp)
+#add_library(${PROJECT_NAME} src/serial)
 #target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 #add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
+add_executable(
+  ${PROJECT_NAME}_node
+  src/command.cpp
+  src/sensor.cpp
+  src/serial.cpp
+  src/ts_driver_node.cpp
+)
 
+add_dependencies(
+  ${PROJECT_NAME}_node
+  ${PROJECT_NAME}_gencfg
+)
 
-add_executable(${PROJECT_NAME}_node src/ts_driver_node.cpp)
-add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
-target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+#target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 
 
 install(
@@ -83,15 +91,11 @@ install(
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   COMPONENT main
 )
-
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  PATTERN ".git" EXCLUDE
 )
-
-install(DIRECTORY launch
+install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  PATTERN ".git" EXCLUDE
 )
 
 

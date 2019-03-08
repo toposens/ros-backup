@@ -1,9 +1,11 @@
 <launch>
 	<arg name="port" default="/dev/ttyUSB0" />
 	<arg name="frame" default="toposens" />
+  <arg name="t_celsius" default="24.5" />
 
 	<node pkg="toposens_driver" type="toposens_driver_node" name="ts_driver_node" output="screen">
 		<param name="port" value="$(arg port)" />
 		<param name="frame" value="$(arg frame)" />
+    <param name="t_celsius" value="$(arg t_celsius)" />
 	</node>
 </launch>

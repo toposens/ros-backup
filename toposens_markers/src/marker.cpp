@@ -19,8 +19,13 @@ Marker::Marker(ros::NodeHandle nh, ros::NodeHandle private_nh)
   f = boost::bind(&Marker::_reconfig, this, _1, _2);
   _srv->setCallback(f);
 
+<<<<<<< HEAD
   // Subscribe to topic with ts points
   _sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Marker::_sanitize, this);
+=======
+	// Subscribe to topic with ts points
+	_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Marker::_sanitize, this);
+>>>>>>> 2d019cd... Create Command class with overloaded constructors
   _sensingRange = 0;
 }
 

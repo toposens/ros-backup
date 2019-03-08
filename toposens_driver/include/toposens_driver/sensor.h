@@ -1,54 +1,43 @@
 /** @file     sensor.h
  *  @author   Adi Singh, Sebastian Dengler
  *  @date     January 2019
- *  @brief    Converts raw sensor data to ROS friendly structures.
- *  Parses a TsScan from a single input data frame by extracting
- *  its header information and the vector of TsPoints contained
- *  in its payload. Messages are published to topic /ts_scans.
  */
 
 #ifndef SENSOR_H
 #define SENSOR_H
 
+#define NOT_CALIBRATED 100.0
+
 #include <ros/ros.h>
 #include <dynamic_reconfigure/server.h>
 
+#include <toposens_driver/command.h>
 #include <toposens_driver/serial.h>
 #include <toposens_msgs/TsScan.h>
 #include <toposens_driver/TsDriverConfig.h>
 
+/** namespace lalala lal */
 namespace toposens_driver
 {
-typedef dynamic_reconfigure::Server<TsDriverConfig> Cfg;
-const std::string kScansTopic   = "ts_scans";
-const int  kTopicQueueSize      = 100;
+/** ROS topic for publishing TsScan messages. */
+static const char kScansTopic[] = "ts_scans";
+/** Maximum number of messages held in buffer for #kScansTopic. */
+static const int kQueueSize = 100;
 
-// @todo Separate this into a separate commands class
-// The following commands are defined in TS firmware
-const char kCmdPrefix           = 'C';
-const int  kCmdBufferSize       = 100;
-const char kCmdSigStrength[6]   = "nWave";
-const char kCmdFilterSize[6]    = "filtr";
-const char kCmdNoiseThresh[6]   = "dThre";
-const char kCmdVoxelLimits[6]   = "goLim";
-const char kCmdBoostShortR[6]   = "slop1";
-const char kCmdBoostMidR[6]     = "slop2";
-const char kCmdBoostLongR[6]    = "slop3";
-
-/** Manages conversion of a single sensor data frame into a TsScan message.
- *  Also provides an interface for configuring sensor performance parameters.
- *
+/** @brief  Converts raw sensor data to ROS friendly message structures.
+ *  @details  Parses a TsScan from a single input data frame by extracting
+ *  its header information and the vector of TsPoints contained in its payload.
  *  A TsScan contains timestamped header information followed by a vector
  *  of TsPoints. A single TsPoint has a 3D location (x, y, z) and an
- *  associated intenstiy.
+ *  associated intenstiy. Messages are published to topic #kScansTopic.
  */
 class Sensor
 { 
   public:
 
     /** Initiates a serial connection and transmits default settings to sensor.
-     *  @param nh Public nodehandle for pub-sub to ROS topics.
-     *  @param private_nh Private nodehandle for retrieving launch parameters.
+     *  @param nh Public nodehandle for pub-sub ops on ROS topics.
+     *  @param private_nh Private nodehandle for accessing launch parameters.
     */
     Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh);
     ~Sensor() {}
@@ -61,10 +50,20 @@ class Sensor
     /** Shuts down serial connection to the sensor. */
     void shutdown(void);
 
+	/** Performs sensor calibration for the given temperature.
+	 *  @param temperature value used for recalibration.
+	 * @returns True if entering calibration mode.
+	 */
+	bool calibrate(float ambientTempC);
+
+
   private:
+    /** Structure generated from cfg file for storing local copy of sensor parameters.*/
+    typedef dynamic_reconfigure::Server<TsDriverConfig> Cfg;
+    
     /** Transmits settings commands on startup with initial data
-     *  from the config server.
-     */
+    *  from the config server.
+    */
     void _init(void);
 
     /** Extracts TsPoints from the current data frame and reads them
@@ -90,23 +89,28 @@ class Sensor
      */
     void _reconfig(TsDriverConfig &cfg, uint32_t level);
 
-		/** Transforming from TS coordinate frame to ROS coordinate frame.
-		 *  @param x_val Pointer to string containing x value in TS coordinate frame
-		 *	@param y_val Pointer to string containing y value in TS coordinate frame
-		 *	@param z_Val Pointer to string containing z value in TS coordinate frame
-		 */
-		void _transform(const std::string &x_val,
-										const std::string &y_val,
-										const std::string &z_val);
+  	/** Listens port whether sensor is in calibration mode.
+  	*	 @returns True if sensor is calibrating.
+  	*/
+  	bool _isCalibrating();
+	
+    /** Efficiently converts a char array representing a signed integer to
+     *  its numerical value.
+     *  @param s C-string representing an integer value.
+     *  @returns Signed float value after conversion.
+     *  @throws std::bad_cast String contains non-numerical characters.
+     */
+    float _toNum(const char *s);
 
     std::string _frame;     /**< Frame ID assigned to TsScan messages.*/
     TsDriverConfig _cfg;    /**< Maintains current values of all config params.*/
     std::unique_ptr<Cfg> _srv;  /**< Pointer to config server*/
 
-    ros::Publisher _pub;    /**< Topic for publishing TsScans.*/
+    ros::Publisher _pub;    /**< Handler for publishing TsScans.*/
     std::unique_ptr<Serial> _serial;  /**< Pointer for accessing serial functions.*/
     std::stringstream _data;  /**< Buffer for storing a raw data frame.*/
 
+    float _calibTempC; /**< Temperature the sensor is calibrated on */
 };
 } // namespace toposens_driver
 

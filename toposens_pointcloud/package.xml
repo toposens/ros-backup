@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>toposens_pointcloud</name>
-  <version>0.9.2</version>
+  <version>0.9.3</version>
   <description>PCL integration for TS sensors mounted on Turtlebot3.</description>
   
   <maintainer email="singh@toposens.com">Adi Singh</maintainer>

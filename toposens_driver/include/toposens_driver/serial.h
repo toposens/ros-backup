@@ -1,8 +1,6 @@
 /** @file     serial.h
  *  @author   Adi Singh, Sebastian Dengler
  *  @date     January 2019
- *  @brief    Provides raw I/O access to TS data stream.
- *  @details  Methods defined here are independent of ROS.
  */
 
 #ifndef SERIAL_H
@@ -14,9 +12,11 @@
 namespace toposens_driver
 {
 
-/** Low level manager for serial I/O operations.
- *  Sets up a UART bridge to access raw data packets from a TS device.
- *  Maintains simple read-write access at the given baud rate.
+/** @brief  Provides low-level I/O access to TS data stream using
+ *  native Unix API.
+ *  @details  Sets up a UART bridge to access raw data packets
+ *  from a TS device. Maintains simple read-write access at the
+ *  given baud rate. Methods defined here are independent of ROS.
  */
 class Serial
 {
@@ -31,11 +31,6 @@ class Serial
      *  @returns True if connection is open, false otherwise.
      */
     bool isAlive();
-
-    /** Checks the calibration bit of incoming raw data.
-     *  @returns True if calibration bit is set, false otherwise.
-     */
-    bool isCalibrating();
 
     /** Extracts a single TS data frame into the given iostream.
       * @param data Points to a string stream expecting a sensor frame.
@@ -56,6 +51,7 @@ class Serial
     const unsigned int kBaud = B921600; /**< Baud rate needed for TS device comms.*/
 
 };
+
 } // namespace toposens_driver
 
 #endif // SERIAL_H
