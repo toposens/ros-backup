@@ -16,6 +16,7 @@ find_package(
   toposens_msgs
 )
 
+
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -52,12 +53,6 @@ include_directories(
   include ${catkin_INCLUDE_DIRS}
 )
 
-<<<<<<< HEAD
-add_library(${PROJECT_NAME} src/marker.cpp)
-add_executable(${PROJECT_NAME}_node src/ts_markers_node.cpp)
-add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
-target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME} ${catkin_LIBRARIES})
-=======
 
 add_executable(
   ${PROJECT_NAME}_node
@@ -74,7 +69,6 @@ target_link_libraries(
   ${PROJECT_NAME}_node
   ${catkin_LIBRARIES}
 )
->>>>>>> 2d019cd... Create Command class with overloaded constructors
 
 
 install(
@@ -85,6 +79,10 @@ install(
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 install(DIRECTORY launch

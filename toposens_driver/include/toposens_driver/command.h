@@ -6,9 +6,6 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#include <dynamic_reconfigure/server.h>
-
-#include <toposens_driver/serial.h>
 #include <toposens_driver/TsDriverConfig.h>
 
 namespace toposens_driver
@@ -34,20 +31,21 @@ class Command
     /** An arbitrary cuboid volume with points of interest and the sensor at its origin. */
     typedef TsDriverConfig::DEFAULT::VOXEL TsVoxel;
 
-  // The following commands are defined in TS firmware
-  // Exposed as public constants to be accessed by the Command API
-  // ranges also defined in Cfg.
-  enum Parameter
-  {
-    SigStrength,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
-    FilterSize,   /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
-    NoiseThresh,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
-    VoxelLimits,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
-    BoostShortR,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
-    BoostMidR,    /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
-    BoostLongR,   /** Long-range SNR booster for last third of x-range [0 to 1000]. */
-    CalibTemp     /** Ambient temperature that sensor is calibrated to */
-  };
+    /** Defined in TS firmware and exposed as public constants to
+     *  be accessed by the #Command API. Ranges and default values
+     *  are stated in the package's cfg file.     
+     */
+    enum Parameter
+    {
+      SigStrength,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
+      FilterSize,   /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
+      NoiseThresh,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
+      VoxelLimits,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
+      BoostShortR,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
+      BoostMidR,    /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
+      BoostLongR,   /** Long-range SNR booster for last third of x-range [0 to 1000]. */
+      CalibTemp     /** Ambient temperature that sensor is calibrated to */
+    };
 
     /** Empty constructor allowing subsequent manual generation of command. */
     Command(){};
@@ -69,7 +67,7 @@ class Command
      *  parameter values of an existing object.
      *  @param param Setting name from the enumerated command list.
      *  @param value Desired integer value for sensor parameter.
-     *  @returns True if command message is built, false otherwise.
+     *  @returns True on successful command generation.
      */
     bool generate(Parameter param, int value);
 
@@ -78,7 +76,7 @@ class Command
      *  parameter values of an existing object.
      *  @param param Setting name from the enumerated command list.
      *  @param voxel Cuboidal limit ranges as [min, max] values for each dimension.
-     *  @returns True if command message is built, false otherwise.
+     *  @returns True on successful command generation.
      */
     bool generate(Parameter param, TsVoxel voxel);
 
@@ -91,13 +89,14 @@ class Command
     char _bytes[100];   /**< Large enough buffer to hold a well-formed command.*/
     static const char kPrefix = 'C'; /**< Designates a string as a firmware command.*/
 
-  /**
-    * Looks up key defined by the TS firmware for every parameter
-    * @param param Setting name from the enumerated command list.
-    * @return TS firmware defined parameter key
-    */
-  std::string _getKey(Parameter param);
+    /** Looks up command keys defined by the TS firmware corresponding to
+     *  given setting parameters.
+     *  @param param Setting name from the enumerated command list.
+     *  @returns Corresponding firmware parameter key.
+     */
+    std::string _getKey(Parameter param);
 
+    bool _validate(int &lower_val, int &upper_val);
 };
 
 } // namespace toposens_driver

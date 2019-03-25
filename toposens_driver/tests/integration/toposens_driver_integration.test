@@ -1,0 +1,48 @@
+<launch>
+    <arg name="port" default="/dev/ttyUSB0" />
+    <arg name="frame" default="toposens" />
+    <arg name="t_celsius" default="24.5" />
+
+  <include file="$(find toposens_driver)/launch/toposens_driver.launch">
+    <arg name="port" value="$(arg port)" />
+    <arg name="frame" value="$(arg frame)" />
+    <arg name="t_celsius" value="$(arg t_celsius)" />
+  </include>
+
+    <!-- Parameter Test -->
+    <!-- Tests if changes to noise_threshold, signal_strength, voxel_limits parameter values are applied by the sensor. -->
+    <test pkg="toposens_driver"
+          type="toposens_driver_integration_test"
+          test-name="ts_driver_integration_paramtest">
+      <param name="port" value="$(arg port)" />
+      <param name="frame" value="$(arg frame)" />
+      <param name="t_celsius" value="$(arg t_celsius)" />
+    </test>
+
+    <!-- Hz Test-->
+    <!-- Tests publishing rate of topics-->
+    <test name="hztest"
+          test-name="ts_driver_integration_hztest"
+          pkg="rostest"
+          type="hztest">
+      <param name="topic" value="/ts_scans"/>
+      <param name="hz" value="10.0"/>
+      <param name="hzerror" value="1.0"/>
+      <param name="test_duration" value="5.0"/>
+    </test>
+
+    <!-- Topic Test -->
+    <!-- Tests whether each topic publishes at least once.-->
+    <test name="publishtest"
+          test-name="-ts_driver_integration_publishtest"
+          pkg="rostest"
+          type="publishtest">
+      <rosparam>
+          topics:
+          -   name: /ts_scans
+          timeout: 10
+          negative: False
+      </rosparam>
+    </test>
+
+</launch>

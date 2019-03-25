@@ -24,17 +24,17 @@ Serial::Serial(std::string port)
   _fd = -1;
   _port = port;
 
-  // Open serial port to access sensor stream
-  _fd = open(_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+	// Open serial port to access sensor stream
+	_fd = open(_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
-  if (!isAlive()) {
-    ROS_ERROR("Error opening connection at %s: %s", _port.c_str(), strerror (errno));
-    return;
-  }
+	if (!isAlive()) {
+		ROS_ERROR("Error opening connection at %s: %s", _port.c_str(), strerror (errno));
+		return;
+	}
   ROS_DEBUG("Toposens serial established with fd %d\n", _fd);
 
-  // Set options of serial data transfer
-  struct termios tty;
+	// Set options of serial data transfer
+	struct termios tty;
   memset(&tty, 0, sizeof(tty));
 
   // Get current attributes of termios structure
@@ -65,22 +65,22 @@ Serial::Serial(std::string port)
   // disable special data post-processing
   tty.c_oflag &= ~(OPOST | ONLCR);
 
-  // wait for at least 8 bytes to be received
+  // wait for at least 1 byte to be received
   // length of a valid empty data frame
-  tty.c_cc[VMIN] = 8;
+  tty.c_cc[VMIN] = 1;
   // wait for 0.1s till data received
   tty.c_cc[VTIME] = 1;
 
 
-  // Set attributes of termios structure
-  if(tcsetattr(_fd, TCSANOW, &tty) != 0) {
-    ROS_WARN("Error configuring device at %s: %s", _port.c_str(), strerror (errno));
-    return;
-  }
+	// Set attributes of termios structure
+	if(tcsetattr(_fd, TCSANOW, &tty) != 0) {
+		ROS_WARN("Error configuring device at %s: %s", _port.c_str(), strerror (errno));
+		return;
+	}
 
-  ROS_DEBUG("Serial setings updated:\n  BaudRate = %d \n  DataBits = 8 \n  Parity = disabled", kBaud);
-  tcflush(_fd, TCIFLUSH);     // Discard old data in RX buffer
-  ROS_INFO("Device at %s ready for communication", _port.c_str());
+	ROS_DEBUG("Serial setings updated:\n  BaudRate = %d \n  DataBits = 8 \n  Parity = disabled", kBaud);
+	tcflush(_fd, TCIFLUSH);			// Discard old data in RX buffer
+	ROS_INFO("Device at %s ready for communication", _port.c_str());
 }
 
 /** Flushes out bits from the serial pipe and closes its
@@ -90,12 +90,13 @@ Serial::~Serial(void)
 {
   ROS_INFO("Closing serial connection...");
 
-  if (tcflush(_fd, TCIOFLUSH) | close(_fd) == -1) {
-    ROS_ERROR("Error closing serial connection: %s", strerror(errno));
-    return;
-  }
-  ROS_INFO("Serial connection killed");
+	if (tcflush(_fd, TCIOFLUSH) | close(_fd) == -1) {
+		ROS_ERROR("Error closing serial connection: %s", strerror(errno));
+		return;
+	}
+	ROS_INFO("Serial connection killed");
 }
+
 
 /** Uses the fact that open(3) returns -1 if it errors
  *  out while opening a serial stream.
@@ -112,16 +113,18 @@ bool Serial::isAlive() {
  */
 void Serial::getFrame(std::stringstream &data) {
   char buffer[2000];
-  int nBytes = 0;
-  do {
-    memset(&buffer, '\0', sizeof(buffer));
-    nBytes = read(_fd, &buffer, sizeof(buffer));
+	int nBytes = 0;
 
-  //  ROS_WARN("%d", nBytes);
+	do {
+		memset(&buffer, '\0', sizeof(buffer));
+		nBytes = read(_fd, &buffer, sizeof(buffer));
+//    ROS_WARN("%d", nBytes);
     if (nBytes < 1) continue;
-    data << buffer;
-  } while (buffer[nBytes-1] != 'E');
+		data << buffer;
+	} while (buffer[nBytes-1] != 'E');
+
 }
+
 
 /** Note that this returns true as long as data is written to
  *  the serial stream without error. A success handshake from
@@ -132,16 +135,18 @@ void Serial::getFrame(std::stringstream &data) {
  */
 bool Serial::send(char* bytes)
 {
-  if (!isAlive()) {
+	if (!isAlive()) {
     ROS_ERROR("Connection at %s unavailable: %s", _port.c_str(), strerror (errno));
     return false;
   }
+
   int tx_length = write(_fd, bytes, strlen(bytes) + 1);
+
   if (tx_length == -1) {
     ROS_ERROR("Failed to transmit %s: %s", bytes, strerror (errno));
     return false;
   }
-  ROS_DEBUG("Bytes transmitted: %s", bytes);
+	ROS_DEBUG("Bytes transmitted: %s", bytes);
   return true;
 }
 

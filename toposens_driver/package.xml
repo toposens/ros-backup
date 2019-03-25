@@ -15,15 +15,17 @@
   <url type="repository">TBD</url>
   <url type="bugtracker">TBD</url>
 
+
   <buildtool_depend>catkin</buildtool_depend>
+
 
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>toposens_msgs</depend>
-  
-  <exec_depend>message_runtime</exec_depend>
+  <depend>message_runtime</depend>
 
+  <test_depend>code_coverage</test_depend>
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>
 </package>

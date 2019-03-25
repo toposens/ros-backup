@@ -3,7 +3,10 @@
  *  @date     January 2019
  */
 
- #include "toposens_driver/sensor.h"
+#include <toposens_driver/command.h>
+#include "toposens_driver/sensor.h"
+#define NOT_CALIBRATED 100.0
+
 
 namespace toposens_driver
 {
@@ -16,22 +19,11 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
   private_nh.getParam("port", port);
   private_nh.getParam("frame", _frame);
 
-  float t_celsius;
-  private_nh.getParam("t_celsius", t_celsius);
-
   // Set up serial connection to sensor
   _serial = std::make_unique<Serial>(port);
-  if (!_serial->isAlive()) throw "WTF Exception";
+  if (!_serial->isAlive()) throw "Error opening serial port!";
 
   _calibTempC = NOT_CALIBRATED;
-  calibrate(t_celsius);
-
-  // Check if sensor is busy self calibrating (every power on)
-  if (_serial->isCalibrating()) {
-    ROS_INFO("Auto calibration in progress...");
-    while(_serial->isCalibrating()) continue;
-    ROS_INFO("Sensor calibration successful");
-  } else ROS_INFO("Sensor already calibrated");
 
   // Set up dynamic reconfigure to change sensor settings
   _srv = std::make_unique<Cfg>(private_nh);
@@ -51,18 +43,17 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
  */
 bool Sensor::poll(void)
 {
-  // @todo implement better exception
-  // @todo no need for this consistent check... save on space
-  if (!_serial->isAlive()) throw "WTF Exception";
+  if (!_serial->isAlive()) throw "Serial connection has died!";
+
   _serial->getFrame(_data);
 
   toposens_msgs::TsScan scan;
   scan.header.stamp = ros::Time::now();
   scan.header.frame_id = _frame;
 
-  Sensor::_parse(scan);
+  Sensor::parse(scan, _data);
   if (!scan.points.size()) return false;
-  
+
   _pub.publish(scan);
   return true;
 }
@@ -70,7 +61,7 @@ bool Sensor::poll(void)
 /** Deletes underlying serial and config server objects
  *  managed by class pointers.
  */
-void Sensor::shutdown() 
+void Sensor::shutdown()
 {
   _serial.reset();
   _srv.reset();
@@ -118,37 +109,24 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
   if (level == -1) return Sensor::_init();
 
   Command cmd;
-  if      (level == 0) cmd.generate(Command::SigStrength,  _cfg.sig_strength);
-  else if (level == 1) cmd.generate(Command::FilterSize,   _cfg.filter_size);
-  else if (level == 2) cmd.generate(Command::NoiseThresh,  _cfg.noise_thresh);
-  else if (level == 3) cmd.generate(Command::BoostShortR,  _cfg.short_range);
-  else if (level == 4) cmd.generate(Command::BoostMidR,    _cfg.mid_range);
-  else if (level == 5) cmd.generate(Command::BoostLongR,   _cfg.long_range);
-  else                 cmd.generate(Command::VoxelLimits,  _cfg.groups.voxel);
-  // at else statement, level is 6-11 which indicates change in a voxel limit
+  if     (level == 0) cmd.generate(Command::SigStrength,  _cfg.sig_strength);
+  else if(level == 1) cmd.generate(Command::FilterSize,   _cfg.filter_size);
+  else if(level == 2) cmd.generate(Command::NoiseThresh,  _cfg.noise_thresh);
+  else if(level == 3) cmd.generate(Command::BoostShortR,  _cfg.short_range);
+  else if(level == 4) cmd.generate(Command::BoostMidR,    _cfg.mid_range);
+  else if(level == 5) cmd.generate(Command::BoostLongR,   _cfg.long_range);
+  else                cmd.generate(Command::VoxelLimits,  _cfg.groups.voxel);
+  // level is 6-11, indicating a parameter change in voxel limits
+  try {
 
-  if (_serial->send(cmd.getBytes())) ROS_INFO("Sensor setting updated");
-  else ROS_WARN("Settings update failed");
+    if (_serial->send(cmd.getBytes())) ROS_INFO("Sensor setting updated");
+    else ROS_WARN("Settings update failed");
+
+  } catch (const std::exception& e) {
+    ROS_ERROR("%s: %s", e.what(), cmd.getBytes());
+  }
 }
 
-// Reads into a private member datastream to avoid creating a buffer object on each poll
-bool Sensor::poll(void)
-{
-  if (!_serial->isAlive()) throw "WTF Exception";
-  _serial->getFrame(_data);
-
-  // TODO: check for calibration bit here
-
-  toposens_msgs::TsScan scan;
-  scan.header.stamp = ros::Time::now();
-  scan.header.frame_id = _frame;
-
-  Sensor::_parse(scan);
-  if (!scan.points.size()) return false;
-
-  _pub.publish(scan);
-  return true;
-}
 
 /** This O(log n) algorithm only works when the input data frame is
  *  exactly in the expected format. Char-by-char error checks are not
@@ -186,13 +164,13 @@ bool Sensor::poll(void)
  *  @n Four points extracted: P1(-415, 10, 257, 61); P2(-235, 19, 718, 55);
  *  P3(-507, 43, 727, 75); P4(142, 360, 1555, 52)
  */
-void Sensor::_parse(toposens_msgs::TsScan &scan)
+  void Sensor::parse(toposens_msgs::TsScan &scan, std::stringstream &data)
 {
   // x, y, z, v data is always 5 bytes long
   const int val_length = 5;
   std::size_t index = 0;
 
-  std::string strData = _data.str();
+  std::string strData = data.str();
   // ROS_INFO_STREAM(strData);
 
   while (1) {
@@ -223,6 +201,9 @@ void Sensor::_parse(toposens_msgs::TsScan &scan)
       ROS_DEBUG_STREAM(strData);
     }
   }
+
+  data.str(std::string());
+  data.clear();
 }
 
 /** Checks the calibration process indication bit in the data frame.
@@ -237,8 +218,9 @@ void Sensor::_parse(toposens_msgs::TsScan &scan)
     _serial->getFrame(_data);
 
     std::string data = _data.str().c_str();
+    size_t frame_start = data.find('S');
     
-    return (data[3] == '1');
+    return (data[frame_start+3] == '1');
   }
 
 /** Performs sensor calibration for the given temperature.
@@ -271,33 +253,18 @@ void Sensor::_parse(toposens_msgs::TsScan &scan)
  *  base-10 multiplication of valid digits and adding them together.
  *  The resulting number is cast to a float before returning.
  */
-float Sensor::_toNum(const char* s){
-  int abs = 0, factor = 1;
-  if (*s == '-') factor = -1;
+  float Sensor::_toNum(const char* s){
+    int abs = 0, factor = 1;
+    if (*s == '-') factor = -1;
+      // if the first character is neither "-" nor a number than throw an exception
+    else if(*s != '0') throw std::invalid_argument("Not a valid TS point.");
 
-  for(s++; *s; s++){
-    int d = *s - '0';
-    if (d >= 0 && d <= 9) abs = abs*10 + d;
-    else throw std::bad_cast();
-  }
-  return (float)(factor * abs);
-};
-
-/** Char is a valid number if its decimal range from ASCII value '0'
- *  falls between 0 and 9. Number is iteratively constructed through
- *  base-10 multiplication of valid digits and adding them together.
- *  The resulting number is cast to a float before returning.
- */
-float Sensor::_toNum(const char* s){
-  int abs = 0, factor = 1;
-  if (*s == '-') factor = -1;
-
-  for(s++; *s; s++){
-    int d = *s - '0';
-    if (d >= 0 && d <= 9) abs = abs*10 + d;
-    else throw std::bad_cast();
-  }
-  return (float)(factor * abs);
-};
+    for(s++; *s; s++){
+      int d = *s - '0';
+      if (d >= 0 && d <= 9) abs = abs*10 + d;
+      else throw std::bad_cast();
+    }
+    return (float)(factor * abs);
+  };
 
 } // namespace toposens_driver

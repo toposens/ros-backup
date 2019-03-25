@@ -41,12 +41,17 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
   ros::Rate loop_rate(10); // 10 Hz
 
+
   // TODO: Exception should raise better message
   try {
     toposens_driver::Sensor d(nh, private_nh);
 
+//    d.calibrate(t_celsius);
+
     while (!g_shutdown) {
-      d.poll();
+      if (!d.poll()) {
+        ROS_ERROR("Current sensor settings eliminate all data points.");
+      }
       ros::spinOnce();
       loop_rate.sleep();
     }

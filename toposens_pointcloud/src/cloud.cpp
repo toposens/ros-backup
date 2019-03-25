@@ -103,6 +103,7 @@ pcl::PointXYZI Cloud::_transform(toposens_msgs::TsPoint p, std_msgs::Header h)
   return point;
 }
 
+
 /** @todo add sensor mesh to display */
 
 } // namespace toposens_pointcloud

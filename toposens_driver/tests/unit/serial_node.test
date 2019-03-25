@@ -2,10 +2,14 @@
   <arg name="port" default="/dev/ttyUSB0" />
   <arg name="frame" default="toposens" />
   <arg name="t_celsius" default="24.5" />
-  
-  <node pkg="toposens_driver" type="toposens_driver_node" name="ts_driver_node" output="screen">
+
+  <!-- Tests handling of the serial port and reception of data frames from the Ts Sensor. -->
+  <test pkg="toposens_driver"
+        type="toposens_driver_serial_test"
+        test-name="ts_driver_serial_test"
+        time-limit="10.0">
     <param name="port" value="$(arg port)" />
     <param name="frame" value="$(arg frame)" />
     <param name="t_celsius" value="$(arg t_celsius)" />
-  </node>
+  </test>
 </launch>
