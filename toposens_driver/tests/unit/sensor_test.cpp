@@ -208,7 +208,6 @@ using namespace toposens_driver;
       data << frame.first;
 
       toposens_msgs::TsScan scan;
-
       dev->parse(scan, data);
 
       if (scan.points.size() == 2) {
