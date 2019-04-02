@@ -9,7 +9,7 @@ add_executable(
 
 target_link_libraries(
   ${PROJECT_NAME}_node
-  ${catkin_LIBRARIES}
+#  ${catkin_LIBRARIES}
   ${PROJECT_NAME}
 )
 

@@ -12,6 +12,7 @@ add_library(
 add_dependencies(
   ${PROJECT_NAME}
   ${PROJECT_NAME}_gencfg
+  ${catkin_EXPORTED_TARGETS}
 )
 
 target_link_libraries(
