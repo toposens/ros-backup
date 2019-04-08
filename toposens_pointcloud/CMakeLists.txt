@@ -9,7 +9,6 @@ project(toposens_pointcloud)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
-  pcl_conversions
   pcl_ros
   roscpp
   rospy
@@ -53,7 +52,6 @@ catkin_package(
   CATKIN_DEPENDS
   dynamic_reconfigure
   message_runtime
-  pcl_conversions
   pcl_ros
   roscpp
   rospy

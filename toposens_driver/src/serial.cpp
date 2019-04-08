@@ -110,19 +110,36 @@ bool Serial::isAlive() {
 
 /** Reads incoming bytes to the string stream pointer till
  *  the firmware-defined frame terminator 'E' is reached.
+ *  Returns if no data has been received for 1 second.
  */
 void Serial::getFrame(std::stringstream &data) {
   char buffer[2000];
 	int nBytes = 0;
+  ros::Time latest = ros::Time::now();
+  
+  do {
+    memset(&buffer, '\0', sizeof(buffer));
+    nBytes = read(_fd, &buffer, sizeof(buffer));
+    if (nBytes < 1) continue;
 
-	do {
+ //   std::cerr << buffer;
+    data << buffer;
+    latest = ros::Time::now();
+    // should this break instead when buffer contains E (at any position)
+    if (buffer[nBytes-1] == 'E') break;
+  } while (ros::Time::now() - latest < ros::Duration(1));
+
+/*	do {
 		memset(&buffer, '\0', sizeof(buffer));
 		nBytes = read(_fd, &buffer, sizeof(buffer));
 //    ROS_WARN("%d", nBytes);
     if (nBytes < 1) continue;
-		data << buffer;
-	} while (buffer[nBytes-1] != 'E');
 
+    std::cerr << nBytes;
+
+    data << buffer;
+	} while (buffer[nBytes-1] != 'E');
+*/
 }
 
 
@@ -140,10 +157,10 @@ bool Serial::send(char* bytes)
     return false;
   }
 
-  int tx_length = write(_fd, bytes, strlen(bytes) + 1);
+  int tx_length = write(_fd, bytes, strlen(bytes));
 
   if (tx_length == -1) {
-    ROS_ERROR("Failed to transmit %s: %s", bytes, strerror (errno));
+    ROS_ERROR("Failed to transmit %s: %s", bytes, strerror(errno));
     return false;
   }
 	ROS_DEBUG("Bytes transmitted: %s", bytes);

@@ -112,9 +112,9 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
   if     (level == 0) cmd.generate(Command::SigStrength,  _cfg.sig_strength);
   else if(level == 1) cmd.generate(Command::FilterSize,   _cfg.filter_size);
   else if(level == 2) cmd.generate(Command::NoiseThresh,  _cfg.noise_thresh);
-  else if(level == 3) cmd.generate(Command::BoostShortR,  _cfg.short_range);
-  else if(level == 4) cmd.generate(Command::BoostMidR,    _cfg.mid_range);
-  else if(level == 5) cmd.generate(Command::BoostLongR,   _cfg.long_range);
+  else if(level == 3) cmd.generate(Command::SNRBoostNear, _cfg.boost_near);
+  else if(level == 4) cmd.generate(Command::SNRBoostMid,  _cfg.boost_mid);
+  else if(level == 5) cmd.generate(Command::SNRBoostFar,  _cfg.boost_far);
   else                cmd.generate(Command::VoxelLimits,  _cfg.groups.voxel);
   // level is 6-11, indicating a parameter change in voxel limits
   try {

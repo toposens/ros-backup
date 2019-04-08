@@ -23,9 +23,9 @@ void generateAllCommands(std::list<Command> commands, int val){
   commands.emplace_back(Command(Command::SigStrength, val));
   commands.emplace_back(Command(Command::FilterSize, val));
   commands.emplace_back(Command(Command::NoiseThresh, val));
-  commands.emplace_back(Command(Command::BoostShortR, val));
-  commands.emplace_back(Command(Command::BoostMidR, val));
-  commands.emplace_back(Command(Command::BoostLongR, val));
+  commands.emplace_back(Command(Command::SNRBoostNear, val));
+  commands.emplace_back(Command(Command::SNRBoostMid, val));
+  commands.emplace_back(Command(Command::SNRBoostFar, val));
   commands.emplace_back(Command(Command::VoxelLimits, vxl));
 
   // Unexpected behaviors

@@ -1,40 +1,24 @@
-image: ros:melodic-ros-core
+image: registry.gitlab.com/toposens/ros-projects/ts-ros:latest
 
 cache:
   paths:
     - ccache/
 
 before_script:
- - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
- - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+   - source gitlab-ros.bash
 
 lint:
   stage: build
-  before_script:
-    - apt update  >/dev/null 2>&1
-    - apt install -y python-catkin-lint >/dev/null 2>&1
   script:
     - catkin_lint -W3 .
 
 make:
   stage: build
   script:
-    - catkin_make
+    - catkin_make_isolated
 
 test:
   stage: test
   script:
     - catkin_make run_tests
     - catkin_test_results
-  coverage: /^TOTAL.*\s+(\d+\%)$/
-
-# catkin tools
-#catkin_tools:
-#  stage: build
-#  script:
-#    - catkin build --summarize --no-status --force-color
-
-#catkin tools_tests:
-#  stage: test
-#  script:
-#    - catkin run_tests --no-status --force-color

@@ -6,43 +6,60 @@
 
 find_package(roslaunch REQUIRED)
 find_package(rostest REQUIRED)
-#find_package(tf2_ros REQUIRED)
-find_package(code_coverage REQUIRED)
 
-#if(ENABLE_COVERAGE_TESTING)
-#    include(CodeCoverage)
-#    APPEND_COVERAGE_COMPILER_FLAGS()
-#endif()
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable")
+add_definitions(-Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable)
+
+add_executable(
+	${PROJECT_NAME}_mock
+	tty_emulator/tty0tty.c
+)
+
+install(
+	TARGETS ${PROJECT_NAME}_mock
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ################
 ## Unit Tests ##
 ################
-add_rostest_gtest(${PROJECT_NAME}_command_test unit/command_node.test unit/command_test.cpp)
-add_dependencies(${PROJECT_NAME}_command_test ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_command_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_rostest_gtest(${PROJECT_NAME}_sensor_test unit/sensor_node.test unit/sensor_test.cpp)
-add_dependencies(${PROJECT_NAME}_sensor_test ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_sensor_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_rostest_gtest(${PROJECT_NAME}_command_test unit/command_node.test unit/command_test.cpp)
+#add_dependencies(${PROJECT_NAME}_command_test ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(${PROJECT_NAME}_command_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_rostest_gtest(${PROJECT_NAME}_serial_test unit/serial_node.test unit/serial_test.cpp)
-add_dependencies(${PROJECT_NAME}_serial_test ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_serial_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_rostest_gtest(${PROJECT_NAME}_sensor_test unit/sensor_node.test unit/sensor_test.cpp)
+#add_dependencies(${PROJECT_NAME}_sensor_test ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(${PROJECT_NAME}_sensor_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+add_rostest_gtest(
+	${PROJECT_NAME}_serial_test
+	unit/serial_node.test
+	unit/serial_test.cpp
+)
+
+add_dependencies(
+	${PROJECT_NAME}_serial_test
+	${catkin_EXPORTED_TARGETS}
+	${PROJECT_NAME}_mock
+)
+
+target_link_libraries(
+	${PROJECT_NAME}_serial_test
+	${catkin_LIBRARIES}
+	${PROJECT_NAME}
+)
 
 #######################
 ## Integration Tests ##
 #######################
-#add_rostest_gtest(${PROJECT_NAME}_integration_test integration/toposens_driver_integration.test integration/param_test.cpp)
-#add_dependencies(${PROJECT_NAME}_integration_test ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(${PROJECT_NAME}_integration_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_rostest_gtest(${PROJECT_NAME}_param_test integration/param_node.test integration/param_test.cpp)
+#add_dependencies(${PROJECT_NAME}_param_test ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(${PROJECT_NAME}_param_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-##########################
-## Code Coverage Report ##
-##########################
-#if(ENABLE_COVERAGE_TESTING)
-#    set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
-#    add_code_coverage(
-#            NAME ${PROJECT_NAME}_coverage
-#            DEPENDS tests
-#    )
-#endif()
+
+###################
+## Code Coverage ##
+###################
+#include(code_coverage.cmake)
+#coverage_add_target(run_tests_${PROJECT_NAME})

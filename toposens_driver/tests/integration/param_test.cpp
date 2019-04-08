@@ -10,6 +10,11 @@
 #include <toposens_driver/TsDriverConfig.h>
 #include <toposens_driver/sensor.h>
 
+#include <toposens_driver/command.h>
+
+#include <termios.h>
+#include <fcntl.h>
+
 /**
  * Test that changes in sensor parameters are being applied.
  */
@@ -34,6 +39,9 @@ namespace toposens_driver {
       dynamic_reconfigure::GroupState group_state;
       dynamic_reconfigure::Config conf;
 
+      int _fd;    /**< Linux file descriptor pointing to TS device port.*/
+      std::string _mock_port = "/dev/tnt1";  /**< Stored device port for future access.*/
+
       virtual void SetUp() {
         ros::NodeHandle nh;
 
@@ -42,6 +50,13 @@ namespace toposens_driver {
 
         param_server = std::make_unique<Cfg_server>(nh);
         cfg.__fromServer__(nh);
+
+        _fd = open(_mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+      }
+
+
+      void TearDown() override {
+        close(_fd);
       }
 
     public:
@@ -125,13 +140,34 @@ namespace toposens_driver {
       }
   };
 
+  /**
+   * Test data frame that is send to sensor for paramter updates.
+   * Desired behavior: Message is well formed and output clipped to paramter value limits.
+   */
+  TEST_F(ParamTest, parameterCommandGeneration) {
+
+    Command cmd;
+    char buffer[2000];
+
+    cfg.sig_strength = 100;
+    updateConfigurations(cfg);
+
+    do{
+      memset(&buffer, '\0', sizeof(buffer));
+    }while(read(_fd, &buffer, sizeof(buffer)) <1);
+
+
+    cmd.generate(Command::SigStrength, 5.0);
+    EXPECT_EQ(std::string(buffer), cmd.getBytes());
+
+  }
 
   /**
    * Test that changes in signal strength are being applied.
    *  Desired behavior: - set signal strength to 0 ==> No points are expected
    *                    - increase signal strength ==> median point intensity should increase
    */
-  TEST_F(ParamTest, parameterSigStrength) {
+  TEST_F(ParamTest, DISABLED_parameterSigStrength) {
 
     float intensity_before, intensity_after;
 
@@ -155,7 +191,7 @@ namespace toposens_driver {
    * Test that changes in noise threshold are being applied.
    * Desired behavior: no point intensities lower than noise_thresh
    */
-  TEST_F(ParamTest, parameterNoiseThreshold){
+  TEST_F(ParamTest, DISABLED_parameterNoiseThreshold){
 
     int num_points_before, num_points_after;
 
@@ -181,7 +217,7 @@ namespace toposens_driver {
    * Test that changes in VoxelLimits are being applied.
    * Desired behavior: Sensor only reports point coordinates inside voxel limits
    */
-  TEST_F(ParamTest, parameterVoxelLimits) {
+  TEST_F(ParamTest, DISABLED_parameterVoxelLimits) {
 
     // change configurations here
     auto timestamp = ros::Time::now();

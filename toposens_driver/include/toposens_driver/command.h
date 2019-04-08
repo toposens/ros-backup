@@ -37,14 +37,14 @@ class Command
      */
     enum Parameter
     {
-      SigStrength,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
-      FilterSize,   /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
-      NoiseThresh,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
-      VoxelLimits,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
-      BoostShortR,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
-      BoostMidR,    /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
-      BoostLongR,   /** Long-range SNR booster for last third of x-range [0 to 1000]. */
-      CalibTemp     /** Ambient temperature that sensor is calibrated to */
+      SigStrength  =0,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
+      FilterSize   =1,  /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
+      NoiseThresh  =2,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
+      VoxelLimits  =3,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
+      SNRBoostNear =4,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
+      SNRBoostMid  =5,  /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
+      SNRBoostFar  =6,  /** Long-range SNR booster for last third of x-range [0 to 1000]. */
+      CalibTemp    =7   /** Ambient temperature that sensor is calibrated to */
     };
 
     /** Empty constructor allowing subsequent manual generation of command. */
@@ -85,6 +85,7 @@ class Command
      */
     char* getBytes() { return _bytes; }
 
+
   private:
     char _bytes[100];   /**< Large enough buffer to hold a well-formed command.*/
     static const char kPrefix = 'C'; /**< Designates a string as a firmware command.*/
@@ -96,7 +97,21 @@ class Command
      */
     std::string _getKey(Parameter param);
 
-    bool _validate(int &lower_val, int &upper_val);
+    /**
+     * Checks if desired parameter value are consistent with value limits specified in TsDriverConfig.
+     * @param param Setting name from the enumerated command list.
+     * @param value Desired integer value for sensor parameter.
+     * @return True if values are consistent.
+     */
+    bool _isValidSingular(Parameter param, int value);
+
+    /**
+     * Checks if desired voxel limits are consistent with value limits specified in TsDriverConfig.
+     * @param param Setting name from the enumerated command list.
+     * @param voxel Cuboidal limit ranges as [min, max] values for each dimension.
+     * @return True if values are consistent.
+     */
+    bool _isValidDimensional(Parameter param, TsDriverConfig::DEFAULT::VOXEL voxel);
 };
 
 } // namespace toposens_driver

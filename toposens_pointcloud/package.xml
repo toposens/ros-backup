@@ -19,7 +19,6 @@
   <depend>rospy</depend>
   <depend>tf</depend>
   <depend>pcl_ros</depend>
-  <depend>pcl_conversions</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>toposens_msgs</depend>
   <depend>toposens_driver</depend>
