@@ -135,12 +135,6 @@ TEST_F(SerialTest, getFrameWellFormatted)
 }
 
 
-int _print(std::string msg)
-{
-  std::cerr << "[INFO] " << msg << std::endl;
-} 
-
-
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

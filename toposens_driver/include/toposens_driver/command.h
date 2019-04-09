@@ -97,7 +97,21 @@ class Command
      */
     std::string _getKey(Parameter param);
 
-    bool _validate(int &lower_val, int &upper_val);
+    /**
+     * Checks if desired parameter value are consistent with value limits specified in TsDriverConfig.
+     * @param param Setting name from the enumerated command list.
+     * @param value Desired integer value for sensor parameter.
+     * @return True if values are consistent.
+     */
+    bool _isValidSingular(Parameter param, int value);
+
+    /**
+     * Checks if desired voxel limits are consistent with value limits specified in TsDriverConfig.
+     * @param param Setting name from the enumerated command list.
+     * @param voxel Cuboidal limit ranges as [min, max] values for each dimension.
+     * @return True if values are consistent.
+     */
+    bool _isValidDimensional(Parameter param, TsDriverConfig::DEFAULT::VOXEL voxel);
 };
 
 } // namespace toposens_driver
