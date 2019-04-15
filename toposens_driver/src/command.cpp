@@ -123,9 +123,9 @@ bool Command::_isValidSingular(Parameter param, int value)
     if      (param == Parameter::SigStrength) return ((value >= minCfg.sig_strength) && (value <= maxCfg.sig_strength));
     else if (param == Parameter::FilterSize)  return ((value >= minCfg.filter_size)  && (value <= maxCfg.filter_size));
     else if (param == Parameter::NoiseThresh) return ((value >= minCfg.noise_thresh) && (value <= maxCfg.noise_thresh));
-    else if (param == Parameter::BoostShortR) return ((value >= minCfg.short_range)  && (value <= maxCfg.short_range));
-    else if (param == Parameter::BoostMidR)   return ((value >= minCfg.mid_range)    && (value <= maxCfg.mid_range));
-    else if (param == Parameter::BoostLongR)  return ((value >= minCfg.long_range)   && (value <= maxCfg.long_range));
+    else if (param == Parameter::SNRBoostNear) return ((value >= minCfg.boost_near)  && (value <= maxCfg.boost_near));
+    else if (param == Parameter::SNRBoostMid)   return ((value >= minCfg.boost_mid)    && (value <= maxCfg.boost_mid));
+    else if (param == Parameter::SNRBoostFar)  return ((value >= minCfg.boost_far)   && (value <= maxCfg.boost_far));
     else /* Unkown singular parameter */      {
         ROS_ERROR("Dimensional command called with singular hand-over parameter. Skipping...");
         return false;
