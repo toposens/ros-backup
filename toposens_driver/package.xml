@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>toposens_driver</name>
-  <version>0.9.3</version>
+  <version>0.9.1</version>
   <description>ROS device driver for communication with TS sensors.</description>
   
   <maintainer email="singh@toposens.com">Adi Singh</maintainer>
