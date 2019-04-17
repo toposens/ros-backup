@@ -2,15 +2,34 @@
 Changelog for package toposens
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.9.3 (2019-03-25)
+0.9.2 (2019-04-17)
 ------------------
-* Completed sensor documentation.
-* Updated package descriptions
-* Reworded package file
-* Testing version bumping
-* Updated version tags
-* Updated package descriptions
-* Generated changelogs
-* Added dynamic reconfiguring to markers visualization
-* Refactored to stanard ROS package template.
+* Fixed package versions
+* Contributors: Adi Singh
+
+0.9.1 (2019-04-15)
+------------------
+
+0.9.0 (2019-04-09)
+------------------
+
+0.8.1 (2019-03-29)
+------------------
+* Added gitlab CI script
+* Contributors: Adi Singh, Christopher Lang
+
+0.8.0 (2019-03-25)
+------------------
+* Created Command class with overloaded constructors
+* Contributors: Christopher Lang, Nancy Seckel
+
+0.7.0 (2019-02-27)
+------------------
+* Added native PCL integration
+* Implemented markers using rviz visual tools
+* Contributors: Adi Singh
+
+0.5.0 (2019-02-07)
+------------------
+* Refactored to standard ROS package template
 * Contributors: Adi Singh

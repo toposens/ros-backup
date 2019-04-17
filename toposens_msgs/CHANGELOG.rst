@@ -2,16 +2,33 @@
 Changelog for package toposens_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.9.3 (2019-03-25)
+0.9.2 (2019-04-17)
 ------------------
-* Completed sensor documentation.
-* Updated package descriptions
-* Reworded package file
-* Testing version bumping
-* Updated version tags
-* Generated changelogs
-* Added native pcl integration
+* Fixed package versions
+* Contributors: Adi Singh
+
+0.9.1 (2019-04-15)
+------------------
+
+0.9.0 (2019-04-09)
+------------------
+
+0.8.1 (2019-03-29)
+------------------
+
+0.8.0 (2019-03-25)
+------------------
+* Created Command class with overloaded constructors
+* Contributors: Christopher Lang
+
+0.7.0 (2019-02-27)
+------------------
+* Added native PCL integration
 * Implemented markers using rviz visual tools
-* Added comments to message structures
-* Refactored to stanard ROS package template.
+* Added dynamic reconfigure capability
+* Contributors: Adi Singh
+
+0.5.0 (2019-02-07)
+------------------
+* Refactored to standard ROS package template
 * Contributors: Adi Singh
