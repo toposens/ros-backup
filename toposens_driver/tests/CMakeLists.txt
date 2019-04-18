@@ -27,7 +27,7 @@ install(
 #add_rostest_gtest(${PROJECT_NAME}_command_test unit/command_node.test unit/command_test.cpp)
 #add_dependencies(${PROJECT_NAME}_command_test ${catkin_EXPORTED_TARGETS})
 #target_link_libraries(${PROJECT_NAME}_command_test ${catkin_LIBRARIES} ${PROJECT_NAME})
-
+#
 #add_rostest_gtest(${PROJECT_NAME}_sensor_test unit/sensor_node.test unit/sensor_test.cpp)
 #add_dependencies(${PROJECT_NAME}_sensor_test ${catkin_EXPORTED_TARGETS})
 #target_link_libraries(${PROJECT_NAME}_sensor_test ${catkin_LIBRARIES} ${PROJECT_NAME})
@@ -53,7 +53,6 @@ target_link_libraries(
 #######################
 ## Integration Tests ##
 #######################
-
 #add_rostest_gtest(${PROJECT_NAME}_param_test integration/param_node.test integration/param_test.cpp)
 #add_dependencies(${PROJECT_NAME}_param_test ${catkin_EXPORTED_TARGETS})
 #target_link_libraries(${PROJECT_NAME}_param_test ${catkin_LIBRARIES} ${PROJECT_NAME})

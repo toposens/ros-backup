@@ -97,7 +97,6 @@ Serial::~Serial(void)
 	ROS_INFO("Serial connection killed");
 }
 
-
 /** Uses the fact that open(3) returns -1 if it errors
  *  out while opening a serial stream.
  *
@@ -141,7 +140,6 @@ void Serial::getFrame(std::stringstream &data) {
 	} while (buffer[nBytes-1] != 'E');
 */
 }
-
 
 /** Note that this returns true as long as data is written to
  *  the serial stream without error. A success handshake from

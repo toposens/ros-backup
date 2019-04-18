@@ -2,7 +2,7 @@
 
 [![pipeline status](https://gitlab.com/toposens/ros-projects/ts-ros/badges/master/pipeline.svg)](https://gitlab.com/toposens/ros-projects/ts-ros/commits/master)
 
----
+
 # Overview
 
 ROS packages for working with Toposens 3D Ultrasound sensors: http://toposens.com/

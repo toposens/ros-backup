@@ -21,19 +21,26 @@ namespace toposens_driver
 
  @todo ... document parameters and return values
  */
-bool Command::generate(Parameter param, int value)
-{
-  memset(&_bytes, '\0', sizeof(_bytes));
-  std::string format = "%c%s%05d\r";
+  bool Command::generate(Parameter param, int value)
+  {
+    memset(&_bytes, '\0', sizeof(_bytes));
+    std::string format = "%c%s%05d\r";
 
-  if(!_isValidSingular(param, value)){
-    ROS_WARN("Out of range value %i clipped to closest limit", value);
-    value = (value < 0) ? 0 : 1000;
+    if(param == VoxelLimits){
+      ROS_ERROR("Dimensional command called with singular hand-over parameter. Skipping...");
+      return false;
+    }
+
+    if((value < MIN_VALUE) || (value > MAX_VALUE)){
+      ROS_WARN("Out of range value %i clipped to closest limit", value);
+      value = (value < MIN_VALUE) ? MIN_VALUE : MAX_VALUE;
+    }
+
+
+    int n_bytes = std::sprintf( _bytes, format.c_str(), kPrefix, _getKey(param).c_str(), value);
+    return (n_bytes > 0);
   }
 
-  int n_bytes = std::sprintf( _bytes, format.c_str(), kPrefix, _getKey(param).c_str(), value);
-  return (n_bytes > 0);
-}
 
 /** Generates a dimensional command message for a voxel update.
  *
@@ -54,116 +61,69 @@ bool Command::generate(Parameter param, int value)
 
   @todo ... document parameters and return values
  */
-bool Command::generate(Parameter param, TsVoxel voxel)
-{
-  memset(&_bytes, '\0', sizeof(_bytes));
+  bool Command::generate(Parameter param, TsVoxel voxel)
+  {
+    memset(&_bytes, '\0', sizeof(_bytes));
 
-  if (param != VoxelLimits) {
-    ROS_ERROR("Singluar command called with dimensional hand-over parameter. Skipping...");
-    return false;
-  }
-
-  if (!_isValidDimensional(param, voxel)) return false;
-
-  std::string format = "%c%s%05d%05d%05d%05d%05d%05d\r";
-  int n_bytes = std::sprintf(_bytes, format.c_str(), kPrefix, _getKey(param).c_str(),
-                              voxel.x_min * 10, voxel.x_max * 10,
-                              voxel.y_min * 10, voxel.y_max * 10,
-                              voxel.z_min * 10, voxel.z_max * 10
-                            );
-  return (n_bytes > 0);
-}
-
-
-bool Command::_validate(int &lower_val, int &upper_val)
-{
-  int upper_limit = 9999;
-  int lower_limit = -9999;
-
-  if (upper_val > upper_limit) {
-    upper_val = upper_limit;
-    ROS_WARN("Invalid dimensional value changed from %i to %d", upper_val, upper_limit);
-  }
-
-  if (lower_val > lower_limit) {
-    lower_val = lower_limit;
-    ROS_WARN("Invalid dimensional value changed from %i to %d", lower_val, lower_limit);
-  }
-
-  if (upper_val <= lower_val) {
-    ROS_ERROR("Invalid relative magnitudes. Skipping command generation.");
-    return false;
-  }
-
-  return true;
-}
-
-
-
-/** Command keys are 5-byte strings hard-coded in the TS device firmware. */
-std::string Command::_getKey(Parameter param)
-{
-  if      (param == Parameter::SigStrength) return "nWave";
-  else if (param == Parameter::FilterSize)  return "filtr";
-  else if (param == Parameter::NoiseThresh) return "dThre";
-  else if (param == Parameter::SNRBoostNear) return "slop1";
-  else if (param == Parameter::SNRBoostMid)   return "slop2";
-  else if (param == Parameter::SNRBoostFar)  return "slop3";
-  else if (param == Parameter::CalibTemp)   return "DTemp";
-  else /*VoxelLimit*/                       return "goLim";
-}
-
-/** Checks if desired parameter value are consistent with value limits specified in TsDriverConfig. */
-bool Command::_isValidSingular(Parameter param, int value)
-{
-
-    TsDriverConfig minCfg = TsDriverConfig::__getMin__();
-    TsDriverConfig maxCfg = TsDriverConfig::__getMax__();
-
-    if      (param == Parameter::SigStrength) return ((value >= minCfg.sig_strength) && (value <= maxCfg.sig_strength));
-    else if (param == Parameter::FilterSize)  return ((value >= minCfg.filter_size)  && (value <= maxCfg.filter_size));
-    else if (param == Parameter::NoiseThresh) return ((value >= minCfg.noise_thresh) && (value <= maxCfg.noise_thresh));
-    else if (param == Parameter::SNRBoostNear) return ((value >= minCfg.boost_near)  && (value <= maxCfg.boost_near));
-    else if (param == Parameter::SNRBoostMid)   return ((value >= minCfg.boost_mid)    && (value <= maxCfg.boost_mid));
-    else if (param == Parameter::SNRBoostFar)  return ((value >= minCfg.boost_far)   && (value <= maxCfg.boost_far));
-    else /* Unkown singular parameter */      {
-        ROS_ERROR("Dimensional command called with singular hand-over parameter. Skipping...");
-        return false;
-    }
-}
-
-/** Checks if desired voxel limits are consistent with value limits specified in TsDriverConfig. */
-bool Command::_isValidDimensional(Parameter param, TsVoxel voxel)
-{
-    if(param == Parameter::VoxelLimits){
-
-        TsDriverConfig minCfg = TsDriverConfig::__getMin__();
-        TsDriverConfig maxCfg = TsDriverConfig::__getMax__();
-
-        if (voxel.x_min <= voxel.x_max ||
-            voxel.y_min <= voxel.y_max ||
-            voxel.z_min <= voxel.z_max ) {
-            ROS_ERROR("Voxel min value exceeds max value. Skipping command generation.");
-            return false;
-        }
-
-        if ( (voxel.x_min <= minCfg.x_min) ||  (voxel.x_min >= maxCfg.x_min) ||
-             (voxel.y_min <= minCfg.y_min) ||  (voxel.y_min >= maxCfg.y_min) ||
-             (voxel.z_min <= minCfg.z_min) ||  (voxel.z_min >= maxCfg.z_min) ) {
-            ROS_WARN("Voxel min limits clipped to feasible range.");
-        }
-
-        if ( (voxel.x_max >= minCfg.x_max) ||  (voxel.x_max >= maxCfg.x_max) ||
-             (voxel.y_max >= minCfg.y_max) ||  (voxel.y_max >= maxCfg.y_max) ||
-             (voxel.z_max >= minCfg.z_max) ||  (voxel.z_max >= maxCfg.z_max) ) {
-            ROS_WARN("Voxel max limits clipped to feasible range.");
-        }
-
-        return true;
+    if (param != VoxelLimits) {
+      ROS_ERROR("Singluar command called with dimensional hand-over parameter. Skipping...");
+      return false;
     }
 
-    ROS_ERROR("Singluar command called with dimensional hand-over parameter. Skipping command generation.");
-    return false;
-}
+    if (   !_validate(voxel.x_min, voxel.x_max)
+           || !_validate(voxel.y_min, voxel.y_max)
+           || !_validate(voxel.z_min, voxel.z_max)
+            ) return false;
+
+
+    std::string format = "%c%s%05d%05d%05d%05d%05d%05d\r";
+    int n_bytes = std::sprintf(_bytes, format.c_str(),kPrefix, _getKey(param).c_str(),
+                               voxel.x_min * 10, voxel.x_max * 10,
+                               voxel.y_min * 10, voxel.y_max * 10,
+                               voxel.z_min * 10, voxel.z_max * 10
+    );
+
+    return (n_bytes > 0);
+  }
+
+
+  /** Command keys are 5-byte strings hard-coded in the TS device firmware. */
+  std::string Command::_getKey(Parameter param)
+  {
+    if      (param == Parameter::SigStrength) return "nWave";
+    else if (param == Parameter::FilterSize)  return "filtr";
+    else if (param == Parameter::NoiseThresh) return "dThre";
+    else if (param == Parameter::SNRBoostNear)return "slop1";
+    else if (param == Parameter::SNRBoostMid) return "slop2";
+    else if (param == Parameter::SNRBoostFar) return "slop3";
+    else if (param == Parameter::CalibTemp)   return "DTemp";
+    else /*VoxelLimit*/                       return "goLim";
+  }
+
+  /** Verifies that desired coordinate range values do not result in a digit overflow in the command bytes. */
+  bool Command::_validate(int &lower_val, int &upper_val)
+  {
+    int upper_limit = MAX_VALUE / 10;
+    int lower_limit = MIN_VALUE / 10;
+
+    if (upper_val > MAX_VALUE) {
+      upper_val = upper_limit;
+      ROS_WARN("Invalid dimensional value changed from %i to %d", upper_val, upper_limit);
+    }
+
+    if (lower_val > MIN_VALUE) {
+      lower_val = lower_limit;
+      ROS_WARN("Invalid dimensional value changed from %i to %d", lower_val, lower_limit);
+    }
+
+    if (upper_val <= lower_val) {
+      ROS_ERROR("Invalid relative magnitudes. Skipping command generation.");
+      return false;
+    }
+
+    return true;
+  }
+
+
 
 } // namespace toposens_driver

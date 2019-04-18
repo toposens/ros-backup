@@ -88,7 +88,6 @@ using namespace toposens_driver;
     EXPECT_TRUE(scan.points.size() == 0) ;
   }
 
-
   /**
    * Test parsing of bad data frame.
    * Desired behavior: extract no points from empty data frame.
@@ -208,8 +207,8 @@ using namespace toposens_driver;
       data << frame.first;
 
       toposens_msgs::TsScan scan;
-      dev->parse(scan, data);
 
+      dev->parse(scan, data);
       if (scan.points.size() == 2) {
         ADD_FAILURE() << frame.second;
       } else if (scan.points.size() == 0) {

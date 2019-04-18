@@ -25,8 +25,8 @@ namespace toposens_driver
  *
  *  Note that modifications on these parameters are done on the sensor chip, not in this driver
  */
-class Command
-{
+  class Command
+  {
   public:
     /** An arbitrary cuboid volume with points of interest and the sensor at its origin. */
     typedef TsDriverConfig::DEFAULT::VOXEL TsVoxel;
@@ -37,15 +37,18 @@ class Command
      */
     enum Parameter
     {
-      SigStrength  =0,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
-      FilterSize   =1,  /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
-      NoiseThresh  =2,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
-      VoxelLimits  =3,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
-      SNRBoostNear =4,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
-      SNRBoostMid  =5,  /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
-      SNRBoostFar  =6,  /** Long-range SNR booster for last third of x-range [0 to 1000]. */
-      CalibTemp    =7   /** Ambient temperature that sensor is calibrated to */
+      SigStrength =0,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
+      FilterSize  =1,  /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
+      NoiseThresh =2,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
+      VoxelLimits =3,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
+      SNRBoostNear=4,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
+      SNRBoostMid =5,  /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
+      SNRBoostFar =6,  /** Long-range SNR booster for last third of x-range [0 to 1000]. */
+      CalibTemp   =7   /** Ambient temperature that sensor is calibrated to */
     };
+
+    const int MAX_VALUE = 9999;
+    const int MIN_VALUE = -9999;
 
     /** Empty constructor allowing subsequent manual generation of command. */
     Command(){};
@@ -98,21 +101,21 @@ class Command
     std::string _getKey(Parameter param);
 
     /**
-     * Checks if desired parameter value are consistent with value limits specified in TsDriverConfig.
-     * @param param Setting name from the enumerated command list.
-     * @param value Desired integer value for sensor parameter.
-     * @return True if values are consistent.
-     */
-    bool _isValidSingular(Parameter param, int value);
+      * Checks if desired parameter value are consistent with value limits specified in TsDriverConfig.
+      * @param param Setting name from the enumerated command list.
+      * @param value Desired integer value for sensor parameter.
+      * @return True if values are consistent.
+      */
 
     /**
-     * Checks if desired voxel limits are consistent with value limits specified in TsDriverConfig.
-     * @param param Setting name from the enumerated command list.
-     * @param voxel Cuboidal limit ranges as [min, max] values for each dimension.
-     * @return True if values are consistent.
+     * Verifies that desired coordinate range values do not result in a digit overflow in the command bytes.
+     * @param lower_val
+     * @param upper_val
+     * @return True if desired range is valid, i.e. does not result in an overflow.
      */
-    bool _isValidDimensional(Parameter param, TsDriverConfig::DEFAULT::VOXEL voxel);
-};
+    bool _validate(int &lower_val, int &upper_val);
+
+  };
 
 } // namespace toposens_driver
 
