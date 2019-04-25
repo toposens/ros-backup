@@ -1,0 +1,8 @@
+<launch>
+  <!-- Command Test -->
+  <!-- Tests generation of parameter setting commands. -->
+  <!-- @todo in current implementation, doesn't look like command class needs a test launch node -->
+  <test pkg="toposens_driver" test-name="CommandTest"
+        type="toposens_driver_command_test" time-limit="10.0">
+  </test>
+</launch>

@@ -1,0 +1,20 @@
+<launch>
+  <arg name="driver_port" default="/dev/ttyUSB0" />
+
+  <include file="$(find toposens_driver)/launch/toposens_driver.launch">
+    <arg name="port" value="$(arg driver_port)" />
+  </include>
+
+  <!-- Hz Test-->
+  <!-- Tests publishing rate of topics-->
+  <test name="hztest"
+        test-name="ScansTest"
+        pkg="rostest"
+        type="hztest"
+        time-limit="10.0">
+    <param name="topic" value="/ts_scans"/>
+    <param name="hz" value="10.0"/>
+    <param name="hzerror" value="1.0"/>
+    <param name="test_duration" value="5.0"/>
+  </test>
+</launch>

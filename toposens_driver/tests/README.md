@@ -1,34 +1,52 @@
 ## How to run the Tests 
 
 ```
-catki_make --make-args run_tests 
+catkin_make run_tests
 ```
 
 ## Description of the tests in the ros driver package
 
-# 1. Unit Tests 
-
 * Serial Test: 
 
-Testing the behavior of the serial constructor with invalid port devices 
-(null port device and non-existent port device) and with valid mock ports.
+Testing the behavior of the serial port constructor with invalid mock port devices
+(null port device and non-existent port device) and with valid ones.
 
-Testing the behavior of the getFrame method with invalid data frame format.
+Testing Serial::getFrame with well formatted TS data frame format.
 
-* Sensor Test: 
+Testing Serial::send using two interconnected mock ports.
+
+* Sensor Test:
  
-Testing the behavior of the parse method with valid, invalid and large 
-data frames.
+Testing Sensor::poll with valid, large and empty data frames.
 
-Testing the sensor shutdown method . 
+Tests for handling invalid data frames.
+
+Testing Sensor::shutdown : Shutting down the sensor should allow to start another sensor application.
+
+Testing Sensor::poll using dumped data from a file.
+
+To get new data in the dump file make sure that the sensor is plugged in.
+
+> Run : 
+
+```
+catkin_make -DPLUGGED_IN=true run_tests
+```
 
 * Command Test: 
 
-Testing the behavior of the generate method with invalid Inputs ( invalid 
-integer value for the singular command message and invalid voxel limit 
-range values  for the dimensional command message )
+Testing the behavior of the Command constructor with valid and invalid parameters.
 
-# 2. Integration Tests
+Testing if the generated command message is well formed.
 
-Testing that changes in sensor parameters (noise Threshold, Signal Strength
-and VoxelLimits) are being applied.
+
+* Reconfigure Test:
+
+Testing that changes in sensor parameters are being applied.
+
+
+* Hz Test:
+
+Checks 10 Hz publishing rate of ts_driver_node. 
+
+

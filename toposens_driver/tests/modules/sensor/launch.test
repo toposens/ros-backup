@@ -1,0 +1,19 @@
+<launch>
+  <arg name="mock_port" default="tty3" />
+  <arg name="driver_port" default="tty4" />
+
+  <arg name="file" default="$(find toposens_driver)/tests/raw_stream"/> />
+
+  <node pkg="toposens_driver" type="toposens_driver_mock"
+        name="tty_emulator" args="$(arg mock_port) $(arg driver_port)" />
+
+  <!-- Sensor Test -->
+  <!-- Tests parsing of the incoming data frame. -->
+  <test pkg="toposens_driver" test-name="SensorTest"
+        type="toposens_driver_sensor_test" time-limit="10.0">
+    <param name="port" value="$(arg driver_port)" />
+    <param name="mock_port" value="$(arg mock_port)" />
+
+    <param name="file" value="$(arg file)"/>
+  </test>
+</launch>

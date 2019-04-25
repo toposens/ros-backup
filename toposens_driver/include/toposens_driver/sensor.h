@@ -43,12 +43,6 @@ class Sensor
      */
     bool poll(void);
 
-    /** Extracts TsPoints from the current data frame and reads them
-     *  into the referenced TsScan object.
-     *  @param scan Pointer to a TsScan for storing parsed data.
-     */
-    void parse(toposens_msgs::TsScan &scan, std::stringstream &data);
-
     /** Shuts down serial connection to the sensor. */
     void shutdown(void);
 
@@ -76,6 +70,14 @@ class Sensor
      */
     void _reconfig(TsDriverConfig &cfg, uint32_t level);
 
+
+    /** Extracts TsPoints from the current data frame and reads them
+     *  into the referenced TsScan object.
+     *  @param scan Pointer to a TsScan for storing parsed data.
+     */
+    void _parse(const std::string &frame);
+
+
   	/** Listens port whether sensor is in calibration mode.
   	 *	 @returns True if sensor is calibrating.
   	 */
@@ -83,19 +85,21 @@ class Sensor
 	
     /** Efficiently converts a char array representing a signed integer to
      *  its numerical value.
-     *  @param s C-string representing an integer value.
+     *  @param i String iterator representing an integer value.
      *  @returns Signed float value after conversion.
      *  @throws std::bad_cast String contains non-numerical characters.
      */
-    float _toNum(const char *s);
+    float _toNum(auto &i);
 
-    std::string _frame;     /**< Frame ID assigned to TsScan messages.*/
+    std::string _frame_id;     /**< Frame ID assigned to TsScan messages.*/
     TsDriverConfig _cfg;    /**< Maintains current values of all config params.*/
     std::unique_ptr<Cfg> _srv;  /**< Pointer to config server*/
 
 	  ros::Publisher _pub;    /**< Handler for publishing TsScans.*/
     std::unique_ptr<Serial> _serial;  /**< Pointer for accessing serial functions.*/
-    std::stringstream _data;  /**< Buffer for storing a raw data frame.*/
+    std::stringstream _buffer;  /**< Buffer for storing a raw data frame.*/
+
+    toposens_msgs::TsScan _scan;
 
     float _calibTempC;  /**< Latest calibrated temperature */
 
