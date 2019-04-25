@@ -42,9 +42,7 @@ std::string Command::_getKey(Parameter param)
   if      (param == Parameter::SigStrength) return "nWave";
   else if (param == Parameter::FilterSize)  return "filtr";
   else if (param == Parameter::NoiseThresh) return "dThre";
-  else if (param == Parameter::SNRBoostNear)return "slop1";
-  else if (param == Parameter::SNRBoostMid) return "slop2";
-  else if (param == Parameter::SNRBoostFar) return "slop3";
+  else if (param == Parameter::SNRBoost)    return "boost";
   else if (param == Parameter::CalibTemp)   return "DTemp";
   else /*VoxelLimit*/                       return "goLim";
 }

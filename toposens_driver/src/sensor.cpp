@@ -115,9 +115,7 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
   if     (level == 0) cmd = new Command(Command::SigStrength,  _cfg.sig_strength);
   else if(level == 1) cmd = new Command(Command::FilterSize,   _cfg.filter_size);
   else if(level == 2) cmd = new Command(Command::NoiseThresh,  _cfg.noise_thresh);
-  else if(level == 3) cmd = new Command(Command::SNRBoostNear, _cfg.boost_near);
-  else if(level == 4) cmd = new Command(Command::SNRBoostMid,  _cfg.boost_mid);
-  else if(level == 5) cmd = new Command(Command::SNRBoostFar,  _cfg.boost_far);
+  else if(level == 3) cmd = new Command(Command::SNRBoost, _cfg.boost_near);
 
   char* cmdString = cmd->getBytes();
   try

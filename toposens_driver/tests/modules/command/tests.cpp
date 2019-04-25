@@ -42,9 +42,8 @@ TEST_F(CommandTest, validValues)
   Command cmd_3(Command::NoiseThresh, 15);
   EXPECT_STREQ(cmd_3.getBytes(), "CdThre00015\r");
 
- // @todo rename this to slopf
-  Command cmd_4(Command::SNRBoostNear, 0);
-  EXPECT_STREQ(cmd_4.getBytes(), "Cslop100000\r");
+  Command cmd_4(Command::SNRBoost, 0);
+  EXPECT_STREQ(cmd_4.getBytes(), "Cboost00000\r");
 
   Command cmd_5(Command::CalibTemp, -3);
   EXPECT_STREQ(cmd_5.getBytes(), "CDTemp-0003\r");
@@ -70,10 +69,9 @@ TEST_F(CommandTest, invalidValues)
   Command cmd_3(Command::NoiseThresh, 000000);
   EXPECT_STREQ(cmd_3.getBytes(), "CdThre00000\r");
 
- // @todo rename this to slopf
   // Test conversions between number system representations.
-  Command cmd_4(Command::SNRBoostNear, 00604);
-  EXPECT_STREQ(cmd_4.getBytes(), "Cslop100388\r");
+  Command cmd_4(Command::SNRBoost, 00604);
+  EXPECT_STREQ(cmd_4.getBytes(), "Cboost00388\r");
 
   Command cmd_5(Command::CalibTemp, INT_MAX);
   EXPECT_STREQ(cmd_5.getBytes(), "CDTemp09999\r");

@@ -41,10 +41,8 @@ class Command
       FilterSize   =1,  /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
       NoiseThresh  =2,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
       VoxelLimits  =3,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
-      SNRBoostNear =4,  /** Short-range SNR booster for first third of x-range [0 to 1000]. */
-      SNRBoostMid  =5,  /** Mid-range SNR booster for second third of x-range [0 to 1000]. */
-      SNRBoostFar  =6,  /** Long-range SNR booster for last third of x-range [0 to 1000]. */
-      CalibTemp    =7   /** Ambient temperature that sensor is calibrated to */
+      SNRBoost     =4,  /** SNR booster for the x-range [0 to 1000]. */
+      CalibTemp    =5   /** Ambient temperature that sensor is calibrated to */
     };
 
     /** Empty constructor allowing subsequent manual generation of command. */
