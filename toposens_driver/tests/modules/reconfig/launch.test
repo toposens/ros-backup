@@ -1,0 +1,19 @@
+<launch>
+  <arg name="sensor_port" default="tty5" />
+  <arg name="driver_port" default="tty6" />
+
+  <node pkg="toposens_driver" type="toposens_driver_mock"
+        name="tty_emulator" args="$(arg sensor_port) $(arg driver_port)" />
+
+  <node pkg="toposens_driver" type="toposens_driver_node" name="ts_driver_node">
+    <param name="port" value="$(arg driver_port)" />
+  </node>
+
+  <!-- Dynamic Reconfigure Test -->
+  <!-- Tests if changes to noise_threshold, signal_strength, voxel_limits parameter values are applied by the sensor. -->
+  <test pkg="toposens_driver" test-name="ReconfigTest"
+        type="toposens_driver_reconfig_test" time-limit="10.0">
+    <param name="port" value="$(arg driver_port)" />
+    <param name="sensor_port" value="$(arg sensor_port)" />
+  </test>
+</launch>

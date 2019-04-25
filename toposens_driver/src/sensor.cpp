@@ -17,7 +17,7 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
   std::string port;
   private_nh.getParam("port", port);
-  private_nh.getParam("frame", _frame);
+  private_nh.getParam("frame_id", _frame_id);
 
   // Set up serial connection to sensor
   _serial = std::make_unique<Serial>(port);
@@ -43,18 +43,19 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
  */
 bool Sensor::poll(void)
 {
+  _scan.header.stamp = ros::Time::now();
+  _scan.header.frame_id = _frame_id;
+  _scan.points.clear();
+
   if (!_serial->isAlive()) throw "Serial connection has died!";
+  _serial->getFrame(_buffer);
+  Sensor::_parse(_buffer.str());
 
-  _serial->getFrame(_data);
-
-  toposens_msgs::TsScan scan;
-  scan.header.stamp = ros::Time::now();
-  scan.header.frame_id = _frame;
-
-  Sensor::parse(scan, _data);
-  if (!scan.points.size()) return false;
-
-  _pub.publish(scan);
+  if (_scan.points.empty()) return false;
+  _pub.publish(_scan);
+  
+  _buffer.str(std::string());
+  _buffer.clear();
   return true;
 }
 
@@ -101,30 +102,34 @@ void Sensor::_init(void) {
  */
 void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
 {
-  if ((int)level > 11) {
+  if ((int)level > 11)
+  {
     ROS_INFO("Update skipped: Parameter not recognized");
     return;
   }
+
   _cfg = cfg;
   if (level == -1) return Sensor::_init();
 
-  Command cmd;
-  if     (level == 0) cmd.generate(Command::SigStrength,  _cfg.sig_strength);
-  else if(level == 1) cmd.generate(Command::FilterSize,   _cfg.filter_size);
-  else if(level == 2) cmd.generate(Command::NoiseThresh,  _cfg.noise_thresh);
-  else if(level == 3) cmd.generate(Command::SNRBoostNear, _cfg.boost_near);
-  else if(level == 4) cmd.generate(Command::SNRBoostMid,  _cfg.boost_mid);
-  else if(level == 5) cmd.generate(Command::SNRBoostFar,  _cfg.boost_far);
-  else                cmd.generate(Command::VoxelLimits,  _cfg.groups.voxel);
-  // level is 6-11, indicating a parameter change in voxel limits
-  try {
+  Command* cmd;
+  if     (level == 0) cmd = new Command(Command::SigStrength,  _cfg.sig_strength);
+  else if(level == 1) cmd = new Command(Command::FilterSize,   _cfg.filter_size);
+  else if(level == 2) cmd = new Command(Command::NoiseThresh,  _cfg.noise_thresh);
+  else if(level == 3) cmd = new Command(Command::SNRBoostNear, _cfg.boost_near);
+  else if(level == 4) cmd = new Command(Command::SNRBoostMid,  _cfg.boost_mid);
+  else if(level == 5) cmd = new Command(Command::SNRBoostFar,  _cfg.boost_far);
 
-    if (_serial->send(cmd.getBytes())) ROS_INFO("Sensor setting updated");
+  char* cmdString = cmd->getBytes();
+  try
+  {
+    if (_serial->send(cmdString)) ROS_INFO("Sensor setting updated");
     else ROS_WARN("Settings update failed");
-
-  } catch (const std::exception& e) {
-    ROS_ERROR("%s: %s", e.what(), cmd.getBytes());
+  } 
+  catch (const std::exception& e)
+  {
+    ROS_ERROR("%s: %s", e.what(), cmdString);
   }
+  delete cmd;
 }
 
 
@@ -164,88 +169,35 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
  *  @n Four points extracted: P1(-415, 10, 257, 61); P2(-235, 19, 718, 55);
  *  P3(-507, 43, 727, 75); P4(142, 360, 1555, 52)
  */
-  void Sensor::parse(toposens_msgs::TsScan &scan, std::stringstream &data)
+void Sensor::_parse(const std::string &frame)
 {
-  // x, y, z, v data is always 5 bytes long
-  const int val_length = 5;
-  std::size_t index = 0;
+  auto i = frame.begin();
 
-  std::string strData = data.str();
-  // ROS_INFO_STREAM(strData);
-
-  while (1) {
-    index = strData.find('X', index);
-    if (index == std::string::npos) break;
-    std::string x_val, y_val, z_val, v_val;
-
-    x_val = strData.substr(index + 1, val_length);
-    index = strData.find('Y', index);
-    y_val = strData.substr(index + 1, val_length);
-    index = strData.find('Z', index);
-    z_val = strData.substr(index + 1, val_length);
-    index = strData.find('V', index);
-    v_val = strData.substr(index + 1, val_length);
+  for (i; i < frame.end(); ++i) {
+    // Find next X-tag in the frame
+    while (*i != 'X') if (++i == frame.end()) return;
 
     try {
       toposens_msgs::TsPoint pt;
-      pt.intensity = _toNum(v_val.c_str()) / 100; // reduces points to normal size
-      if (pt.intensity <= 0) continue;
+      pt.location.x = _toNum(++i) / 1000.0;
 
-      pt.location.x = _toNum(x_val.c_str()) / 1000.0;
-      pt.location.y = _toNum(y_val.c_str()) / 1000.0;
-      pt.location.z = _toNum(z_val.c_str()) / 1000.0;
-      scan.points.push_back(pt);
+      if(*(++i) == 'Y') pt.location.y = _toNum(++i) / 1000.0;
+      else throw std::invalid_argument("Expected Y-tag not found");
+
+      if(*(++i) == 'Z') pt.location.z = _toNum(++i) / 1000.0;
+      else throw std::invalid_argument("Expected Z-tag not found");
+
+      if(*(++i) == 'V') pt.intensity = _toNum(++i) / 100.0;
+      else throw std::invalid_argument("Expected V-tag not found");
+
+      if (pt.intensity > 0) _scan.points.push_back(pt);
+
     } catch (const std::exception& e) {
-      ROS_WARN("Error: %s", e.what());
-      ROS_DEBUG("Unexpected non-numerical characters in data stream");
-      ROS_DEBUG_STREAM(strData);
+      ROS_INFO("Skipped invalid point in stream");
+      ROS_DEBUG("Error: %s in message %s", e.what(), frame.c_str());
     }
   }
-
-  data.str(std::string());
-  data.clear();
 }
-
-/** Checks the calibration process indication bit in the data frame.
-    S001020E => Calibration Empty Frame
-    S000020E => Normal Empty Frame
-  */
-  bool Sensor::_isCalibrating()
-  {
-    _data.str(std::string());
-    _data.clear();
-
-    _serial->getFrame(_data);
-
-    std::string data = _data.str().c_str();
-    size_t frame_start = data.find('S');
-    
-    return (data[frame_start+3] == '1');
-  }
-
-/** Performs sensor calibration for the given temperature.
-  */
-  bool Sensor::calibrate(float ambientTempC)
-  {
-    ROS_INFO("TS sensor calibrating for %3.1f C ...", ambientTempC);
-
-    if(_calibTempC != ambientTempC){
-      _calibTempC = NOT_CALIBRATED;
-      Command cCalib(Command::CalibTemp, (int)(ambientTempC*10));
-      _serial->send(cCalib.getBytes());
-    }
-
-    while(true){
-      if(_isCalibrating())
-        _calibTempC = ambientTempC;
-      else if(_calibTempC != NOT_CALIBRATED)
-        break;
-
-      ros::Duration(0.1).sleep();
-    }
-
-    ROS_INFO("TS sensor calibration done.");
-  }
 
 
 /** Char is a valid number if its decimal range from ASCII value '0'
@@ -253,18 +205,61 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
  *  base-10 multiplication of valid digits and adding them together.
  *  The resulting number is cast to a float before returning.
  */
-  float Sensor::_toNum(const char* s){
-    int abs = 0, factor = 1;
-    if (*s == '-') factor = -1;
-      // if the first character is neither "-" nor a number than throw an exception
-    else if(*s != '0') throw std::invalid_argument("Not a valid TS point.");
+float Sensor::_toNum(auto &i)
+{
+  // Size of X, Y, Z, V data is always 5 bytes
+  int abs = 0, factor = 1, length = 5;
 
-    for(s++; *s; s++){
-      int d = *s - '0';
-      if (d >= 0 && d <= 9) abs = abs*10 + d;
-      else throw std::bad_cast();
-    }
-    return (float)(factor * abs);
-  };
+  // If the first character is neither "-"
+  // nor a number than throw an exception
+  if (*i == '-') factor = -1;
+  else if (*i != '0') throw std::invalid_argument("Invalid value char");
+
+  while (--length) {
+    int d = *(++i) - '0';
+    if (d >= 0 && d <= 9) abs = abs*10 + d;
+    else throw std::bad_cast();
+  }
+  return (float)(factor * abs);
+}
+
+
+/** Checks the calibration process indication bit in the data frame.
+    S001020E => Calibration Empty Frame
+    S000020E => Normal Empty Frame
+  */
+bool Sensor::_isCalibrating()
+{
+  _buffer.str(std::string());
+  _buffer.clear();
+
+  _serial->getFrame(_buffer);
+
+  std::string data = _buffer.str().c_str();
+  size_t frame_start = data.find('S');
+  
+  return (data[frame_start+3] == '1');
+}
+
+/** Performs sensor calibration for the given temperature.
+  */
+bool Sensor::calibrate(float ambientTempC)
+{
+  ROS_INFO("TS sensor calibrating for %3.1f C ...", ambientTempC);
+
+  if(_calibTempC != ambientTempC){
+    _calibTempC = NOT_CALIBRATED;
+    Command cCalib(Command::CalibTemp, (int)(ambientTempC*10));
+    _serial->send(cCalib.getBytes());
+  }
+
+  while(true){
+    if(_isCalibrating()) _calibTempC = ambientTempC;
+    else if(_calibTempC != NOT_CALIBRATED) break;
+    ros::Duration(0.1).sleep();
+  }
+
+  ROS_INFO("TS sensor calibration done.");
+}
 
 } // namespace toposens_driver

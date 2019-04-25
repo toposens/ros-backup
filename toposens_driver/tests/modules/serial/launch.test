@@ -1,0 +1,15 @@
+<launch>
+  <arg name="mock_port" default="tty1" />
+  <arg name="driver_port" default="tty2" />
+
+  <node pkg="toposens_driver" type="toposens_driver_mock"
+        name="tty_emulator" args="$(arg mock_port) $(arg driver_port)" />
+
+  <!-- Serial Test -->
+  <!-- Tests handling of tty ports and Tx/Rx of serial data -->
+  <test pkg="toposens_driver" test-name="SerialTest"
+        type="toposens_driver_serial_test" time-limit="10.0">
+    <param name="port" value="$(arg driver_port)" />
+    <param name="mock_port" value="$(arg mock_port)" />
+  </test>
+</launch>

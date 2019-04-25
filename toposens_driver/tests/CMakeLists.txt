@@ -1,14 +1,18 @@
-### Unit tests
-#
-#   Only configured when CATKIN_ENABLE_TESTING is true.
-
-# these dependencies are only needed for unit testing
-
 find_package(roslaunch REQUIRED)
 find_package(rostest REQUIRED)
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable")
-add_definitions(-Wall -O2 -D_GNU_SOURCE -Wno-unused-but-set-variable)
+add_definitions(
+	-Wall
+	-O2
+	-D_GNU_SOURCE
+	-Wno-unused-but-set-variable
+	-Wno-unused-result
+	-Wno-conversion-null
+)
+
+###############
+## Emulation ##
+###############
 
 add_executable(
 	${PROJECT_NAME}_mock
@@ -17,45 +21,71 @@ add_executable(
 
 install(
 	TARGETS ${PROJECT_NAME}_mock
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-################
-## Unit Tests ##
-################
+#@todo can we just execute emulator here directly, have all tests run
+# and kill the process later?
 
-#add_rostest_gtest(${PROJECT_NAME}_command_test unit/command_node.test unit/command_test.cpp)
-#add_dependencies(${PROJECT_NAME}_command_test ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(${PROJECT_NAME}_command_test ${catkin_LIBRARIES} ${PROJECT_NAME})
-#
-#add_rostest_gtest(${PROJECT_NAME}_sensor_test unit/sensor_node.test unit/sensor_test.cpp)
-#add_dependencies(${PROJECT_NAME}_sensor_test ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(${PROJECT_NAME}_sensor_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+###############
+## Data Dump ##
+###############
 
-add_rostest_gtest(
-	${PROJECT_NAME}_serial_test
-	unit/serial_node.test
-	unit/serial_test.cpp
+if(PLUGGED_IN)
+	set(LOG_PERIOD 3s)
+	set(PORT /dev/ttyUSB0)
+
+	#@todo for launch file to work, the node executable needs to be first built
+	# see if you can issue a post build command instead
+	# or make sure catkin_make has been called before the run_tests
+
+	message(STATUS "Extracting data from live stream for ${LOG_PERIOD}")
+	execute_process(
+		COMMAND timeout ${LOG_PERIOD}
+						roslaunch ${PROJECT_NAME} ${PROJECT_NAME}.launch
+		COMMAND timeout ${LOG_PERIOD}
+						cat ${PORT}
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		OUTPUT_FILE raw_stream
+	)
+	message(STATUS "Raw stream extraction complete")
+
+# @todo make hertz test run with raw stream file? or bag file?
+# can we feed data directly to emulator port ttyx?
+#add_rostest(hertz/ts_scans.test DEPENDENCIES ${PROJECT_NAME}_node)
+endif()
+
+
+#############
+## Modules ##
+#############
+
+set(TEST_MODULES
+	command
+	reconfig
+	sensor
+	serial
 )
 
-add_dependencies(
-	${PROJECT_NAME}_serial_test
-	${catkin_EXPORTED_TARGETS}
-	${PROJECT_NAME}_mock
-)
+foreach(M ${TEST_MODULES})
 
-target_link_libraries(
-	${PROJECT_NAME}_serial_test
-	${catkin_LIBRARIES}
-	${PROJECT_NAME}
-)
+	add_rostest_gtest(
+		${PROJECT_NAME}_${M}_test
+		modules/${M}/launch.test
+		modules/${M}/tests.cpp
+	)
 
-#######################
-## Integration Tests ##
-#######################
-#add_rostest_gtest(${PROJECT_NAME}_param_test integration/param_node.test integration/param_test.cpp)
-#add_dependencies(${PROJECT_NAME}_param_test ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(${PROJECT_NAME}_param_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+	add_dependencies(
+		${PROJECT_NAME}_${M}_test
+		${PROJECT_NAME}_mock
+		${PROJECT_NAME}_node
+	)
+
+	target_link_libraries(
+		${PROJECT_NAME}_${M}_test
+		${PROJECT_NAME}
+	)
+endforeach()
 
 
 ###################

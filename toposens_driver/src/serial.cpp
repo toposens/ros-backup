@@ -90,7 +90,8 @@ Serial::~Serial(void)
 {
   ROS_INFO("Closing serial connection...");
 
-	if (tcflush(_fd, TCIOFLUSH) | close(_fd) == -1) {
+//	if (tcflush(_fd, TCIOFLUSH) || close(_fd) == -1) {
+  if (close(_fd) == -1) {
 		ROS_ERROR("Error closing serial connection: %s", strerror(errno));
 		return;
 	}
@@ -111,7 +112,8 @@ bool Serial::isAlive() {
  *  the firmware-defined frame terminator 'E' is reached.
  *  Returns if no data has been received for 1 second.
  */
-void Serial::getFrame(std::stringstream &data) {
+void Serial::getFrame(std::stringstream &data)
+{
   char buffer[2000];
 	int nBytes = 0;
   ros::Time latest = ros::Time::now();
@@ -127,15 +129,11 @@ void Serial::getFrame(std::stringstream &data) {
     // should this break instead when buffer contains E (at any position)
     if (buffer[nBytes-1] == 'E') break;
   } while (ros::Time::now() - latest < ros::Duration(1));
-
 /*	do {
 		memset(&buffer, '\0', sizeof(buffer));
 		nBytes = read(_fd, &buffer, sizeof(buffer));
 //    ROS_WARN("%d", nBytes);
     if (nBytes < 1) continue;
-
-    std::cerr << nBytes;
-
     data << buffer;
 	} while (buffer[nBytes-1] != 'E');
 */
