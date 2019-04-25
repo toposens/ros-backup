@@ -2,17 +2,10 @@ devel/
 logs/
 build/
 bin/
-lib/
+#lib/
 msg_gen/
 srv_gen/
-msg/*Action.msg
-msg/*ActionFeedback.msg
-msg/*ActionGoal.msg
-msg/*ActionResult.msg
-msg/*Feedback.msg
-msg/*Goal.msg
-msg/*Result.msg
-msg/_*.py
+#msg/
 build_isolated/
 devel_isolated/
 
