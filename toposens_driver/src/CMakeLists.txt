@@ -4,9 +4,9 @@
 
 add_library(
   ${PROJECT_NAME}
-  command.cpp
-  sensor.cpp
-  serial.cpp
+  lib/command.cpp
+  lib/sensor.cpp
+  lib/serial.cpp
 )
 
 add_dependencies(
@@ -23,4 +23,25 @@ target_link_libraries(
 install(
   TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+
+################
+## Executable ##
+################
+
+add_executable(
+  ${PROJECT_NAME}_node
+  ts_driver_node.cpp
+)
+
+target_link_libraries(
+  ${PROJECT_NAME}_node
+  ${PROJECT_NAME}
+)
+
+install(
+  TARGETS ${PROJECT_NAME}_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  COMPONENT main
 )

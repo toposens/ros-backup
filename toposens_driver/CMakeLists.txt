@@ -2,21 +2,21 @@ cmake_minimum_required(VERSION 2.8.3)
 project(toposens_driver)
 
 set(${PROJECT_NAME}_DEPS
-    dynamic_reconfigure
-    message_runtime
-    roscpp
-    rospy
-    toposens_msgs
+  dynamic_reconfigure
+  message_runtime
+  roscpp
+  rospy
+  toposens_msgs
 )
 
 find_package(
-    catkin REQUIRED
-    COMPONENTS ${${PROJECT_NAME}_DEPS}
+  catkin REQUIRED
+  COMPONENTS ${${PROJECT_NAME}_DEPS}
 )
 
 find_package(
-    Boost REQUIRED
-    COMPONENTS system
+  Boost REQUIRED
+  COMPONENTS system
 )
 
 
@@ -25,13 +25,13 @@ find_package(
 ############
 
 generate_dynamic_reconfigure_options(
-    cfg/TsDriver.cfg
+	cfg/TsDriver.cfg
 )
 
 catkin_package(
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
-    CATKIN_DEPENDS ${${PROJECT_NAME}_DEPS}
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS ${${PROJECT_NAME}_DEPS}
 )
 
 ###########
@@ -39,13 +39,12 @@ catkin_package(
 ###########
 
 include_directories(
-    include
-    ${Boost_INCLUDE_DIR}
-    ${catkin_INCLUDE_DIRS}
+  include
+  ${Boost_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS}
 )
 
 add_subdirectory(src)
-add_subdirectory(nodes)
 
 install(
   DIRECTORY include/${PROJECT_NAME}/
