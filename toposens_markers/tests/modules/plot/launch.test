@@ -1,0 +1,5 @@
+<launch>
+    <!-- @todo comment this properly -->
+    <test pkg="toposens_markers" test-name="PlotTest"
+          type="toposens_markers_plot_test" time-limit="10.0" />
+</launch>
