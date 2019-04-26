@@ -1,25 +1,25 @@
-#include "toposens_markers/markers.h"
-
+#include "toposens_markers/plot.h"
 #include <toposens_driver/sensor.h>
+
 
 namespace toposens_markers
 {   
 /** A dynamic reconfigure server is set up to change marker scale
  *  and lifetime during runtime.
  */
-Markers::Markers(ros::NodeHandle nh, ros::NodeHandle private_nh)
+Plot::Plot(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
-	private_nh.param<std::string>("frame", _frame, "toposens");		//Frame for tf
-  _rviz.reset(new rviz_visual_tools::RvizVisualTools(_frame,"/" + kMarkersTopic));
+	private_nh.param<std::string>("frame_id", _frame_id, "toposens");		//Frame for tf
+  _rviz.reset(new rviz_visual_tools::RvizVisualTools(_frame_id,"/" + kMarkersTopic));
   _rviz->enableBatchPublishing();
 
   // Set up dynamic reconfigure to change marker settings
   _srv = std::make_unique<Cfg>(private_nh);
-  Cfg::CallbackType f = boost::bind(&Markers::_reconfig, this, _1, _2);
+  Cfg::CallbackType f = boost::bind(&Plot::_reconfig, this, _1, _2);
   _srv->setCallback(f);
 
 	// Subscribe to topic with TS scans
-	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Markers::_sanitize, this);
+	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Plot::_sanitize, this);
   _sensingRange = 0;
 }
 
@@ -30,7 +30,7 @@ Markers::Markers(ros::NodeHandle nh, ros::NodeHandle private_nh)
  *  parameter as it is always retrieved directly from the cfg object
  *  whenever its value is needed in the code.
  */
-void Markers::_reconfig(TsMarkersConfig &cfg, uint32_t level)
+void Plot::_reconfig(TsMarkersConfig &cfg, uint32_t level)
 {
   if ((int)level > 2) {
     ROS_INFO("Update skipped: Parameter not recognized");
@@ -48,7 +48,7 @@ void Markers::_reconfig(TsMarkersConfig &cfg, uint32_t level)
  *  trigger, all scans that have expired their lifetime are deleted.
  *  Rviz plotting is thereafter refreshed for this sanitzied data.
  */
-void Markers::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
+void Plot::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
 {
   _scans.push_back(*msg);
 
@@ -59,7 +59,7 @@ void Markers::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
     _scans.pop_front();
   } while(!_scans.empty());
 
-  Markers::_plot();
+  Plot::_plot();
 }
 
 /** Rviz provides no straightforward way of deleting individual
@@ -76,7 +76,7 @@ void Markers::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
  *  markers to be visualized in a given update and publishes them
  *  to Rviz in one go when trigger() is called.
  */
-void Markers::_plot(void) {
+void Plot::_plot(void) {
   _rviz->deleteAllMarkers();
 
   for (auto it1 = _scans.begin(); it1 != _scans.end(); ++it1) {
@@ -90,12 +90,12 @@ void Markers::_plot(void) {
       std_msgs::ColorRGBA color = _rviz->getColorScale(pt.location.x/_sensingRange);
       geometry_msgs::Vector3 scale = _rviz->getScale(_baseScale, pt.intensity);
 
-      _rviz->publishSphere(location, color, scale, kPointsNs);
+      if (scale.x > 0) _rviz->publishSphere(location, color, scale, kPointsNs);
     }
   }
   // have to add mesh everytime since rviz has no way of
   // deleting all markers by namespace alone
-  Markers::_addSensorMesh();
+  Plot::_addSensorMesh();
   _rviz->trigger();
 }
 
@@ -106,7 +106,7 @@ void Markers::_plot(void) {
  *  @todo this orientation should be included in the stl files
  *  instead of being done here on each op.
  */ 
-void Markers::_addSensorMesh(void)
+void Plot::_addSensorMesh(void)
 {
   geometry_msgs::Pose og;
   _rviz->generateEmptyPose(og);
