@@ -1,0 +1,10 @@
+<launch>
+  	<!-- @todo comment this properly -->
+  <node pkg="tf" type="static_transform_publisher" name="toposens_link"
+  			args="0.05 -0.1 0.0 0 0 0 1 world toposens 100" />
+
+  <test pkg="toposens_pointcloud" test-name="CloudTest"
+        type="toposens_pointcloud_cloud_test" time-limit="10.0">
+    <param name="target_frame" value="world" />
+  </test>
+</launch>

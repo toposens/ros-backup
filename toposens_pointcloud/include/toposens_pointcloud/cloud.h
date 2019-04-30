@@ -11,11 +11,24 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl_ros/point_cloud.h>
 
+#include <toposens_msgs/TsPoint.h>
 #include <toposens_msgs/TsScan.h>
 
 
+POINT_CLOUD_REGISTER_POINT_STRUCT(
+  toposens_msgs::TsPoint,
+  (double, location.x, x)
+  (double, location.y, y)
+  (double, location.z, z)
+  (float,  intensity,  i)
+)
+
 namespace toposens_pointcloud
 {
+  static const std::string kPointCloudTopic  = "ts_cloud";
+  
+  /** Templatized pointcloud containing all parsed TsPoints.*/
+  typedef pcl::PointCloud<toposens_msgs::TsPoint> TsCloud;
 
 /** @brief Demonstrates basic TF and PCL integrations for TsScan data.
  *  @details Subscribes to a topic publishing TsScans and converts 
@@ -27,6 +40,7 @@ namespace toposens_pointcloud
 class Cloud
 {
   public:
+
     /** Subscribes to a TsScans topic and prepares a PointCloud structure
      *  for persistent storage.
      *  @param nh Public nodehandle for pub-sub ops on ROS topics.
@@ -42,9 +56,6 @@ class Cloud
     void save(std::string filename);
 
   private:
-    /** Templatized pointcloud containing all parsed TsPoints.*/
-    typedef pcl::PointCloud<pcl::PointXYZI> TsCloud;
-
     /** Converts and broadcasts incoming scans as PointCloud messages.
      *  Maintains a local copy of all accumulated scans in their
      *  corresponding PointCloud form.
@@ -57,7 +68,7 @@ class Cloud
      *  @param  h  Header data of TsScan containing this point.
      *  @returns   PCL point with coordinate values in target frame. 
      */
-    pcl::PointXYZI _transform(toposens_msgs::TsPoint p, std_msgs::Header h);
+    toposens_msgs::TsPoint _transform(toposens_msgs::TsPoint pt, std_msgs::Header h);
 
     std::string target_frame;     /**< Target frame for scan transformations.*/
     TsCloud::Ptr store;          /**< Collection of all pointclouds from a single run.*/
