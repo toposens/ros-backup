@@ -1,0 +1,19 @@
+sudo: required
+services:
+- docker
+cache: ccache
+
+language: generic
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+
+env:
+  global:
+    - DOCKER_IMAGE=toposens/toposens
+    - SCRIPT=travis.sh
+
+script:
+  - ./$SCRIPT
