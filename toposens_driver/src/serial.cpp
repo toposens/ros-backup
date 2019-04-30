@@ -155,7 +155,6 @@ bool Serial::send(char* bytes)
   }
 
   int tx_length = write(_fd, bytes, strlen(bytes));
-
   if (tx_length == -1) {
     ROS_ERROR("Failed to transmit %s: %s", bytes, strerror(errno));
     return false;
