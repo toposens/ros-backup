@@ -10,10 +10,9 @@
   <!-- Sensor Test -->
   <!-- Tests parsing of the incoming data frame. -->
   <test pkg="toposens_driver" test-name="SensorTest"
-        type="toposens_driver_sensor_test" time-limit="10.0">
+        type="toposens_driver_sensor_test">
     <param name="port" value="$(arg driver_port)" />
     <param name="mock_port" value="$(arg mock_port)" />
-
     <param name="file" value="$(arg file)"/>
   </test>
 </launch>

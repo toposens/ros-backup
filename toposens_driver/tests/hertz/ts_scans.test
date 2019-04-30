@@ -7,11 +7,7 @@
 
   <!-- Hz Test-->
   <!-- Tests publishing rate of topics-->
-  <test name="hztest"
-        test-name="ScansTest"
-        pkg="rostest"
-        type="hztest"
-        time-limit="10.0">
+  <test pkg="rostest" type="hztest" test-name="ScansFrequency">
     <param name="topic" value="/ts_scans"/>
     <param name="hz" value="10.0"/>
     <param name="hzerror" value="1.0"/>

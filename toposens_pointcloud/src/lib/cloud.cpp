@@ -4,9 +4,9 @@
 #include <toposens_driver/sensor.h>
 
 
+
 namespace toposens_pointcloud
 {
-
 /** Each incoming scan is converted to a new PointCloud message of
  *  template XYZI, which corresponds well with a TsPoint structure.
  *  A second persistent PointCloud structure holds the cumulative
@@ -24,7 +24,7 @@ Cloud::Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh)
   private_nh.param<std::string>("target_frame", target_frame, "toposens");
 
 	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Cloud::_convert, this);
-  _cloud_pub = nh.advertise<TsCloud>("ts_cloud", 100);
+  _cloud_pub = nh.advertise<TsCloud>(kPointCloudTopic, 100);
 
   store = boost::make_shared<TsCloud>();
   pcl_conversions::toPCL(ros::Time::now(), store->header.stamp);
@@ -55,25 +55,26 @@ void Cloud::save(std::string filename)
  */
 void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
 {
-  //ROS_WARN_STREAM(*msg);
-
   TsCloud::Ptr tc(new TsCloud);
   pcl_conversions::toPCL(msg->header.stamp, tc->header.stamp);
   tc->header.frame_id = target_frame;
   tc->height = 1;
 
-  std_msgs::Header header = msg->header;
-  std::vector<toposens_msgs::TsPoint> points = msg->points;
-
-  try {
+  try
+  {
     //@todo does this need to be done everytime or can it be done in constructor?
-    _tf.waitForTransform(target_frame, header.frame_id, header.stamp, ros::Duration(0.5));
-    for (auto it2 = points.begin(); it2 != points.end(); ++it2) {
-      pcl::PointXYZI p = _transform(*it2, header);
+    _tf.waitForTransform(target_frame, msg->header.frame_id, msg->header.stamp, ros::Duration(0.5));
+    
+    for (auto it = msg->points.begin(); it != msg->points.end(); ++it)
+    {
+      if (it->intensity <= 0) continue;
+      toposens_msgs::TsPoint p = _transform(*it, msg->header);
       tc->points.push_back(p);
       store->points.push_back(p);
     }
-  } catch (tf::TransformException ex) {
+  }
+  catch (tf::TransformException ex)
+  {
     ROS_INFO_STREAM(ex.what());
   }
 
@@ -88,20 +89,29 @@ void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
  *  Transformation is skipped if #target_frame is same as the point's
  *  current frame, and a simple conversion to PointXYZI is returned.
  */
-pcl::PointXYZI Cloud::_transform(toposens_msgs::TsPoint p, std_msgs::Header h)
+toposens_msgs::TsPoint Cloud::_transform(toposens_msgs::TsPoint pt, std_msgs::Header h)
 {
-  pcl::PointXYZI point(p.intensity);
   geometry_msgs::PointStamped ps;
-  ps.point = p.location;
-  if (h.frame_id != target_frame) {
-    ps.header = h;
-    _tf.transformPoint(target_frame, ps, ps);
+  ps.point = pt.location;
+
+  if (h.frame_id != target_frame)
+  {
+    try
+    {
+      ps.header.frame_id = h.frame_id;
+      ps.header.stamp = ros::Time::now();
+      _tf.transformPoint(target_frame, ps, ps);
+    }
+    catch (tf::TransformException ex)
+    {
+      ROS_ERROR("TsPoint transformation failed: %s", ex.what());
+    }
   }
-  point.x = ps.point.x;
-  point.y = ps.point.y;
-  point.z = ps.point.z;
-  return point;
+
+  pt.location = ps.point;
+  return pt;
 }
+
 
 /** @todo add sensor mesh to display */
 

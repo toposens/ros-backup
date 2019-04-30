@@ -8,7 +8,7 @@
   <!-- Serial Test -->
   <!-- Tests handling of tty ports and Tx/Rx of serial data -->
   <test pkg="toposens_driver" test-name="SerialTest"
-        type="toposens_driver_serial_test" time-limit="10.0">
+        type="toposens_driver_serial_test">
     <param name="port" value="$(arg driver_port)" />
     <param name="mock_port" value="$(arg mock_port)" />
   </test>
