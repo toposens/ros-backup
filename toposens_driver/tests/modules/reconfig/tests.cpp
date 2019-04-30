@@ -25,12 +25,11 @@ class ReconfigTest : public ::testing::Test {
   protected:
     ros::NodeHandle* private_nh;
     int mock_sensor;
+    char init_buff[100];
+    int n_bytes = 0;
 
     void SetUp()
     {
-      char init_buff[100];
-      int n_bytes = 0;
-
       private_nh = new ros::NodeHandle("~");
       std::string mock_port;
       private_nh->getParam("sensor_port", mock_port);
@@ -38,9 +37,7 @@ class ReconfigTest : public ::testing::Test {
       mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
       // Flushes out initial commands sent by _init
       // @todo maybe check this output as well?
-      while(n_bytes < 1) {
-        n_bytes = read(mock_sensor, &init_buff, sizeof(init_buff));
-      }
+
     }
 
 
@@ -70,10 +67,13 @@ class ReconfigTest : public ::testing::Test {
 
 // Adding a second test fixture does not send init commands
 // again. Only sent on first init of node from launch.test file
-//TEST_F(ReconfigTest, checkInitConfig)
-//{
-//  EXPECT_EQ(std::string(init_buff), "CnWave00012\r");
-//}
+TEST_F(ReconfigTest, checkInitConfig)
+{
+  while((n_bytes < 1)) {
+    n_bytes = read(mock_sensor, &init_buff, sizeof(init_buff));
+  }
+  EXPECT_EQ(std::string(init_buff), "CnWave00005\rCfiltr00020\rCdThre00005\r");
+}
 
 
 /**
@@ -83,14 +83,15 @@ class ReconfigTest : public ::testing::Test {
 TEST_F(ReconfigTest, changeSigStrength)
 {
   char buff[100];
-  int n_bytes = 0;
+  n_bytes = 0;
   memset(&buff, '\0', sizeof(buff));
 
   updateCfg("sig_strength", 12);
 
   ros::Duration(0.01).sleep();
   ros::spinOnce();
-  while(n_bytes < 1) n_bytes = read(mock_sensor, &buff, sizeof(buff));
+
+  while((n_bytes < 1))n_bytes = read(mock_sensor, &buff, sizeof(buff));
 
   EXPECT_EQ(std::string(buff), "CnWave00012\r");
 }

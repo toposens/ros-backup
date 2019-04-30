@@ -128,6 +128,7 @@ void Serial::getFrame(std::stringstream &data)
     latest = ros::Time::now();
     // should this break instead when buffer contains E (at any position)
     if (buffer[nBytes-1] == 'E') break;
+
   } while (ros::Time::now() - latest < ros::Duration(1));
 /*	do {
 		memset(&buffer, '\0', sizeof(buffer));

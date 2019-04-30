@@ -95,6 +95,7 @@ TEST_F(SerialTest, getFrameWellFormatted)
 
   Serial* serial = new Serial(driver_port);
   std::stringstream ss;
+
   serial->getFrame(ss);
   std::string rx_data = ss.str();
 
