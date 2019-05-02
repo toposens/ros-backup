@@ -73,4 +73,4 @@ cd build
 ls -a
 cd coverage
 ls -a
-echo file_get_contents("/index.html");
+echo "$(cat index.html)"
