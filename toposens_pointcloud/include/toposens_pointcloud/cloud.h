@@ -12,10 +12,12 @@
 #include <pcl_ros/point_cloud.h>
 
 #include <toposens_msgs/TsScan.h>
-
+#include <rviz_visual_tools/rviz_visual_tools.h>
 
 namespace toposens_pointcloud
 {
+  static const std::string kMeshCloudTopic   = "ts_mesh_marker"; /** topic for plotting sensor mesh*/
+  const std::string kMeshNs    = "TsSensor";  /**< Rviz namespace for sensor mesh.*/
 
 /** @brief Demonstrates basic TF and PCL integrations for TsScan data.
  *  @details Subscribes to a topic publishing TsScans and converts 
@@ -27,6 +29,7 @@ namespace toposens_pointcloud
 class Cloud
 {
   public:
+
     /** Subscribes to a TsScans topic and prepares a PointCloud structure
      *  for persistent storage.
      *  @param nh Public nodehandle for pub-sub ops on ROS topics.
@@ -59,12 +62,17 @@ class Cloud
      */
     pcl::PointXYZI _transform(toposens_msgs::TsPoint p, std_msgs::Header h);
 
+  /** Adds a scaled TS sensor at rviz origin as a visual aid. */
+  void _addSensorMesh(void);
+
     std::string target_frame;     /**< Target frame for scan transformations.*/
     TsCloud::Ptr store;          /**< Collection of all pointclouds from a single run.*/
 
   	ros::Subscriber _scans_sub;  /**< Handler for subscribing to TsScans.*/
     ros::Publisher _cloud_pub;   /**< Handler for publishing PCL messages.*/
   	tf::TransformListener _tf;   /**< Listener for frame mapping.*/
+
+  rviz_visual_tools::RvizVisualToolsPtr _rviz;  /**< Helper for plotting markers.*/
 };
 
 } // namespace toposens_pointcloud

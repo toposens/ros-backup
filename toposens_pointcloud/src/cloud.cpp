@@ -21,7 +21,10 @@ namespace toposens_pointcloud
  */
 Cloud::Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
+
   private_nh.param<std::string>("target_frame", target_frame, "toposens");
+  _rviz.reset(new rviz_visual_tools::RvizVisualTools(target_frame,"/" +kMeshCloudTopic));
+  _rviz->enableBatchPublishing();
 
 	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Cloud::_convert, this);
   _cloud_pub = nh.advertise<TsCloud>("ts_cloud", 100);
@@ -30,6 +33,7 @@ Cloud::Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh)
   pcl_conversions::toPCL(ros::Time::now(), store->header.stamp);
   store->header.frame_id = target_frame;
   store->height = 1;
+
 }
 
 /** Filename should be provided without extension. File is saved
@@ -56,7 +60,7 @@ void Cloud::save(std::string filename)
 void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
 {
   //ROS_WARN_STREAM(*msg);
-
+  _rviz->deleteAllMarkers();
   TsCloud::Ptr tc(new TsCloud);
   pcl_conversions::toPCL(msg->header.stamp, tc->header.stamp);
   tc->header.frame_id = target_frame;
@@ -80,6 +84,9 @@ void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
   tc->width = tc->points.size();
   store->width += tc->width;
   _cloud_pub.publish(tc);
+
+  Cloud::_addSensorMesh();
+  _rviz->trigger();
 }
 
 /** Converts TsPoint to an intermediary PointStamped message compatible
@@ -103,6 +110,19 @@ pcl::PointXYZI Cloud::_transform(toposens_msgs::TsPoint p, std_msgs::Header h)
   return point;
 }
 
-/** @todo add sensor mesh to display */
+void Cloud::_addSensorMesh(void) {
+
+    geometry_msgs::Pose og;
+    _rviz->generateEmptyPose(og);
+    og.orientation.x = og.orientation.z = 1/sqrt(2);
+    og.orientation.w = 0;
+
+    _rviz->publishMesh(og, "package://toposens_markers/meshes/Body.stl",
+                       rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
+    _rviz->publishMesh(og, "package://toposens_markers/meshes/Cover.stl",
+                       rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
+
+}
+
 
 } // namespace toposens_pointcloud

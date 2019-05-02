@@ -15,7 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   toposens_driver
   toposens_msgs
-)
+  rviz_visual_tools
+        )
 
 
 ## System dependencies are found with CMake's conventions
@@ -58,7 +59,9 @@ catkin_package(
   tf
   toposens_driver
   toposens_msgs
+  rviz_visual_tools
 )
+
 
 include_directories(
   include ${catkin_INCLUDE_DIRS}
