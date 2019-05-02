@@ -81,7 +81,7 @@ function(coverage_add_target tgt)
                 --legend ${PROJECT_NAME}.info.cleaned
 
                 # Clean up auxiliary files
-                COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}.info ${PROJECT_NAME}.info.cleaned
+                #COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_NAME}.info ${PROJECT_NAME}.info.cleaned
                 COMMAND ${CMAKE_COMMAND} -E echo "Coverage report found in: ${COVERAGE_DIR}"
 
                 WORKING_DIRECTORY ${COVERAGE_DIR}
