@@ -79,4 +79,4 @@ ls -a
 echo "$(cat index.html)"
 
 #cd ..
-bash <(curl -s https://codecov.io/bash) -X gcov
+bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage
