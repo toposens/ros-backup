@@ -79,6 +79,8 @@ ls -al
 echo "$(cat index.html)"
 cd src
 ls -al
+cd lib
+ls -al
 
 echo $PWD
 
