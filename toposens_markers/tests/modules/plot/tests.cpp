@@ -11,63 +11,61 @@ using namespace toposens_markers;
 
 class PlotTest : public ::testing::Test
 {
-  protected:
-    const int kNumPoints = 10;
-    ros::NodeHandle* priv_nh;
-    Plot* p;
+protected:
+  const int kNumPoints = 10;
+  ros::NodeHandle* priv_nh;
+  Plot* p;
 
-    ros::Subscriber markers_sub;
-    ros::Publisher scans_pub;
-    toposens_msgs::TsScan scan;
-    std::vector<visualization_msgs::Marker> markers;
+  ros::Subscriber markers_sub;
+  ros::Publisher scans_pub;
+  toposens_msgs::TsScan scan;
+  std::vector<visualization_msgs::Marker> markers;
 
-    void SetUp()
+  void SetUp()
+  {
+    ros::NodeHandle nh;
+    priv_nh = new ros::NodeHandle("~");
+    p = new Plot(nh, *priv_nh);
+
+    scans_pub = nh.advertise<toposens_msgs::TsScan>(
+                  toposens_driver::kScansTopic, 
+                  toposens_driver::kQueueSize
+                );
+  
+    markers_sub = nh.subscribe(kMarkersTopic, 100, &PlotTest::store, this);
+
+    scan.header.stamp = ros::Time::now();
+    scan.header.frame_id = "toposens";
+  }
+
+  void TearDown()
+  {
+    markers.clear();
+    scan.points.clear();
+    delete p;
+    delete priv_nh;
+  }
+
+
+  void listen()
+  {
+    std::cerr << "[TEST] Listening for markers...";
+    ros::Time end = ros::Time::now() + ros::Duration(1.0);
+    while(ros::Time::now() < end)
     {
-      ros::NodeHandle nh;
-      priv_nh = new ros::NodeHandle("~");
-      p = new Plot(nh, *priv_nh);
-
-      scans_pub = nh.advertise<toposens_msgs::TsScan>(
-                    toposens_driver::kScansTopic, 
-                    toposens_driver::kQueueSize
-                  );
-    
-      markers_sub = nh.subscribe(kMarkersTopic, 100, &PlotTest::store, this);
-
-      scan.header.stamp = ros::Time::now();
-      scan.header.frame_id = "toposens";
+      ros::spinOnce();
+      ros::Duration(0.1).sleep();
     }
+    std::cerr << "completed" << std::endl;
+  }
 
-    void TearDown()
-    {
-      markers.clear();
-      scan.points.clear();
-      delete p;
-      delete priv_nh;
+
+  void store(const visualization_msgs::MarkerArray::ConstPtr &msg)
+  {
+    for (auto &m : msg->markers) {
+      if (m.ns == kPointsNs) markers.push_back(m);
     }
-
-
-    void listen()
-    {
-      std::cerr << "[TEST] Listening for markers...";
-      ros::Time end = ros::Time::now() + ros::Duration(1.0);
-      while(ros::Time::now() < end)
-      {
-        ros::spinOnce();
-        ros::Duration(0.1).sleep();
-      }
-      std::cerr << "completed" << std::endl;
-    }
-
-
-    void store(const visualization_msgs::MarkerArray::ConstPtr &msg)
-    {
-      for (auto &m : msg->markers)
-      {
-        if (m.ns == kPointsNs) markers.push_back(m);
-      }
-    }
-
+  }
 };
 
 
@@ -75,7 +73,7 @@ class PlotTest : public ::testing::Test
 *  Tests that no empty scans are plotted.
 *  Desired behavior: Points to be plotted is zero if an empty scan (zero-initialized) was published.
 */
-TEST_F(PlotTest, publishEmptyScan)
+TEST_F(PlotTest, emptyScan)
 {
   std::cerr << "[TEST] Publishing empty scan...";
   scans_pub.publish(scan);
@@ -88,7 +86,7 @@ TEST_F(PlotTest, publishEmptyScan)
 
 
 
-TEST_F(PlotTest, publishZeroIntensityScan)
+TEST_F(PlotTest, zeroIntensityScan)
 {
   std::cerr << "[TEST] Publishing scan with zero-intensity points...";
   for(int i = 0; i < kNumPoints; i++)
@@ -112,7 +110,7 @@ TEST_F(PlotTest, publishZeroIntensityScan)
  *  Tests that all the received points/scans are plotted.
  *  Desired behavior: All valid points/scans are plotted in the same order with which they were published.
  */
-TEST_F(PlotTest, publishValidScans)
+TEST_F(PlotTest, validScans)
 {
   std::cerr << "[TEST] Publishing scan with plottable points...";
 

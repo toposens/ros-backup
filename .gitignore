@@ -2,10 +2,8 @@ devel/
 logs/
 build/
 bin/
-#lib/
 msg_gen/
 srv_gen/
-#msg/
 build_isolated/
 devel_isolated/
 

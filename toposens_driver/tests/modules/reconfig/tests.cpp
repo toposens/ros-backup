@@ -6,11 +6,8 @@
 #include <ros/ros.h>
 #include <gtest/gtest.h>
 
-#include <toposens_msgs/TsScan.h>
+#include <dynamic_reconfigure/server.h>
 #include <toposens_driver/TsDriverConfig.h>
-#include <toposens_driver/sensor.h>
-
-#include <toposens_driver/command.h>
 
 #include <termios.h>
 #include <fcntl.h>
@@ -100,6 +97,7 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "ts_driver_reconfig_test");
+  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }
 

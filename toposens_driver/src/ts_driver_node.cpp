@@ -41,7 +41,6 @@ int main(int argc, char** argv)
   ros::NodeHandle private_nh("~");
   ros::Rate loop_rate(10); // 10 Hz
 
-
   // @todo: Exception should raise better message
   try {
     toposens_driver::Sensor d(nh, private_nh);
@@ -49,7 +48,7 @@ int main(int argc, char** argv)
 //    d.calibrate(t_celsius);
 
     while (!g_shutdown) {
-      d.poll();
+      d.poll(); // @todo give message that scan is empty
       ros::spinOnce();
       loop_rate.sleep();
     }
