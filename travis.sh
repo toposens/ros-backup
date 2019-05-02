@@ -18,6 +18,7 @@ if ! [ "$IN_DOCKER" ]; then
   result=$?
 
   bash <(curl -s https://codecov.io/bash)
+  ls -a
 
   case $result in
     0) tput setaf 2; echo "Travis script finished successfully";;
