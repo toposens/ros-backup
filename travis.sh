@@ -78,5 +78,7 @@ cd coverage
 ls -a
 echo "$(cat index.html)"
 
+echo $PWD
+
 #cd ..
-bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage/index.html
+bash <(curl -s https://codecov.io/bash) -X gcov -s /root/catkin_ws/build/coverage
