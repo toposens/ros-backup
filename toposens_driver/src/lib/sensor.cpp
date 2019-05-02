@@ -19,6 +19,9 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
   private_nh.getParam("port", port);
   private_nh.getParam("frame_id", _frame_id);
 
+//  private_nh.param<std::string>("port", port, "/dev/ttyUSB0"); 
+//  private_nh.param<std::string>("frame_id", _frame_id, "toposens");
+
   // Set up serial connection to sensor
   _serial = std::make_unique<Serial>(port);
   if (!_serial->isAlive()) throw "Error opening serial port!";

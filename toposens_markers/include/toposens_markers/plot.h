@@ -55,7 +55,7 @@ class Plot
      *  @param private_nh Private nodehandle for accessing launch parameters.
      */
     Plot(ros::NodeHandle nh, ros::NodeHandle private_nh);
-    ~Plot() {}
+    ~Plot() {};
 
   private:
     /** Structure generated from cfg file for storing local copy of marker parameters.*/
@@ -82,9 +82,9 @@ class Plot
     /** Adds a scaled TS sensor at rviz origin as a visual aid. */
     void _addSensorMesh(void);
 
-    std::string _frame_id;          /**< Frame ID assigned to rviz Marker messages.*/
-    TsMarkersConfig _cfg;        /**< Maintains current values of all config params.*/
-    std::unique_ptr<Cfg> _srv;   /**< Pointer to config server*/
+    std::string _frame_id;       /**< Frame ID assigned to rviz Marker messages.*/
+    double _lifetime;            /**< Maintains current values of marker lifetime.*/
+    std::shared_ptr<Cfg> _srv;   /**< Pointer to config server*/
 
     ros::Subscriber _scans_sub;  /**< Handler for subscribing to TsScans.*/
     float _sensingRange;         /**< Largest z-distance measurement in subscribed data.*/
