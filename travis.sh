@@ -20,8 +20,6 @@ if ! [ "$IN_DOCKER" ]; then
     $DOCKER_IMAGE /root/$(basename $PWD)/./$SCRIPT
   result=$?
 
-  sudo ls -a /root
-
   case $result in
     0) tput setaf 2; echo "Travis script finished successfully";;
     1) tput setaf 1; echo "Travis script failed at catkin_lint";;
@@ -80,5 +78,5 @@ cd coverage
 ls -a
 echo "$(cat index.html)"
 
-cd ..
+#cd ..
 bash <(curl -s https://codecov.io/bash) -X gcov
