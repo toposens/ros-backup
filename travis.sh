@@ -9,7 +9,7 @@ if ! [ "$IN_DOCKER" ]; then
   ci_env=`bash <(curl -s https://codecov.io/env)`
 
   docker run \
-    -e ci_env
+    -e ci_env \
     -e IN_DOCKER=true \
     -e TRAVIS_BRANCH \
     -e TRAVIS_BUILD_DIR \
@@ -20,7 +20,7 @@ if ! [ "$IN_DOCKER" ]; then
     $DOCKER_IMAGE /root/$(basename $PWD)/./$SCRIPT
   result=$?
 
-  ls -a /root
+  sudo ls -a /root
 
   case $result in
     0) tput setaf 2; echo "Travis script finished successfully";;
