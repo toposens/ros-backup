@@ -82,4 +82,4 @@ echo "$(cat index.html)"
 
 #CODECOV_TOKEN="39fdfe66-5f8c-468e-b68f-4d6529702b14"
 cd ..
-bash <(curl -s https://codecov.io/bash -X gcov)
+bash <(curl -s https://codecov.io/bash) -X gcov
