@@ -85,4 +85,4 @@ ls -al
 echo $PWD
 
 #cd ..
-bash <(curl -s https://codecov.io/bash) -X gcov -s root/catkin_ws/build/coverage
+bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage/toposens_driver.info
