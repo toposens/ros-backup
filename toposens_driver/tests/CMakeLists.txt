@@ -61,10 +61,10 @@ endif()
 #############
 
 set(TEST_MODULES
-	command
-	reconfig
-	sensor
-	serial
+		command
+		reconfig
+		sensor
+		serial
 )
 
 foreach(M ${TEST_MODULES})

@@ -31,6 +31,12 @@ class SerialTest : public ::testing::Test
       delete private_nh;
     }
 
+  void _connect1(std::string testPort)
+  {
+    Serial* conn = new Serial(testPort);
+    delete conn;
+  }
+
     void _connect(std::string testPort, bool validPort, std::string onFail)
     {
       testing::internal::CaptureStderr();
@@ -53,13 +59,15 @@ class SerialTest : public ::testing::Test
  */
 TEST_F(SerialTest, openInvalidPort)
 {
+
   std::string failMsg = "Connecting to fictitious port did not result in failure.";
 
   std::cerr << "[TEST] Attempting connection to null port...";
-  _connect("", false, failMsg);
+  EXPECT_ANY_THROW( _connect1(""));
 
   std::cerr << "[TEST] Attempting connection to non-existent port...";
-  _connect("tty69", false, failMsg);
+  EXPECT_ANY_THROW(_connect1("tty69"));
+
 }
 
 
@@ -73,9 +81,11 @@ TEST_F(SerialTest, openValidPort)
 
   std::cerr << "[TEST] Attempting connection to mock sensor port...";
   _connect(mock_port, true, failMsg);
+  //EXPECT_NO_THROW(_connect(mock_port, true, failMsg));
 
   std::cerr << "[TEST] Attempting connection to mock driver port...";
   _connect(driver_port, true, failMsg);
+  //EXPECT_NO_THROW(_connect(driver_port, true, failMsg));
 }
 
 

@@ -21,7 +21,6 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
 
   // Set up serial connection to sensor
   _serial = std::make_unique<Serial>(port);
-  if (!_serial->isAlive()) throw "Error opening serial port!";
 
   _calibTempC = NOT_CALIBRATED;
 
@@ -47,7 +46,6 @@ bool Sensor::poll(void)
   _scan.header.frame_id = _frame_id;
   _scan.points.clear();
 
-  if (!_serial->isAlive()) throw "Serial connection has died!";
   _serial->getFrame(_buffer);
   Sensor::_parse(_buffer.str());
 
