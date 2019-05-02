@@ -67,4 +67,4 @@ catkin_make run_tests || exit 3
 catkin_test_results || exit 4
 
 # Code coverage
-catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage
+catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage || exit 5
