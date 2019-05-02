@@ -17,7 +17,6 @@ if ! [ "$IN_DOCKER" ]; then
     $DOCKER_IMAGE /root/$(basename $PWD)/./$SCRIPT
   result=$?
 
-  bash <(curl -s https://codecov.io/bash)
   ls -a
 
   case $result in
@@ -77,3 +76,7 @@ ls -a
 cd coverage
 ls -a
 echo "$(cat index.html)"
+
+
+CODECOV_TOKEN="39fdfe66-5f8c-468e-b68f-4d6529702b14"
+bash <(curl -s https://codecov.io/bash)
