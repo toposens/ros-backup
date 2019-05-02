@@ -73,10 +73,12 @@ catkin_test_results #|| exit 4
 catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage #|| exit 5
 
 cd build
-ls -a
+ls -al
 cd coverage
-ls -a
+ls -al
 echo "$(cat index.html)"
+cd src
+ls -al
 
 echo $PWD
 
