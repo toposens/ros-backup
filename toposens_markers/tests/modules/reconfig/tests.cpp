@@ -16,7 +16,8 @@
  */
 using namespace toposens_markers ;
 
-class ReconfigTest : public ::testing::Test {
+class ReconfigTest : public ::testing::Test
+{
 
 protected:
   const float listen_period = 1.0;

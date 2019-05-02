@@ -10,7 +10,7 @@
     <test pkg="rostest" type="hztest" test-name="MarkersFrequency">
         <param name="topic" value="/ts_markers"/>
         <param name="hz" value="10.0"/>
-        <param name="hzerror" value="1.0"/>
+        <param name="hzerror" value="2.0"/>
         <param name="test_duration" value="5.0"/>
     </test>
 </launch>
