@@ -80,7 +80,7 @@ ls -al
 
 echo $PWD
 
-#cd ..
+cd ..
 echo $CODECOV_TOKEN
 CODECOV_TOKEN="39fdfe66-5f8c-468e-b68f-4d6529702b14"
 #bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage -f toposens_driver.info -R /catkin_ws/src/ts-ros
