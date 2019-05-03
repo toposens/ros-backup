@@ -81,4 +81,4 @@ ls -al
 echo $PWD
 
 #cd ..
-bash <(curl -s https://codecov.io/bash) -X gcov -r /catkin_ws/build/coverage
+bash <(curl -s https://codecov.io/bash) -X gcov -r /root/catkin_ws/build/coverage -f "*.info"
