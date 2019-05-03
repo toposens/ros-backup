@@ -1,6 +1,6 @@
 [![Toposens](https://toposens.com/wp-content/themes/toposens/assets/img/logo2.png)](https://toposens.com)
 
-[![pipeline status](https://gitlab.com/toposens/ros-projects/testci/badges/master/pipeline.svg)](https://gitlab.com/toposens/ros-projects/testci/commits/master)
+[![Pipeline Status](https://gitlab.com/toposens/ros-projects/testci/badges/master/pipeline.svg)](https://gitlab.com/toposens/ros-projects/testci/commits/master)
 
 
 # Overview
