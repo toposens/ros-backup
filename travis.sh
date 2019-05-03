@@ -48,7 +48,7 @@ export CCACHE_DIR=/root/ccache
 # Prepare workspace
 PROJECT_NAME="testing"
 URL=${TRAVIS_BUILD_DIR/"/home/travis/build"/"https://github.com"}
-cd /root
+#cd /root
 mkdir -p /catkin_ws/src
 git clone $URL -b $TRAVIS_BRANCH /catkin_ws/src/$PROJECT_NAME
 
@@ -81,4 +81,4 @@ ls -al
 echo $PWD
 
 #cd ..
-bash <(curl -s https://codecov.io/bash) -X gcov -r /root/catkin_ws/build/coverage -f "*.info"
+bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage -f "*.info"
