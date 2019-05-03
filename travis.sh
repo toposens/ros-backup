@@ -76,13 +76,9 @@ cd build
 ls -al
 cd coverage
 ls -al
-echo "$(cat index.html)"
-cd src
-ls -al
-cd lib
-ls -al
+echo "$(cat toposens_driver.xml)"
 
 echo $PWD
 
 #cd ..
-bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage
+bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage/toposens_driver.xml
