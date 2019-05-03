@@ -48,7 +48,7 @@ export CCACHE_DIR=/root/ccache
 # Prepare workspace
 PROJECT_NAME="testing"
 URL=${TRAVIS_BUILD_DIR/"/home/travis/build"/"https://github.com"}
-cd /root
+#cd /root
 mkdir -p /catkin_ws/src
 git clone $URL -b $TRAVIS_BRANCH /catkin_ws/src/$PROJECT_NAME
 
@@ -83,4 +83,4 @@ echo $PWD
 #cd ..
 echo $CODECOV_TOKEN
 CODECOV_TOKEN="39fdfe66-5f8c-468e-b68f-4d6529702b14"
-bash <(curl -s https://codecov.io/bash) -X gcov -s /root/catkin_ws/build/coverage -f toposens_driver.info -R /root/catkin_ws/src/ts-ros
+bash <(curl -s https://codecov.io/bash) -X gcov -s /catkin_ws/build/coverage -f toposens_driver.info -R /catkin_ws/src/ts-ros
