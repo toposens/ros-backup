@@ -21,7 +21,6 @@ Developed and tested for [ROS Melodic](http://wiki.ros.org/melodic) on [Ubuntu 1
     `sudo apt install python-catkin-tools ros-melodic-rviz-visual-tools ros-melodic-code-coverage`
 
 
-
 # Building
 
  *  Follow Section 3 of [this](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment) guide to create your catkin workspace
