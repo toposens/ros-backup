@@ -67,7 +67,7 @@ function(coverage_add_target tgt)
                 --directory ${CMAKE_BINARY_DIR}
                 --base-directory ${PROJECT_SOURCE_DIR}
                 --capture
-                --output-file coverage.info
+                --output-file ${PROJECT_NAME}.info
 
                 # Set directories and capture code counters
                 COMMAND ${LCOV_PATH}
