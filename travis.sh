@@ -99,7 +99,8 @@ ls -a
 #cd lcov
 lcov --directory . --capture --output-file coverage.info
 lcov --list coverage.info
-lcov --remove coverage.info '/catkin_ws/src/testing/toposens_driver/src/lib/*' --output-file coverage.info
+#lcov --remove coverage.info '/catkin_ws/src/testing/toposens_driver/src/lib/*' --output-file coverage.info
+lcov --extract coverage.info '/catkin_ws/src/testing/toposens_driver/src/lib/*' --output-file coverage.info
 ls -a
 lcov --list coverage.info
 bash <(curl -s https://codecov.io/bash) -X gcov || echo "Codecov did not collect coverage reports"
