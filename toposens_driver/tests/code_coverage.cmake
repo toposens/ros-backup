@@ -69,12 +69,6 @@ function(coverage_add_target tgt)
                 --capture
                 --output-file ${PROJECT_NAME}.info
 
-                # Set directories and capture code counters
-                COMMAND ${LCOV_PATH}
-                --directory ${CMAKE_BINARY_DIR}
-                --base-directory ${PROJECT_SOURCE_DIR}
-                --capture
-                --output-file ${PROJECT_NAME}.xml
 
                 # Extract code counters, excluding Google Test and header files
                 COMMAND ${LCOV_PATH}
