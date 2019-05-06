@@ -1,7 +1,7 @@
 [![Toposens](https://toposens.com/wp-content/themes/toposens/assets/img/logo2.png)](https://toposens.com)
 
-[![Build Status](https://travis-ci.org/toposens/ts-ros.svg?branch=travis_ci)](https://travis-ci.org/toposens/ts-ros)
-[![codecov](https://codecov.io/gh/toposens/ts-ros/branch/master/graph/badge.svg)](https://codecov.io/gh/toposens/ts-ros)
+[![Build Status](https://travis-ci.org/toposens/ts-ros.svg?branch=code_coverage)](https://travis-ci.org/toposens/ts-ros)
+[![codecov](https://codecov.io/gh/toposens/ts-ros/branch/code_coverage/graph/badge.svg)](https://codecov.io/gh/toposens/ts-ros)
 
 
 # Overview
