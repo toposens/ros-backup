@@ -3,7 +3,7 @@
 
 
 namespace toposens_markers
-{   
+{
 /** A dynamic reconfigure server is set up to change marker scale
  *  and lifetime during runtime.
  */
@@ -70,7 +70,7 @@ void Plot::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
  *
  *  Sensing range is also updated to keep track of the furthest point
  *  detected by the sensor. This is used for color-coding the markers.
- *  
+ *
  *  RVT (Rviz Visual Tools) wrappers are used for efficient Rviz
  *  plotting. Since batch publishing is enabled, RVT collects all
  *  markers to be visualized in a given update and publishes them
@@ -101,11 +101,11 @@ void Plot::_plot(void) {
 
 /** Only adds the sensor mesh to RVT publishing queue. The actual
  *  publishing is done in the parent function which calls trigger().
- *  
+ *
  *  @todo scale the mesh to mm instead of scaling down from meters.
  *  @todo this orientation should be included in the stl files
  *  instead of being done here on each op.
- */ 
+ */
 void Plot::_addSensorMesh(void)
 {
   geometry_msgs::Pose og;
@@ -113,9 +113,9 @@ void Plot::_addSensorMesh(void)
   og.orientation.x = og.orientation.z = 1/sqrt(2);
   og.orientation.w = 0;
 
-  _rviz->publishMesh(og, "package://toposens_markers/meshes/Body.stl",
+  _rviz->publishMesh(og, "package://toposens_description/meshes/Body.stl",
     rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
-  _rviz->publishMesh(og, "package://toposens_markers/meshes/Cover.stl",
+  _rviz->publishMesh(og, "package://toposens_description/meshes/Cover.stl",
     rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
 }
 
