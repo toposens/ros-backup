@@ -94,12 +94,12 @@ catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage #|| exit 5
 
 
 #cd ../..
-mkdir -p /lcov
+mkdir -p lcov
 ls -a
 cd lcov
 lcov --directory . --capture --output-file coverage.info
 lcov --list coverage.info
-lcov --remove coverage.info '/src/toposens_driver/src/*' --output-file coverage.info
-ls
+lcov --remove coverage.info '/catkin_ws/src/ts-ros/toposens_driver/src/*' --output-file coverage.info
+ls -a
 lcov --list coverage.info
 bash <(curl -s https://codecov.io/bash) -X gcov || echo "Codecov did not collect coverage reports"
