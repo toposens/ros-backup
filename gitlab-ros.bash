@@ -23,13 +23,12 @@ source /opt/ros/$(ls /opt/ros/)/setup.bash
 
 # Prepare workspace
 #------------------
-PROJECT_NAME=$(basename ${CI_PROJECT_DIR})
-rm -rf src && mkdir -p src/${PROJECT_NAME}
-mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${PROJECT_NAME}
+rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
+mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
 
 
 # Initialize git submodules
 #--------------------------
-cd ${CI_PROJECT_DIR}/src/${PROJECT_NAME}
+cd ${CI_PROJECT_DIR}/src/${CI_PROJECT_NAME}
 git submodule update --init --recursive
 cd ${CI_PROJECT_DIR}
