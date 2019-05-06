@@ -97,7 +97,7 @@ cd ../..
 mkdir -p /lcov
 cd lcov
 lcov --directory . --capture --output-file coverage.info
-lcov --remove coverage.info '/usr/*' --output-file coverage.info
+lcov --remove coverage.info '/src/toposens_driver/src/*' --output-file coverage.info
 ls
 lcov --list coverage.info
 bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
