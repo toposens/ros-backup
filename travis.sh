@@ -97,10 +97,11 @@ catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_pointcloud_coverage #|| exit 5
 #mkdir -p lcov
 #ls -a
 mv build/coverage/toposens_driver.info.cleaned toposens_driver.info
-#mv build/coverage/toposens_markers.info.cleaned lcov/toposens_markers.info
-#mv build/coverage/toposens_pointcloud.info.cleaned lcov/toposens_pointcloud.info
+mv build/coverage/toposens_markers.info.cleaned toposens_markers.info
+mv build/coverage/toposens_pointcloud.info.cleaned toposens_pointcloud.info
+lcov -a toposens_driver.info -a toposens_markers.info -a toposens_pointcloud.info -o coverage.info
 #cd lcov
-#ls -a
+ls -a
 
 #mkdir -p lcov
 #ls -a
