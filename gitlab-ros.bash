@@ -17,14 +17,14 @@ echo "##############################################"
 
 # Setup ROS
 #----------
-export CCACHE_DIR=${CI_PROJECT_DIR}/ccache
-source /opt/ros/$(ls /opt/ros/)/setup.bash
+#export CCACHE_DIR=${CI_PROJECT_DIR}/ccache
+#source /opt/ros/$(ls /opt/ros/)/setup.bash
 
 
 # Prepare workspace
 #------------------
-rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
-mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
+#rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
+#mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
 
 
 # Initialize git submodules
