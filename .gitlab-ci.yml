@@ -1,4 +1,4 @@
-image: registry.gitlab.com/toposens/ros-projects/ts-ros:latest
+image: registry.gitlab.com/toposens/public/ts-ros:latest
 
 cache:
   paths:
