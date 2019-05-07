@@ -14,7 +14,7 @@ before_script:
 lint:
   stage: build
   script:
-    - catkin_lint --strict -W2 .
+    - catkin_lint -W2 .
 
 make:
   stage: build
