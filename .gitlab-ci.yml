@@ -9,7 +9,10 @@ variables:
 
 before_script:
     - source /opt/ros/${ROS_DISTRO}/setup.bash
-    - source gitlab-ros.bash
+    - rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
+    - mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
+    - tree .
+#    - source gitlab-ros.bash
 
 lint:
   stage: build
