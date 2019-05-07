@@ -92,7 +92,8 @@ catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage #|| exit 5
 #bash <(curl -s https://codecov.io/bash) -X gcov -s catkin_ws/build/coverage -f toposens_driver.info -R ycatkin_ws/src/ts-ros -v
 #bash <(curl -s https://codecov.io/bash) -f toposens_driver.info
 
-mv build/coverage/toposens_driver.info coverage.info
+mkdir -p lcov
+mv build/coverage/toposens_driver.info lcov/toposens_driver.info
 
 
 #mkdir -p lcov
