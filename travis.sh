@@ -26,6 +26,7 @@ if ! [ "$IN_DOCKER" ]; then
     2) tput setaf 1; echo "Travis script failed at catkin_make_isolated";;
     3) tput setaf 1; echo "Travis script failed at catkin_make run_tests";;
     4) tput setaf 1; echo "Travis script failed at catkin_test_results";;
+    5) tput setaf 1; echo "Travis script failed at catkin_make coverage";;
   esac
   exit $result
 fi
@@ -60,47 +61,22 @@ cd ../..
 
 
 # Lint
-catkin_lint -W3 . #|| exit 1
+catkin_lint -W3 . || exit 1
 
 # Make
-catkin_make_isolated #|| exit 2
+catkin_make_isolated || exit 2
 
 # Test
-catkin_make run_tests #|| exit 3
-catkin_test_results #|| exit 4
+catkin_make run_tests || exit 3
+catkin_test_results || exit 4
 
 # Code coverage
-catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage #|| exit 5
-catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_markers_coverage #|| exit 5
-catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_pointcloud_coverage #|| exit 5
+catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage || exit 5
+catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_markers_coverage || exit 5
+catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_pointcloud_coverage || exit 5
 
-#cd build
-#ls -al
-#cd coverage
-#ls -al
-#echo "$(cat toposens_driver.info)"
-
-#cd ../../..
-
-#echo "--"
-#lcov --list toposens_driver.info
-#echo "---"
-#lcov --list toposens_driver.info.cleaned
-#echo "----"
-
-#echo $PWD
-#echo $CODECOV_TOKEN
-#CODECOV_TOKEN="39fdfe66-5f8c-468e-b68f-4d6529702b14"
-#bash <(curl -s https://codecov.io/bash) -X gcov -s catkin_ws/build/coverage -f toposens_driver.info -R ycatkin_ws/src/ts-ros -v
-#bash <(curl -s https://codecov.io/bash) -f toposens_driver.info
-
+# Merge coverage reports
 lcov -a build/coverage/toposens_driver.info.cleaned -a build/coverage/toposens_markers.info.cleaned -a build/coverage/toposens_pointcloud.info.cleaned -o coverage.info
 
-#mkdir -p lcov
-#ls -a
-#lcov --directory . --capture --output-file coverage.info
-#lcov --list coverage.info
-#lcov --extract coverage.info '/catkin_ws/src/testing/toposens_driver/src/lib/*' --output-file coverage.info
-#ls -a
-#lcov --list coverage.info
+# Push coverage report to Codecov
 bash <(curl -s https://codecov.io/bash) -X gcov || echo "Codecov did not collect coverage reports"
