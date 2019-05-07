@@ -8,14 +8,13 @@ variables:
   CCACHE_DIR: ${CI_PROJECT_DIR}/ccache
 
 before_script:
-    - echo ${ROS_DISTRO}
-    - echo ${CCACHE_DIR}
+    - source /opt/ros/${ROS_DISTRO}/setup.bash
     - source gitlab-ros.bash
 
 lint:
   stage: build
   script:
-    - catkin_lint -W3 .
+    - catkin_lint --strict -W2 .
 
 make:
   stage: build
