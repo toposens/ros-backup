@@ -3,9 +3,15 @@ image: registry.gitlab.com/toposens/public/ts-ros:latest
 cache:
   paths:
     - ccache/
+    
+variables:
+  CCACHE_DIR: ${CI_PROJECT_DIR}/ccache
+  TEST: "HEY GEY"
 
 before_script:
-   - source gitlab-ros.bash
+    - echo ${TEST}
+    - echo ${CCACHE_DIR}
+    - source gitlab-ros.bash
 
 lint:
   stage: build
