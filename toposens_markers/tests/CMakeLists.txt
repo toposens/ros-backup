@@ -28,3 +28,10 @@ endforeach()
 #	hertz/ts_markers.test
 #	DEPENDENCIES ${PROJECT_NAME}_node
 #)
+
+
+###################
+## Code Coverage ##
+###################
+#include(code_coverage.cmake)
+#coverage_add_target(run_tests_${PROJECT_NAME})

@@ -72,7 +72,7 @@ function(coverage_add_target tgt)
 
                 # Extract code counters, excluding Google Test and header files
                 COMMAND ${LCOV_PATH}
-                --extract ${PROJECT_NAME}.info '${PROJECT_SOURCE_DIR}/src/*'
+                --extract ${PROJECT_NAME}.info '${PROJECT_SOURCE_DIR}/src/lib/*'
                 --output-file ${PROJECT_NAME}.info.cleaned
 
 

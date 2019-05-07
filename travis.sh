@@ -93,8 +93,8 @@ catkin_make -DCMAKE_BUILD_TYPE=Coverage toposens_driver_coverage #|| exit 5
 #bash <(curl -s https://codecov.io/bash) -f toposens_driver.info
 
 mkdir -p lcov
-mv build/coverage/toposens_driver.info lcov/toposens_driver.info
-
+mv build/coverage/toposens_driver.info.cleaned lcov/toposens_driver.info
+cd lcov
 
 #mkdir -p lcov
 #ls -a
