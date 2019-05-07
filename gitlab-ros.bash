@@ -29,6 +29,6 @@ echo "##############################################"
 
 # Initialize git submodules
 #--------------------------
-cd ${CI_PROJECT_DIR}/src/${CI_PROJECT_NAME}
-git submodule update --init --recursive
-cd ${CI_PROJECT_DIR}
+#cd ${CI_PROJECT_DIR}/src/${CI_PROJECT_NAME}
+#git submodule update --init --recursive
+#cd ${CI_PROJECT_DIR}
