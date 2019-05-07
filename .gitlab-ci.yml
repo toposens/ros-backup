@@ -6,10 +6,9 @@ cache:
     
 variables:
   CCACHE_DIR: ${CI_PROJECT_DIR}/ccache
-  TEST: "HEY GEY"
 
 before_script:
-    - echo ${TEST}
+    - echo ${ROS_DISTRO}
     - echo ${CCACHE_DIR}
     - source gitlab-ros.bash
 
