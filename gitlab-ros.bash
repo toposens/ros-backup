@@ -23,8 +23,8 @@ echo "##############################################"
 
 # Prepare workspace
 #------------------
-#rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
-#mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
+rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
+mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
 
 
 # Initialize git submodules
