@@ -33,5 +33,5 @@ endforeach()
 ###################
 ## Code Coverage ##
 ###################
-#include(code_coverage.cmake)
-#coverage_add_target(run_tests_${PROJECT_NAME})
+include(code_coverage.cmake)
+coverage_add_target(run_tests_${PROJECT_NAME})
