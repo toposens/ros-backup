@@ -1,19 +1,20 @@
 <launch>
 
+    <!-- Start ts_cloud_node -->
+
+    <node pkg="toposens_pointcloud" type="toposens_pointcloud_node" name="ts_cloud_node">
+        <param type="str" name="fixed_frame" value="toposens" />
+    </node>
+
+
     <!-- Start driver with bag file -->
 
     <!-- Instead of the ts_driver_node publishing on ts_scans topic, we use the bag file to publish
-    on it, allowing ts_cloud_node to subscribe to it and publish on ts_cloud topic so that we could run
-    hzTest-->
+    on it, allowing ts_cloud_node to subscribe to it and publish on ts_cloud topic so that we could run hzTest-->
 
     <node pkg="rosbag" type="play" name="player" output="screen"
-          args="--clock $(find toposens_driver)/tests/dumps/ts_scans.bag"/>
+          args="--clock $(find toposens_driver)/tests/ts_scans.bag" />
 
-    <!-- Start ts_cloud_node -->
-
-    <node pkg="toposens_pointcloud" type="toposens_pointcloud_node" name="ts_cloud_node" output="screen">
-        <param type="str" name="fixed_frame" value="toposens" />
-    </node>
 
     <!-- Hz Test-->
     <!-- Tests publishing rate of ts_cloud topic -->
