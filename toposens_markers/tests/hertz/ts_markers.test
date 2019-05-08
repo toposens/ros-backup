@@ -1,9 +1,8 @@
 <launch>
-    <node pkg="toposens_markers" name="ts_markers_node"
-          type="toposens_markers_node" output="screen" />
+    <node pkg="toposens_markers" name="ts_markers_node" type="toposens_markers_node"/>
 
     <node pkg="rosbag" type="play" name="player" output="screen"
-          args="--clock $(find toposens_markers)/tests/hertz/ts_scans.bag" />
+          args="--clock $(find toposens_driver)/tests/ts_scans.bag" />
 
     <!-- Hz Test-->
     <!-- Tests publishing rate of topics-->

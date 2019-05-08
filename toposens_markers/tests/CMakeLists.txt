@@ -30,6 +30,10 @@ foreach(M ${TEST_MODULES})
 
 endforeach()
 
+#############
+## Hz test ##
+#############
+
 add_rostest(
 	hertz/ts_markers.test
 	DEPENDENCIES ${PROJECT_NAME}_node
