@@ -27,11 +27,11 @@ Serial::Serial(std::string port)
 	// Open serial port to access sensor stream
 	_fd = open(_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
-	  if (_fd==-1) {
-      ROS_ERROR("Error opening connection at %s: %s", _port.c_str(), strerror (errno));
-	    throw "Error opening connection";
-	  }
-
+  if (_fd == -1)
+  {
+    std::string msg = "Error opening connection at" + _port + ": " + strerror(errno);
+    throw std::runtime_error(msg);
+  }
   ROS_DEBUG("Toposens serial established with fd %d\n", _fd);
 
 	// Set options of serial data transfer
@@ -141,19 +141,17 @@ void Serial::getFrame(std::stringstream &data)
  */
 bool Serial::send(char* bytes)
 {
-  if (_fd==-1) {
-    ROS_ERROR("Connection at %s unavailable: %s", _port.c_str(), strerror (errno));
-    throw "Connection unavailable";
+  if (_fd == -1)
+  {
+    std::string msg = "Connection at " + _port + " unavailable: " + strerror (errno);
+    throw std::runtime_error(msg);
   }
 
   int tx_length = write(_fd, bytes, strlen(bytes));
 
-  if (tx_length == -1) {
-    ROS_ERROR("Failed to transmit %s: %s", bytes, strerror(errno));
-    return false;
-  }
-	ROS_DEBUG("Bytes transmitted: %s", bytes);
-  return true;
+  if (tx_length != -1)  ROS_DEBUG("Bytes transmitted: %s", bytes);
+  else ROS_ERROR("Failed to transmit %s: %s", bytes, strerror(errno));
+  return (tx_length != -1);
 }
 
 } // namespace toposens_driver

@@ -21,7 +21,6 @@
   <depend>toposens_msgs</depend>
   <depend>rviz_visual_tools</depend>
   <depend>toposens_driver</depend>
-
   <depend>message_runtime</depend>
 
   <test_depend>roslaunch</test_depend>

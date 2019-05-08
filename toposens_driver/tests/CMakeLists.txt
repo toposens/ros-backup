@@ -61,15 +61,15 @@ endif()
 #############
 
 set(TEST_MODULES
-		command
-		reconfig
-		sensor
-		serial
+	command
+	reconfig
+	sensor
+	serial
 )
 
 foreach(M ${TEST_MODULES})
 
-    add_rostest_gtest(
+  add_rostest_gtest(
 		${PROJECT_NAME}_${M}_test
 		modules/${M}/launch.test
 		modules/${M}/tests.cpp

@@ -15,41 +15,25 @@ using namespace toposens_driver;
 
 class SerialTest : public ::testing::Test
 {
-  protected:
-    std::string mock_port, driver_port;
-    ros::NodeHandle* private_nh;
 
-    void SetUp()
-    {
-      private_nh = new ros::NodeHandle("~");
-      private_nh->getParam("mock_port", mock_port);
-      private_nh->getParam("port", driver_port);
-    }
+protected:
+  std::string sensor_port, driver_port;
+  ros::NodeHandle* private_nh;
 
-    void TearDown()
-    {
-      delete private_nh;
-    }
 
-  void _connect1(std::string testPort)
+  void SetUp()
   {
-    Serial* conn = new Serial(testPort);
-    delete conn;
+    private_nh = new ros::NodeHandle("~");
+    private_nh->getParam("sensor_port", sensor_port);
+    private_nh->getParam("port", driver_port);
   }
 
-    void _connect(std::string testPort, bool validPort, std::string onFail)
-    {
-      testing::internal::CaptureStderr();
-      Serial* conn = new Serial(testPort);
-      delete conn;
 
-      if (validPort == testing::internal::GetCapturedStderr().empty()) {
-        std::cerr << " pass" << std::endl;
-      } else {
-        std::cerr << " fail" << std::endl;
-        ADD_FAILURE() << onFail;
-      }
-    }
+  void TearDown()
+  {
+    delete private_nh;
+  }
+
 };
 
 
@@ -59,15 +43,13 @@ class SerialTest : public ::testing::Test
  */
 TEST_F(SerialTest, openInvalidPort)
 {
-
-  std::string failMsg = "Connecting to fictitious port did not result in failure.";
-
   std::cerr << "[TEST] Attempting connection to null port...";
-  EXPECT_ANY_THROW( _connect1(""));
+  ASSERT_THROW(Serial(""), std::runtime_error);
+  std::cerr << "done" << std::endl;
 
   std::cerr << "[TEST] Attempting connection to non-existent port...";
-  EXPECT_ANY_THROW(_connect1("tty69"));
-
+  ASSERT_THROW(Serial("tty69"), std::runtime_error);
+  std::cerr << "done" << std::endl;
 }
 
 
@@ -77,15 +59,13 @@ TEST_F(SerialTest, openInvalidPort)
  */
 TEST_F(SerialTest, openValidPort)
 {
-  std::string failMsg = "Connecting to valid port resulted in failure.";
-
   std::cerr << "[TEST] Attempting connection to mock sensor port...";
-  _connect(mock_port, true, failMsg);
-  //EXPECT_NO_THROW(_connect(mock_port, true, failMsg));
+  EXPECT_NO_THROW(Serial(sensor_port.c_str()));
+  std::cerr << "done" << std::endl;
 
   std::cerr << "[TEST] Attempting connection to mock driver port...";
-  _connect(driver_port, true, failMsg);
-  //EXPECT_NO_THROW(_connect(driver_port, true, failMsg));
+  EXPECT_NO_THROW(Serial(driver_port.c_str()));
+  std::cerr << "done" << std::endl;
 }
 
 
@@ -96,11 +76,11 @@ TEST_F(SerialTest, openValidPort)
  */
 TEST_F(SerialTest, getFrameWellFormatted)
 {
-  const int mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+  const int conn_fd = open(sensor_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
   // @todo change this to input data dump for this test to make any meaningful sense
   const char tx_data[] = "S000016P0000X-0415Y00010Z00257V00061ES0000";
   std::cerr << "[TEST] Tx Data: " << tx_data << std::endl;
-  write(mock_sensor, tx_data, sizeof(tx_data));
+  write(conn_fd, tx_data, sizeof(tx_data));
 
   Serial* serial = new Serial(driver_port);
   std::stringstream ss;
@@ -143,7 +123,7 @@ TEST_F(SerialTest, getFrameWellFormatted)
 
   ss.str(std::string());
   delete serial;
-  close(mock_sensor);
+  close(conn_fd);
 }
 
 /**
@@ -160,16 +140,16 @@ TEST_F(SerialTest, sendBytes)
   char data[] = "hello world";
 
   Serial* serial = new Serial(driver_port);
-  const int mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+  const int conn_fd = open(sensor_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
   
   EXPECT_TRUE(serial->send(data)) << "Error writing data to serial stream: " << data;
-  while(n_bytes < 1) n_bytes = read(mock_sensor, &buffer, sizeof(buffer));
+  while(n_bytes < 1) n_bytes = read(conn_fd, &buffer, sizeof(buffer));
 
   // Size of data is number of chars + null terminator 
   EXPECT_EQ(n_bytes + 1, (int)sizeof(data)) << "Incorrect number of bytes received";
 
   delete serial;
-  close(mock_sensor);
+  close(conn_fd);
 }
 
 
