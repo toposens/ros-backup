@@ -10,7 +10,6 @@ ROS packages for working with Toposens 3D Ultrasound sensors: http://toposens.co
 Developed and tested for [ROS Melodic](http://wiki.ros.org/melodic) on [Ubuntu 18.04 (Bionic)](http://releases.ubuntu.com/18.04/)
 
 
-
 # Setup
 
 ### For Ubuntu 18.04 (and maybe other versions)

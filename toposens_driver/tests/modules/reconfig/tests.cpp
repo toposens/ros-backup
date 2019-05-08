@@ -17,7 +17,10 @@
  */
 using namespace toposens_driver;
 
-class ReconfigTest : public ::testing::Test {
+class ReconfigTest : public ::testing::Test
+{
+
+  const std::string TAG = "[DRIVER_RECONFIG_TEST] - ";
 
   protected:
     ros::NodeHandle* private_nh;

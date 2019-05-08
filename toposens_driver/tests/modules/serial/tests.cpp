@@ -15,10 +15,13 @@ using namespace toposens_driver;
 
 class SerialTest : public ::testing::Test
 {
-  protected:
+
+public:
+  const std::string TAG = "[DRIVER_SERIAL_TEST] - ";
+
+protected:
     std::string mock_port, driver_port;
     ros::NodeHandle* private_nh;
-    const std::string tag="[SERIAL_TEST] ";
     void SetUp()
     {
       private_nh = new ros::NodeHandle("~");
@@ -55,10 +58,10 @@ TEST_F(SerialTest, openInvalidPort)
 {
   std::string failMsg = "Connecting to fictitious port did not result in failure.";
 
-  std::cerr << tag << "Attempting connection to null port...";
+  std::cerr << TAG << "Attempting connection to null port...";
   _connect("", false, failMsg);
 
-  std::cerr << tag << "Attempting connection to non-existent port...";
+  std::cerr << TAG << "Attempting connection to non-existent port...";
   _connect("tty69", false, failMsg);
 }
 
@@ -71,10 +74,10 @@ TEST_F(SerialTest, openValidPort)
 {
   std::string failMsg = "Connecting to valid port resulted in failure.";
 
-  std::cerr << tag << "Attempting connection to mock sensor port...";
+  std::cerr << TAG << "Attempting connection to mock sensor port...";
   _connect(mock_port, true, failMsg);
 
-  std::cerr << tag << "Attempting connection to mock driver port...";
+  std::cerr << TAG << "Attempting connection to mock driver port...";
   _connect(driver_port, true, failMsg);
 }
 
@@ -89,14 +92,14 @@ TEST_F(SerialTest, getFrameWellFormatted)
   const int mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
   // @todo change this to input data dump for this test to make any meaningful sense
   const char tx_data[] = "S000016P0000X-0415Y00010Z00257V00061ES0000";
-  std::cerr << tag << "Tx Data: " << tx_data << std::endl;
+  std::cerr << TAG << "Tx Data: " << tx_data << std::endl;
   write(mock_sensor, tx_data, sizeof(tx_data));
 
   Serial* serial = new Serial(driver_port);
   std::stringstream ss;
   serial->getFrame(ss);
   std::string rx_data = ss.str();
-  std::cerr << tag <<"Rx Data: " << rx_data << std::endl;
+  std::cerr << TAG <<"Rx Data: " << rx_data << std::endl;
 
 
   // @todo add more type of test data for get frame function

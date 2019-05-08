@@ -19,13 +19,15 @@ using namespace toposens_markers ;
 class ReconfigTest : public ::testing::Test
 {
 
+public:
+  const std::string TAG = "[MARKERS_RECONFIG_TEST] - ";
+
 protected:
   const float listen_period = 1.0;
 
   ros::Subscriber markers_sub;
   ros::Publisher scans_pub;
   toposens_msgs::TsScan scan;
-  const std::string tag="[MARKERS_RECONFIG_TEST] ";
 
   std::vector<visualization_msgs::Marker> markers;
 
@@ -70,7 +72,7 @@ protected:
     scans_pub.publish(scan);
 
     // listen for produced marker(s)
-    std::cerr << tag << "Listening for markers...";
+    std::cerr << TAG << "Listening for markers...";
     ros::Time end = ros::Time::now() + ros::Duration(listen_period);
     while(ros::Time::now() < end) {
       ros::spinOnce();
@@ -83,7 +85,7 @@ protected:
 
   void updateCfg(std::string param_name, double param_value)
   {
-    std::cerr << tag << "Setting plot " << param_name << " to " << param_value << std::endl;
+    std::cerr << TAG << "Setting plot " << param_name << " to " << param_value << std::endl;
     
     dynamic_reconfigure::DoubleParameter double_param;
     double_param.name = param_name;
@@ -131,7 +133,7 @@ TEST_F(ReconfigTest, changeLifetime)
 {
   double new_lifetime = 1.2;
   double min_sleep = new_lifetime - listen_period;
-  if (min_sleep < 0) return ADD_FAILURE() << tag <<  "Min sleep duration cannot be negative: " << min_sleep;
+  if (min_sleep < 0) return ADD_FAILURE() << TAG <<  "Min sleep duration cannot be negative: " << min_sleep;
 
   updateCfg("lifetime", new_lifetime);
   publishAndListen();     // plot has scan after stored after this

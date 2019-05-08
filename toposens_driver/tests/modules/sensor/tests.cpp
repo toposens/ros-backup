@@ -12,6 +12,8 @@ using namespace toposens_driver;
 
 class SensorTest : public ::testing::Test
 {
+  const std::string TAG = "[DRIVER_SENSOR_TEST] - ";
+
   protected:
     Sensor* dev;
     toposens_msgs::TsScan scan;

@@ -11,6 +11,9 @@ using namespace toposens_driver;
 
 class CommandTest : public ::testing::Test
 {
+
+  const std::string TAG = "[DRIVER_COMMAND_TEST] - ";
+
   protected:
     static const int CMD_LEN = 12;
 

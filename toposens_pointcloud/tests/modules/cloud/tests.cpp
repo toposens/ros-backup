@@ -14,6 +14,9 @@ using namespace toposens_pointcloud;
 class CloudTest : public ::testing::Test
 {
 
+public:
+  const std::string TAG = "[POINTCLOUD_CLOUD_TEST] - ";
+
 protected:
   // Defined in static tf broadcast in launch file
   const double tf_x = 0.05;
@@ -21,7 +24,6 @@ protected:
   const double tf_z = 0.0;
 
   const int kNumPoints = 10;
-  const std::string tag="[CLOUD_TEST] ";
 //@todo rename cloud class to something else to not confuse with TsCloud
   // ex, see Markers changed to Plot
 
@@ -69,7 +71,7 @@ protected:
 
   void listen()
   {
-    std::cerr << tag << "Listening for points...";
+    std::cerr << TAG << "Listening for points...";
     ros::Time end = ros::Time::now() + ros::Duration(1.0);
     while(ros::Time::now() < end)
     {
@@ -82,7 +84,7 @@ protected:
 
   void read(std::string filename)
   {
-    std::cerr << tag << "Reading PCD data from " << filename << ".pcd...";
+    std::cerr << TAG << "Reading PCD data from " << filename << ".pcd...";
     pcl::io::loadPCDFile<toposens_msgs::TsPoint>(
       ros::package::getPath("toposens_pointcloud") + "/" + filename + ".pcd",
       cloud
@@ -99,7 +101,7 @@ protected:
  */
 TEST_F(CloudTest, emptyScan)
 {
-  std::cerr << tag << "Publishing empty scan...";
+  std::cerr << TAG << "Publishing empty scan...";
   scans_pub.publish(scan);
   std::cerr << "done" << std::endl;
 
@@ -110,7 +112,7 @@ TEST_F(CloudTest, emptyScan)
 
 TEST_F(CloudTest, zeroIntensityScan)
 {
-  std::cerr << tag << "Publishing scan with zero-intensity points...";
+  std::cerr << TAG << "Publishing scan with zero-intensity points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
@@ -135,7 +137,7 @@ TEST_F(CloudTest, zeroIntensityScan)
  */
 TEST_F(CloudTest, validScan)
 {
-  std::cerr << tag << "Publishing scan with plottable points...";
+  std::cerr << TAG << "Publishing scan with plottable points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
@@ -166,7 +168,7 @@ TEST_F(CloudTest, validScan)
 
 TEST_F(CloudTest, saveData)
 {
-  std::cerr << tag << "Publishing scan with mixed points...";
+  std::cerr << TAG << "Publishing scan with mixed points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
