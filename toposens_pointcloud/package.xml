@@ -22,7 +22,6 @@
   <depend>dynamic_reconfigure</depend>
   <depend>toposens_msgs</depend>
   <depend>toposens_driver</depend>
-  <depend>rviz_visual_tools</depend>
   <exec_depend>message_runtime</exec_depend>
 
   <test_depend>roslaunch</test_depend>

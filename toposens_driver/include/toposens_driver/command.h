@@ -28,8 +28,6 @@ namespace toposens_driver
 class Command
 {
   public:
-    /** An arbitrary cuboid volume with points of interest and the sensor at its origin. */
-    typedef TsDriverConfig::DEFAULT::VOXEL TsVoxel;
 
     /** Defined in TS firmware and exposed as public constants to
      *  be accessed by the #Command API. Ranges and default values
@@ -37,10 +35,9 @@ class Command
      */
     enum Parameter
     {
-      SigStrength  =0,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
-      FilterSize   =1,  /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
-      NoiseThresh  =2,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
-      VoxelLimits  =3,  /** 3D limits specifying boundaries of a volume of interest [0 to x-, y-, z-range]. */
+      SigStrength  =1,  /** Number of waves emitted in every transmission cycle [0 to 20]. */
+      FilterSize   =2,  /** Kernel size applied on ADC signals for edge detection [1 to 100]. */
+      NoiseThresh  =3,  /** Minimum amplitude for an echo to be considered valid [0 to 20]. */
       SNRBoost     =4,  /** SNR booster for the x-range [0 to 1000]. */
       CalibTemp    =5   /** Ambient temperature that sensor is calibrated to */
     };

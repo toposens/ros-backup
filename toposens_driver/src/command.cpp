@@ -44,7 +44,6 @@ std::string Command::_getKey(Parameter param)
   else if (param == Parameter::NoiseThresh) return "dThre";
   else if (param == Parameter::SNRBoost)    return "boost";
   else if (param == Parameter::CalibTemp)   return "DTemp";
-  else /*VoxelLimit*/                       return "goLim";
 }
 
 } // namespace toposens_driver

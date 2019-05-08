@@ -42,8 +42,8 @@ TEST_F(CommandTest, validValues)
   Command cmd_3(Command::NoiseThresh, 15);
   EXPECT_STREQ(cmd_3.getBytes(), "CdThre00015\r");
 
-  Command cmd_4(Command::SNRBoost, 0);
-  EXPECT_STREQ(cmd_4.getBytes(), "Cboost00000\r");
+  Command cmd_4(Command::SNRBoost, 100);
+  EXPECT_STREQ(cmd_4.getBytes(), "Cboost00100\r");
 
   Command cmd_5(Command::CalibTemp, -3);
   EXPECT_STREQ(cmd_5.getBytes(), "CDTemp-0003\r");

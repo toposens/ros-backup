@@ -90,6 +90,7 @@ TEST_F(SerialTest, getFrameWellFormatted)
   const int mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
   const char tx_data[] = "S000016P0000X-0415Y00010Z00257V00061ES0000";
+  std::cerr << "[TEST] Tx Data: " << tx_data << std::endl;
 
   write(mock_sensor, tx_data, sizeof(tx_data));
 
@@ -98,15 +99,14 @@ TEST_F(SerialTest, getFrameWellFormatted)
 
   serial->getFrame(ss);
   std::string rx_data = ss.str();
-
-
-  EXPECT_STREQ(rx_data.c_str(),tx_data)<< "Written Data is supposed to be the same as Read Data!";
-
-    if (rx_data.find('E') == std::string::npos) {
+  std::cerr << "[TEST] Rx Data: " << rx_data << std::endl;
+  
+  if (rx_data.find('E') == std::string::npos) {
       ADD_FAILURE() << "Parsed data frame missing E tag: " << rx_data;
     }
 
-  ss.str(std::string());
+  EXPECT_STREQ(rx_data.c_str(),tx_data)<< "Tx-Rx data mismatch";
+
   delete serial;
   close(mock_sensor);
 }

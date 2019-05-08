@@ -15,8 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   toposens_driver
   toposens_msgs
-  rviz_visual_tools
-        )
+)
 
 
 ## System dependencies are found with CMake's conventions
@@ -52,14 +51,13 @@ catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
   dynamic_reconfigure
+  tf
   message_runtime
   pcl_ros
   roscpp
   rospy
-  tf
   toposens_driver
   toposens_msgs
-  rviz_visual_tools
 )
 
 

@@ -65,6 +65,8 @@ class ReconfigTest : public ::testing::Test {
     }
 };
 
+
+
 /**
  * Tests that changes in the sensor parameters are being updated.
  * Desired behavior: Message is well formed and output clipped to paramter value limits.
@@ -87,6 +89,7 @@ TEST_F(ReconfigTest, changeSigStrength)
 
 }
 
+
 /**
  * Tests that the Sensor settings are initialized.
  * Desired behavior: Message is well formed and output clipped to paramter value limits.
@@ -94,9 +97,8 @@ TEST_F(ReconfigTest, changeSigStrength)
 
 TEST_F(ReconfigTest, checkInitConfig)
 {
- EXPECT_EQ(std::string(init_buff),"CnWave00005\rCfiltr00020\rCdThre00005\r");
+ EXPECT_EQ(std::string(init_buff),"CnWave00005\rCfiltr00020\rCdThre00005\rCboost00500\r");
 }
-
 
 int main(int argc, char** argv)
 {
