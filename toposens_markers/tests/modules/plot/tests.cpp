@@ -11,11 +11,15 @@ using namespace toposens_markers;
 
 class PlotTest : public ::testing::Test
 {
+
+public:
+  const std::string TAG = "[MARKERS_PLOT_TEST] - ";
+
 protected:
   const int kNumPoints = 10;
   ros::NodeHandle* priv_nh;
   Plot* p;
-
+  
   ros::Subscriber markers_sub;
   ros::Publisher scans_pub;
   toposens_msgs::TsScan scan;
@@ -49,7 +53,7 @@ protected:
 
   void listen()
   {
-    std::cerr << "[TEST] Listening for markers...";
+    std::cerr << TAG << "Listening for markers...";
     ros::Time end = ros::Time::now() + ros::Duration(1.0);
     while(ros::Time::now() < end)
     {
@@ -75,7 +79,7 @@ protected:
 */
 TEST_F(PlotTest, emptyScan)
 {
-  std::cerr << "[TEST] Publishing empty scan...";
+  std::cerr << TAG << "Publishing empty scan...";
   scans_pub.publish(scan);
   std::cerr << "done" << std::endl;
 
@@ -88,7 +92,7 @@ TEST_F(PlotTest, emptyScan)
 
 TEST_F(PlotTest, zeroIntensityScan)
 {
-  std::cerr << "[TEST] Publishing scan with zero-intensity points...";
+  std::cerr << TAG << "Publishing scan with zero-intensity points...";
   for(int i = 0; i < kNumPoints; i++)
   {
     toposens_msgs::TsPoint pt;
@@ -112,7 +116,7 @@ TEST_F(PlotTest, zeroIntensityScan)
  */
 TEST_F(PlotTest, validScans)
 {
-  std::cerr << "[TEST] Publishing scan with plottable points...";
+  std::cerr << TAG << "Publishing scan with plottable points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {

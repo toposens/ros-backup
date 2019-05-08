@@ -19,6 +19,9 @@ using namespace toposens_markers ;
 class ReconfigTest : public ::testing::Test
 {
 
+public:
+  const std::string TAG = "[MARKERS_RECONFIG_TEST] - ";
+
 protected:
   const float listen_period = 1.0;
 
@@ -69,20 +72,20 @@ protected:
     scans_pub.publish(scan);
 
     // listen for produced marker(s)
-    std::cerr << "[TEST] Listening for markers...";
+    std::cerr << TAG << "Listening for markers...";
     ros::Time end = ros::Time::now() + ros::Duration(listen_period);
     while(ros::Time::now() < end) {
       ros::spinOnce();
       ros::Duration(0.1).sleep();
     }
-    std::cerr << "completed" << std::endl;
+    std::cerr <<"completed" << std::endl;
   }
 
 
 
   void updateCfg(std::string param_name, double param_value)
   {
-    std::cerr << "[TEST] Setting plot " << param_name << " to " << param_value << std::endl;
+    std::cerr << TAG << "Setting plot " << param_name << " to " << param_value << std::endl;
     
     dynamic_reconfigure::DoubleParameter double_param;
     double_param.name = param_name;
@@ -130,7 +133,7 @@ TEST_F(ReconfigTest, changeLifetime)
 {
   double new_lifetime = 1.2;
   double min_sleep = new_lifetime - listen_period;
-  if (min_sleep < 0) return ADD_FAILURE() << "Min sleep duration cannot be negative: " << min_sleep;
+  if (min_sleep < 0) return ADD_FAILURE() << TAG <<  "Min sleep duration cannot be negative: " << min_sleep;
 
   updateCfg("lifetime", new_lifetime);
   publishAndListen();     // plot has scan after stored after this

@@ -16,6 +16,19 @@ using namespace toposens_driver;
 class SerialTest : public ::testing::Test
 {
 
+public:
+  const std::string TAG = "[DRIVER_SERIAL_TEST] - ";
+
+protected:
+    std::string mock_port, driver_port;
+    ros::NodeHandle* private_nh;
+    void SetUp()
+    {
+      private_nh = new ros::NodeHandle("~");
+      private_nh->getParam("mock_port", mock_port);
+      private_nh->getParam("port", driver_port);
+    }
+
 protected:
   std::string mock_sensor, driver_port;
   ros::NodeHandle* private_nh;
@@ -43,11 +56,11 @@ protected:
  */
 TEST_F(SerialTest, openInvalidPort)
 {
-  std::cerr << "[TEST] Attempting connection to null port...";
+  std::cerr << TAG << "Attempting connection to null port...";
   ASSERT_THROW(Serial(""), std::runtime_error);
   std::cerr << "done" << std::endl;
 
-  std::cerr << "[TEST] Attempting connection to non-existent port...";
+  std::cerr << TAG << "Attempting connection to non-existent port...";
   ASSERT_THROW(Serial("tty69"), std::runtime_error);
   std::cerr << "done" << std::endl;
 }
@@ -59,11 +72,11 @@ TEST_F(SerialTest, openInvalidPort)
  */
 TEST_F(SerialTest, openValidPort)
 {
-  std::cerr << "[TEST] Attempting connection to mock sensor port...";
+  std::cerr << TAG << "Attempting connection to mock sensor port...";
   EXPECT_NO_THROW(Serial(mock_sensor.c_str()));
   std::cerr << "done" << std::endl;
 
-  std::cerr << "[TEST] Attempting connection to mock driver port...";
+  std::cerr << TAG << "Attempting connection to mock driver port...";
   EXPECT_NO_THROW(Serial(driver_port.c_str()));
   std::cerr << "done" << std::endl;
 }
@@ -79,14 +92,14 @@ TEST_F(SerialTest, getFrameWellFormatted)
   const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
   // @todo change this to input data dump for this test to make any meaningful sense
   const char tx_data[] = "S000016P0000X-0415Y00010Z00257V00061ES0000";
-  std::cerr << "[TEST] Tx Data: " << tx_data << std::endl;
+  std::cerr << TAG << "Tx Data: " << tx_data << std::endl;
   write(conn_fd, tx_data, sizeof(tx_data));
 
   Serial* serial = new Serial(driver_port);
   std::stringstream ss;
   serial->getFrame(ss);
   std::string rx_data = ss.str();
-  std::cerr << "[TEST] Rx Data: " << rx_data << std::endl;
+  std::cerr << TAG <<"Rx Data: " << rx_data << std::endl;
 
 
   // @todo add more type of test data for get frame function
