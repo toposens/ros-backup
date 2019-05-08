@@ -1,6 +1,6 @@
 [![Toposens](https://toposens.com/wp-content/themes/toposens/assets/img/logo2.png)](https://toposens.com)
 
-[![pipeline status](https://gitlab.com/toposens/ros-projects/ts-ros/badges/master/pipeline.svg)](https://gitlab.com/toposens/ros-projects/ts-ros/commits/master)
+[![pipeline status](https://gitlab.com/toposens/public/ts-ros/badges/master/pipeline.svg)](https://gitlab.com/toposens/public/ts-ros/commits/master)
 
 
 # Overview
@@ -27,7 +27,7 @@ Developed and tested for [ROS Melodic](http://wiki.ros.org/melodic) on [Ubuntu 1
 
  *  Clone this repo into your catkin workspace
     
-    `git@gitlab.com:toposens/ros-projects/ts-ros.git`
+    `git@gitlab.com:toposens/public/ts-ros.git`
 
  *  Build your workspace from inside your catkin folder
 
@@ -91,7 +91,7 @@ Developed and tested for [ROS Melodic](http://wiki.ros.org/melodic) on [Ubuntu 1
 
     `roslaunch toposens_pointcloud turtlebot_cloud.launch`
 
-[![pipeline status](https://gitlab.com/toposens/ros-projects/ts-ros/badges/master/pipeline.svg)](https://gitlab.com/toposens/ros-projects/ts-ros/commits/master)
+[![pipeline status](https://gitlab.com/toposens/public/ts-ros/badges/master/pipeline.svg)](https://gitlab.com/toposens/public/ts-ros/commits/master)
 
 
 # Overview
@@ -118,7 +118,7 @@ Developed and tested for [ROS Melodic](http://wiki.ros.org/melodic) on [Ubuntu 1
 
  *  Clone this repo into your catkin workspace
     
-    `git@gitlab.com:toposens/ros-projects/ts-ros.git`
+    `git@gitlab.com:toposens/public/ts-ros.git`
 
  *  Build your workspace from inside your catkin folder
 
