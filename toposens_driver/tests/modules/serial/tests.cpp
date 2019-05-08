@@ -17,14 +17,14 @@ class SerialTest : public ::testing::Test
 {
 
 protected:
-  std::string sensor_port, driver_port;
+  std::string mock_sensor, driver_port;
   ros::NodeHandle* private_nh;
 
 
   void SetUp()
   {
     private_nh = new ros::NodeHandle("~");
-    private_nh->getParam("sensor_port", sensor_port);
+    private_nh->getParam("mock_sensor", mock_sensor);
     private_nh->getParam("port", driver_port);
   }
 
@@ -60,7 +60,7 @@ TEST_F(SerialTest, openInvalidPort)
 TEST_F(SerialTest, openValidPort)
 {
   std::cerr << "[TEST] Attempting connection to mock sensor port...";
-  EXPECT_NO_THROW(Serial(sensor_port.c_str()));
+  EXPECT_NO_THROW(Serial(mock_sensor.c_str()));
   std::cerr << "done" << std::endl;
 
   std::cerr << "[TEST] Attempting connection to mock driver port...";
@@ -76,7 +76,7 @@ TEST_F(SerialTest, openValidPort)
  */
 TEST_F(SerialTest, getFrameWellFormatted)
 {
-  const int conn_fd = open(sensor_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+  const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
   // @todo change this to input data dump for this test to make any meaningful sense
   const char tx_data[] = "S000016P0000X-0415Y00010Z00257V00061ES0000";
   std::cerr << "[TEST] Tx Data: " << tx_data << std::endl;
@@ -140,7 +140,7 @@ TEST_F(SerialTest, sendBytes)
   char data[] = "hello world";
 
   Serial* serial = new Serial(driver_port);
-  const int conn_fd = open(sensor_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+  const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
   
   EXPECT_TRUE(serial->send(data)) << "Error writing data to serial stream: " << data;
   while(n_bytes < 1) n_bytes = read(conn_fd, &buffer, sizeof(buffer));
