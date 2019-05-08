@@ -21,6 +21,7 @@ namespace toposens_pointcloud
  */
 Cloud::Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
+
   private_nh.param<std::string>("target_frame", target_frame, "toposens");
 
 	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Cloud::_convert, this);
@@ -81,6 +82,8 @@ void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
   tc->width = tc->points.size();
   store->width += tc->width;
   _cloud_pub.publish(tc);
+
+  Cloud::_addSensorMesh();
 }
 
 /** Converts TsPoint to an intermediary PointStamped message compatible
@@ -112,7 +115,15 @@ toposens_msgs::TsPoint Cloud::_transform(toposens_msgs::TsPoint pt, std_msgs::He
   return pt;
 }
 
+void Cloud::_addSensorMesh(void)
+{
+  //@todo this needs to be implemented
 
-/** @todo add sensor mesh to display */
+  //  _rviz->publishMesh(og, "package://toposens_markers/meshes/Body.stl",
+  //                     rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
+  //  _rviz->publishMesh(og, "package://toposens_markers/meshes/Cover.stl",
+  //                     rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
+}
+
 
 } // namespace toposens_pointcloud

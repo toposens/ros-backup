@@ -84,7 +84,8 @@ TEST_F(SerialTest, openValidPort)
 
 /**
  * Testing Serial::getFrame.
- * Desired behavior: the extracted single TS data frame should include an S tag and an E tag.
+ * Desired behavior: the extracted single TS data frame should be the same as the known published data
+ * and should include an E tag.
  * If it's not the case : Issue Error.
  */
 TEST_F(SerialTest, getFrameWellFormatted)
@@ -97,44 +98,18 @@ TEST_F(SerialTest, getFrameWellFormatted)
 
   Serial* serial = new Serial(driver_port);
   std::stringstream ss;
+
   serial->getFrame(ss);
   std::string rx_data = ss.str();
-  std::cerr << TAG <<"Rx Data: " << rx_data << std::endl;
-
-
-  // @todo add more type of test data for get frame function
-  // read data dump file line by line and pub/sub in loop
-
-
-  // @todo can this be deleted now?
-  /**
-   * The following (commented) code tests for the desired behavior that the data frame in buffer starts with an S and
-   * ends with an E. However, sometimes we receive incomplete frames, which we suspect to be a firmware problem.
-   * Therefore we relaxed the test, such that the desired behavior is an S tag followed by an E tag in the buffer, which
-   * ensures a successful application of the Sensor::_parse method
-   */
-  // Start Version 1
-//      EXPECT_TRUE(data[0] == 'S')
-//                  << "Data frame not prepended by S tag! " << data;
-//
-//      EXPECT_TRUE(data.back() == 'E')
-//                  << "Data frame not closed by E tag!";
-//      // End version 1
-
-  // Start version 2
-  // @todo is this not tested in sensor tests already?
-  std::size_t index = rx_data.find('S');
-  if (index == std::string::npos) {
-    ADD_FAILURE() << "Parsed data frame missing S tag: " << rx_data;
-  } else {
-    index = rx_data.find('E', index + 1);
-    if (index == std::string::npos) {
-      ADD_FAILURE() << "Parsed data frame missing E tag: " << rx_data;
-    }
+  std::cerr << "[TEST] Rx Data: " << rx_data << std::endl;
+  
+  //@todo maybe just do a check here against -1?
+  if (rx_data.find('E') == std::string::npos) {
+    ADD_FAILURE() << "Parsed data frame missing E tag: " << rx_data;
   }
-  // End version 2
 
-  ss.str(std::string());
+  EXPECT_STREQ(rx_data.c_str(),tx_data)<< "Tx-Rx data mismatch";
+
   delete serial;
   close(conn_fd);
 }

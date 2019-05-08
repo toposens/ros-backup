@@ -70,6 +70,9 @@ class Cloud
      */
     toposens_msgs::TsPoint _transform(toposens_msgs::TsPoint pt, std_msgs::Header h);
 
+    /** Adds a scaled TS sensor at rviz origin as a visual aid. */
+    void _addSensorMesh(void);
+
     std::string target_frame;     /**< Target frame for scan transformations.*/
     TsCloud::Ptr store;          /**< Collection of all pointclouds from a single run.*/
 

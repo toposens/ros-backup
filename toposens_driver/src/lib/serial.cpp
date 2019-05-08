@@ -120,6 +120,7 @@ void Serial::getFrame(std::stringstream &data)
     latest = ros::Time::now();
     // should this break instead when buffer contains E (at any position)
     if (buffer[nBytes-1] == 'E') break;
+
   } while (ros::Time::now() - latest < ros::Duration(1));
 
 /*	do {
@@ -148,8 +149,8 @@ bool Serial::send(char* bytes)
   }
 
   int tx_length = write(_fd, bytes, strlen(bytes));
-
-  if (tx_length != -1)  ROS_DEBUG("Bytes transmitted: %s", bytes);
+  
+  if (tx_length != -1) ROS_DEBUG("Bytes transmitted: %s", bytes);
   else ROS_ERROR("Failed to transmit %s: %s", bytes, strerror(errno));
   return (tx_length != -1);
 }
