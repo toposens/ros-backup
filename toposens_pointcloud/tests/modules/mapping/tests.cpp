@@ -1,4 +1,4 @@
-/** @file     pointcloud_test.cpp
+/** @file     mapping/tests.cpp
  *  @author   Roua Mokchah
  *  @date     April 2019
  */
@@ -6,16 +6,16 @@
 #include <gtest/gtest.h>
 #include <ros/package.h>
 #include <toposens_driver/sensor.h>
-#include <toposens_pointcloud/cloud.h>
+#include <toposens_pointcloud/mapping.h>
 
 
 using namespace toposens_pointcloud;
 
-class CloudTest : public ::testing::Test
+class MappingTest : public ::testing::Test
 {
 
 public:
-  const std::string TAG = "[POINTCLOUD_CLOUD_TEST] - ";
+  const std::string TAG = "[POINTCLOUD_MAPPING_TEST] - ";
 
 protected:
   // Defined in static tf broadcast in launch file
@@ -28,7 +28,7 @@ protected:
   // ex, see Markers changed to Plot
 
   ros::NodeHandle* priv_nh;
-  Cloud* c;
+  Mapping* m;
 
   TsCloud cloud;
 
@@ -41,13 +41,13 @@ protected:
   {
     ros::NodeHandle nh;
     priv_nh = new ros::NodeHandle("~");
-    c = new Cloud(nh, *priv_nh);
+    m = new Mapping(nh, *priv_nh);
 
     scans_pub = nh.advertise<toposens_msgs::TsScan>(
                   toposens_driver::kScansTopic, 
                   toposens_driver::kQueueSize
                 );
-    cloud_sub = nh.subscribe(kPointCloudTopic, 100, &CloudTest::store, this);
+    cloud_sub = nh.subscribe(kPointCloudTopic, 100, &MappingTest::store, this);
 
     scan.header.stamp = ros::Time::now();
     scan.header.frame_id = "toposens";
@@ -58,7 +58,7 @@ protected:
   {
     rcvd_points.clear();
     scan.points.clear();
-    delete c;
+    delete m;
     delete priv_nh;
   }
 
@@ -99,7 +99,7 @@ protected:
  * Tests if an empty scan generates PointCloud messages.
  * Desired behavior: Zero PointCloud messages if an empty scan (zero-initialized) was published.
  */
-TEST_F(CloudTest, emptyScan)
+TEST_F(MappingTest, emptyScan)
 {
   std::cerr << TAG << "Publishing empty scan...";
   scans_pub.publish(scan);
@@ -110,7 +110,7 @@ TEST_F(CloudTest, emptyScan)
 }
 
 
-TEST_F(CloudTest, zeroIntensityScan)
+TEST_F(MappingTest, zeroIntensityScan)
 {
   std::cerr << TAG << "Publishing scan with zero-intensity points...";
 
@@ -135,7 +135,7 @@ TEST_F(CloudTest, zeroIntensityScan)
  *  Tests that each incoming scan is converted to a new PointCloud message of
  *  template XYZI.
  */
-TEST_F(CloudTest, validScan)
+TEST_F(MappingTest, validScan)
 {
   std::cerr << TAG << "Publishing scan with plottable points...";
 
@@ -166,7 +166,7 @@ TEST_F(CloudTest, validScan)
 }
 
 
-TEST_F(CloudTest, saveData)
+TEST_F(MappingTest, saveData)
 {
   std::cerr << TAG << "Publishing scan with mixed points...";
 
@@ -183,7 +183,7 @@ TEST_F(CloudTest, saveData)
 
   listen();
   std::string filename = "pointcloud_test";
-  c->save(filename);
+  m->save(filename);
 
   read(filename);
   EXPECT_EQ(cloud.width, kNumPoints/2) << "Valid points not found in PCD file.";
@@ -206,7 +206,7 @@ TEST_F(CloudTest, saveData)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ts_pointcloud_cloud_test");
+  ros::init(argc, argv, "ts_pointcloud_mapping_test");
   ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }

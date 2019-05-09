@@ -1,4 +1,4 @@
-/** @file     cloud.h
+/** @file     mapping.h
  *  @author   Adi Singh
  *  @date     March 2019
  */
@@ -37,7 +37,7 @@ namespace toposens_pointcloud
  *  pointcloud (scale, color, direction, lifetime, etc) can be 
  *  controlled via the PointCloud2 display in Rviz.
  */
-class Cloud
+class Mapping
 {
   public:
 
@@ -46,8 +46,8 @@ class Cloud
      *  @param nh Public nodehandle for pub-sub ops on ROS topics.
      *  @param private_nh Private nodehandle for accessing launch parameters.
      */
-    Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh);
-    ~Cloud() {} // @todo consider saving file on destructor
+    Mapping(ros::NodeHandle nh, ros::NodeHandle private_nh);
+    ~Mapping() {} // @todo consider saving file on destructor
 
     /** Saves all pointcloud data contained in #store as a PCD file
      *  in root folder of the package.
@@ -71,13 +71,14 @@ class Cloud
     toposens_msgs::TsPoint _transform(toposens_msgs::TsPoint pt, std_msgs::Header h);
 
     /** Adds a scaled TS sensor at rviz origin as a visual aid. */
-    void _addSensorMesh(void);
+    void _addSensorMesh();
 
     std::string target_frame;     /**< Target frame for scan transformations.*/
     TsCloud::Ptr store;          /**< Collection of all pointclouds from a single run.*/
 
   	ros::Subscriber _scans_sub;  /**< Handler for subscribing to TsScans.*/
     ros::Publisher _cloud_pub;   /**< Handler for publishing PCL messages.*/
+    ros::Publisher _mesh_pub;   /**< Handler for publishing sensor mesh.*/
   	tf::TransformListener _tf;   /**< Listener for frame mapping.*/
 };
 

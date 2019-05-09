@@ -20,16 +20,6 @@ public:
   const std::string TAG = "[DRIVER_SERIAL_TEST] - ";
 
 protected:
-    std::string mock_port, driver_port;
-    ros::NodeHandle* private_nh;
-    void SetUp()
-    {
-      private_nh = new ros::NodeHandle("~");
-      private_nh->getParam("mock_port", mock_port);
-      private_nh->getParam("port", driver_port);
-    }
-
-protected:
   std::string mock_sensor, driver_port;
   ros::NodeHandle* private_nh;
 

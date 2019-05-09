@@ -7,7 +7,7 @@
 #############
 
 set(TEST_MODULES
-	cloud
+	mapping
 )
 
 foreach(M ${TEST_MODULES})

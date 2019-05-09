@@ -4,7 +4,7 @@
 
 add_library(
         ${PROJECT_NAME}
-        lib/cloud.cpp
+        lib/mapping.cpp
 )
 
 add_dependencies(
