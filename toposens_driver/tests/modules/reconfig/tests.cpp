@@ -17,34 +17,42 @@
  */
 using namespace toposens_driver;
 
+char kReconfigTestInitBuff[100] = "";
+
 class ReconfigTest : public ::testing::Test
 {
 
+public:
   const std::string TAG = "[DRIVER_RECONFIG_TEST] - ";
 
-  protected:
+protected:
     ros::NodeHandle* private_nh;
-    int mock_sensor;
-    char init_buff[100];
+    int conn_handle;
+
 
     void SetUp()
     {
-      int n_bytes = 0;
       private_nh = new ros::NodeHandle("~");
-      std::string mock_port;
-      private_nh->getParam("sensor_port", mock_port);
+      std::string mock_sensor;
+      private_nh->getParam("mock_sensor", mock_sensor);
+      conn_handle = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
-      mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-
-      // Flushes out initial commands sent by _init
-      while((n_bytes < 1) && (std::strlen(init_buff)==0)) {
-        n_bytes = read(mock_sensor, &init_buff, sizeof(init_buff));
+      // Reads in initial commands sent by Sensor::_init
+      int n_bytes = 0;
+      while(!strlen(kReconfigTestInitBuff))
+      {
+        n_bytes = read(conn_handle,
+                    &kReconfigTestInitBuff,
+                    sizeof(kReconfigTestInitBuff)
+                  );
+        if (n_bytes > 0) break;
+        ros::Duration(0.01).sleep();
       }
     }
 
     void TearDown()
     {
-      close(mock_sensor);
+      close(conn_handle);
       delete private_nh;
     }
 
@@ -62,9 +70,22 @@ class ReconfigTest : public ::testing::Test
 
       dynamic_reconfigure::ReconfigureResponse res;
       ros::service::call("/ts_driver_node/set_parameters", req, res);
+      ros::Duration(0.01).sleep();
+      ros::spinOnce();
     }
 };
 
+
+
+/**
+ * Tests that the Sensor settings are initialized.
+ * Desired behavior: Message is well formed and output clipped to paramter value limits.
+ */
+
+TEST_F(ReconfigTest, checkInitConfig)
+{
+  EXPECT_STREQ(kReconfigTestInitBuff, "CnWave00005\rCfiltr00020\rCdThre00005\rCboost00500\r");
+} 
 
 
 /**
@@ -80,25 +101,10 @@ TEST_F(ReconfigTest, changeSigStrength)
 
   updateCfg("sig_strength", 12);
 
-  ros::Duration(0.01).sleep();
-  ros::spinOnce();
-
-  while((n_bytes < 1))n_bytes = read(mock_sensor, &buff, sizeof(buff));
-
+  while((n_bytes < 1))n_bytes = read(conn_handle, &buff, sizeof(buff));
   EXPECT_EQ(std::string(buff),"CnWave00012\r");
-
 }
 
-
-/**
- * Tests that the Sensor settings are initialized.
- * Desired behavior: Message is well formed and output clipped to paramter value limits.
- */
-
-TEST_F(ReconfigTest, checkInitConfig)
-{
- EXPECT_EQ(std::string(init_buff),"CnWave00005\rCfiltr00020\rCdThre00005\rCboost00500\r");
-}
 
 int main(int argc, char** argv)
 {

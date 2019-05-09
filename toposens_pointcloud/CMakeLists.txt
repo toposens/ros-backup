@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
     tf
+    rviz
     toposens_driver
     toposens_msgs
 )
@@ -19,12 +20,12 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
-  dynamic_reconfigure
   tf
   message_runtime
   pcl_ros
   roscpp
   rospy
+  rviz
   toposens_driver
   toposens_msgs
 )
