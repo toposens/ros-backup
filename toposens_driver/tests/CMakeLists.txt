@@ -82,10 +82,10 @@ catkin_download_test_data(
 #############
 
 set(TEST_MODULES
-	command
-	reconfig
+#	command
+#	reconfig
 	sensor
-	serial
+#	serial
 )
 
 foreach(M ${TEST_MODULES})
