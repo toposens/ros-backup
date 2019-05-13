@@ -19,7 +19,7 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
   private_nh.getParam("port", port);
   private_nh.getParam("frame_id", _frame_id);
 
-//  private_nh.param<std::string>("port", port, "/dev/ttyUSB0"); 
+//  private_nh.param<std::string>("port", port, "/dev/ttyUSB0");
 //  private_nh.param<std::string>("frame_id", _frame_id, "toposens");
 
   // Set up serial connection to sensor
@@ -54,7 +54,7 @@ bool Sensor::poll(void)
 
   if (_scan.points.empty()) return false;
   _pub.publish(_scan);
-  
+
   _buffer.str(std::string());
   _buffer.clear();
   return true;
@@ -126,7 +126,7 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
   {
     if (_serial->send(cmdString)) ROS_INFO("Sensor setting updated");
     else ROS_WARN("Settings update failed");
-  } 
+  }
   catch (const std::exception& e)
   {
     ROS_ERROR("%s: %s", e.what(), cmdString);
@@ -239,7 +239,7 @@ bool Sensor::_isCalibrating()
 
   std::string data = _buffer.str().c_str();
   size_t frame_start = data.find('S');
-  
+
   return (data[frame_start+3] == '1');
 }
 
