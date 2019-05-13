@@ -288,39 +288,32 @@ TEST_F(SensorTest, pollLargeFrame)
 
 /**
  * Testing Sensor::poll with valid data frames from dump file.
-  
   read each single scan from the dump file : Example
   S000020P0000X-0104Y-0229Z00206V00036ES000025P0000X-0156Y-0229Z00206V00048E
   line 1 : empty -> continue
   line 2 : 000020P0000X-0104Y-0229Z00206V00036E
   line 3 : 000025P0000X-0156Y-0229Z00206V00048E
  */
-/*TEST_F(SensorTest, pollStreamDump)
+TEST_F(SensorTest, pollStreamDump)
 {
   std::cerr << TAG << "<pollStreamDump>\n";
 
-  std::string dumpfilename;
-  private_nh->getParam("file", dumpfilename);
+  std::string filename;
+  private_nh->getParam("file", filename);
 
   std::ifstream infile;
-  infile.open(dumpfilename);
+  infile.open(filename);
 
   std::string line;
-  while (std::getline(infile,line,'S'))
+  while (std::getline(infile, line, 'S'))
   {
     if (line.empty()) continue;
-
-    testing::internal::CaptureStderr();
-    EXPECT_NO_THROW(pollMockTx(line));
-    if(!testing::internal::GetCapturedStderr().empty())
-    {
-      ADD_FAILURE() << "Unintended behavior with dumped data frame" ;
-    }
+    EXPECT_NO_THROW(this->pollMockTx("S" + line));
   }
   infile.close();
-
-  std::cerr << TAG << "</pollLargeFrame>\n";
-}*/
+  
+  std::cerr << TAG << "</pollStreamDump>\n";
+}
 
 
 
