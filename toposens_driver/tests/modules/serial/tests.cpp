@@ -3,10 +3,10 @@
  *  @date     March 2019
  */
 
-#include <toposens_driver/serial.h>
+#include <fcntl.h>
 #include <ros/ros.h>
 #include <gtest/gtest.h>
-#include <fcntl.h>
+#include <toposens_driver/serial.h>
 
 /**
  * Testing the Serial constructor,the serial::getFrame method and the serial::send method.
@@ -15,9 +15,8 @@ using namespace toposens_driver;
 
 class SerialTest : public ::testing::Test
 {
-
 public:
-  const std::string TAG = "[DRIVER_SERIAL_TEST] - ";
+  const std::string TAG = "\033[36m[DriverSerialTest]\033[00m - ";
 
 protected:
   std::string mock_sensor, driver_port;
@@ -46,13 +45,17 @@ protected:
  */
 TEST_F(SerialTest, openInvalidPort)
 {
-  std::cerr << TAG << "Attempting connection to null port...";
-  ASSERT_THROW(Serial(""), std::runtime_error);
-  std::cerr << "done" << std::endl;
+  std::cerr << TAG << "<openInvalidPort>\n";
 
-  std::cerr << TAG << "Attempting connection to non-existent port...";
-  ASSERT_THROW(Serial("tty69"), std::runtime_error);
-  std::cerr << "done" << std::endl;
+  std::cerr << TAG << "\tAttempting connection to null port...";
+  EXPECT_THROW(Serial(""), std::runtime_error);
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "\tAttempting connection to non-existent port...";
+  EXPECT_THROW(Serial("tty42"), std::runtime_error);
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "</openInvalidPort>\n";
 }
 
 
@@ -62,13 +65,17 @@ TEST_F(SerialTest, openInvalidPort)
  */
 TEST_F(SerialTest, openValidPort)
 {
-  std::cerr << TAG << "Attempting connection to mock sensor port...";
-  EXPECT_NO_THROW(Serial(mock_sensor.c_str()));
-  std::cerr << "done" << std::endl;
+  std::cerr << TAG << "<openValidPort>\n";
 
-  std::cerr << TAG << "Attempting connection to mock driver port...";
+  std::cerr << TAG << "\tAttempting connection to virtual sensor port...";
+  EXPECT_NO_THROW(Serial(mock_sensor.c_str()));
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "\tAttempting connection to virtual driver port...";
   EXPECT_NO_THROW(Serial(driver_port.c_str()));
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "</openValidPort>\n";
 }
 
 
@@ -78,30 +85,31 @@ TEST_F(SerialTest, openValidPort)
  * and should include an E tag.
  * If it's not the case : Issue Error.
  */
-TEST_F(SerialTest, getFrameWellFormatted)
+TEST_F(SerialTest, getValidFrame)
 {
-  const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-  // @todo change this to input data dump for this test to make any meaningful sense
+  std::cerr << TAG << "<getValidFrame>\n";
+
   const char tx_data[] = "S000016P0000X-0415Y00010Z00257V00061ES0000";
-  std::cerr << TAG << "Tx Data: " << tx_data << std::endl;
+  const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+
+  std::cerr << TAG << "\tTx data: " << tx_data << "\n";
+  std::cerr << TAG << "\tManually transmitting over " << mock_sensor << "...";
   write(conn_fd, tx_data, sizeof(tx_data));
+  std::cerr << "done\n";
 
-  Serial* serial = new Serial(driver_port);
+  std::cerr << TAG << "\tSerial::getFrame over " << driver_port << "...";
+  Serial serial(driver_port);
   std::stringstream ss;
+  serial.getFrame(ss);
+  std::cerr << "done\n";
 
-  serial->getFrame(ss);
   std::string rx_data = ss.str();
-  std::cerr << "[TEST] Rx Data: " << rx_data << std::endl;
-  
-  //@todo maybe just do a check here against -1?
-  if (rx_data.find('E') == std::string::npos) {
-    ADD_FAILURE() << "Parsed data frame missing E tag: " << rx_data;
-  }
+  std::cerr << TAG << "\tRx data: " << rx_data << "\n";
 
-  EXPECT_STREQ(rx_data.c_str(),tx_data)<< "Tx-Rx data mismatch";
-
-  delete serial;
+  EXPECT_STREQ(rx_data.c_str(),tx_data);
   close(conn_fd);
+
+  std::cerr << TAG << "</getValidFrame>\n";
 }
 
 /**
@@ -111,29 +119,36 @@ TEST_F(SerialTest, getFrameWellFormatted)
  * to serial stream without error.
  * Expect the correct number of bytes to be received.
  */
-TEST_F(SerialTest, sendBytes)
+TEST_F(SerialTest, sendValidBytes)
 {
+  std::cerr << TAG << "<sendValidBytes>\n";
+
+  char tx_data[] = "CnWave00005\r";
+  const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+
+  std::cerr << TAG << "\tTx data: " << tx_data << "\n";
+  std::cerr << TAG << "\tSerial::send over " << driver_port << "...";
+  Serial serial(driver_port);
+  EXPECT_TRUE(serial.send(tx_data));
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "\tManually receiving over " << mock_sensor << "...";
   int n_bytes = 0;
   char buffer[20];
-  char data[] = "hello world";
-
-  Serial* serial = new Serial(driver_port);
-  const int conn_fd = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-  
-  EXPECT_TRUE(serial->send(data)) << "Error writing data to serial stream: " << data;
   while(n_bytes < 1) n_bytes = read(conn_fd, &buffer, sizeof(buffer));
+  std::cerr << "done\n";
 
-  // Size of data is number of chars + null terminator 
-  EXPECT_EQ(n_bytes + 1, (int)sizeof(data)) << "Incorrect number of bytes received";
-
-  delete serial;
+  std::cerr << TAG << "\tBytes received: " << n_bytes << "\n";
+  EXPECT_EQ(n_bytes + 1, (int)sizeof(tx_data));   // Size of data is number of chars + null terminator 
   close(conn_fd);
+
+  std::cerr << TAG << "</sendValidBytes>\n";
 }
 
 
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ts_driver_test");
+  ros::init(argc, argv, "ts_driver_serial_test");
   return RUN_ALL_TESTS();
 }

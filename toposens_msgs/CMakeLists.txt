@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(toposens_msgs)
 
+set(${PROJECT_NAME}_DEPS
+  geometry_msgs
+	message_generation
+	message_runtime
+	std_msgs
+)
+
 find_package(
 	catkin REQUIRED
-	COMPONENTS
-	geometry_msgs
-	message_generation
-	std_msgs
+	COMPONENTS ${${PROJECT_NAME}_DEPS}
 )
 
 add_message_files(
@@ -23,8 +27,5 @@ generate_messages(
 )
 
 catkin_package(
-	CATKIN_DEPENDS
-	geometry_msgs
-	message_runtime
-	std_msgs
+	CATKIN_DEPENDS ${${PROJECT_NAME}_DEPS}
 )

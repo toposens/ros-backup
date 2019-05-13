@@ -91,7 +91,7 @@ void Plot::_plot(void) {
       std_msgs::ColorRGBA color = _rviz->getColorScale(pt.location.x/_sensingRange);
       geometry_msgs::Vector3 scale = _rviz->getScale(_baseScale, pt.intensity);
 
-      if (scale.x > 0) _rviz->publishSphere(location, color, scale, kPointsNs);
+      if (scale.x > 0) _rviz->publishSphere(location, color, scale, kMarkersNs);
     }
   }
   // have to add mesh everytime since rviz has no way of
