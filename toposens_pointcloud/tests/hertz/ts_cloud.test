@@ -13,7 +13,7 @@
     on it, allowing ts_cloud_node to subscribe to it and publish on ts_cloud topic so that we could run hzTest-->
 
     <node pkg="rosbag" type="play" name="player" output="screen"
-          args="--clock $(find toposens_driver)/tests/ts_scans.bag" />
+          args="--clock --delay=3 $(find toposens_driver)/tests/ts_scans.bag" />
 
 
     <!-- Hz Test-->

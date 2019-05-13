@@ -100,6 +100,7 @@ protected:
   }
 };
 
+
 /**
  * Testing Sensor::poll with a valid data frame
  * Data frame consisting of 4 known points
@@ -116,8 +117,10 @@ TEST_F(SensorTest, pollValidFrame)
                         "P0000X00142Y00360Z01555V00052"
                       "E";
   this->pollMockTx(frame);
+  //std::cerr << "!!!" << pollMockTx(frame) << "!!!";
+  //std::cerr << "---" << scan.points.size() << "---";
 
-  EXPECT_EQ(scan.points.size(), (uint)4);
+  ASSERT_EQ(scan.points.size(), (uint)4) << "Not enough points in scan: " << scan.points.size();
   EXPECT_POINT(scan.points[0], {-0.415, 0.01,  0.257, 0.61}, "Valid point P1");
   EXPECT_POINT(scan.points[1], {-0.235, 0.019, 0.718, 0.55}, "Valid point P2");
   EXPECT_POINT(scan.points[2], {-0.507, 0.043, 0.727, 0.75}, "Valid point P3");
@@ -125,6 +128,7 @@ TEST_F(SensorTest, pollValidFrame)
 
   std::cerr << TAG << "</pollValidFrame>\n";
 }
+
 
 /** Testing Sensor::poll with empty data frames
 *  Desired behavior: extract no points from empty data frame.
@@ -261,6 +265,7 @@ TEST_F(SensorTest, pollThreeMixedPoints)
 
   std::cerr << TAG << "</pollThreeMixedPoints>\n";
 }
+
 
 /**
  * Testing Sensor::poll with large data frame.

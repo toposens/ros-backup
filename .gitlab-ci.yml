@@ -3,7 +3,7 @@ image: registry.gitlab.com/toposens/public/ts-ros:latest
 cache:
   paths:
     - ccache/
-    
+
 variables:
   CCACHE_DIR: ${CI_PROJECT_DIR}/ccache
 
@@ -11,7 +11,7 @@ before_script:
     - source /opt/ros/${ROS_DISTRO}/setup.bash
     - rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
     - mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
-    
+
 lint:
   stage: build
   script:
