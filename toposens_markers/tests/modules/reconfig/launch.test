@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="toposens_markers" type="toposens_markers_node" name="ts_markers_node" />
+
+  <test pkg="toposens_markers" test-name="ReconfigTest"
+        type="toposens_markers_reconfig_test" time-limit="10.0" />
+</launch>

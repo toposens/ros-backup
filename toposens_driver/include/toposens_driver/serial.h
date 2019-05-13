@@ -11,7 +11,6 @@
 
 namespace toposens_driver
 {
-
 /** @brief  Provides low-level I/O access to TS data stream using
  *  native Unix API.
  *  @details  Sets up a UART bridge to access raw data packets
@@ -26,11 +25,6 @@ class Serial
     */
     Serial(std::string port);
     ~Serial();
-
-    /** Checks whether or not serial connection is still open.
-     *  @returns True if connection is open, false otherwise.
-     */
-    bool isAlive();
 
     /** Extracts a single TS data frame into the given iostream.
       * @param data Points to a string stream expecting a sensor frame.
@@ -49,7 +43,6 @@ class Serial
     int _fd;    /**< Linux file descriptor pointing to TS device port.*/
     std::string _port;  /**< Stored device port for future access.*/
     const unsigned int kBaud = B921600; /**< Baud rate needed for TS device comms.*/
-
 };
 
 } // namespace toposens_driver

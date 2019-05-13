@@ -1,9 +1,9 @@
-#include "toposens_pointcloud/cloud.h"
+#include "toposens_pointcloud/mapping.h"
 
 #include <ros/package.h>
 #include <toposens_driver/sensor.h>
 
-
+ #include <visualization_msgs/MarkerArray.h>
 
 namespace toposens_pointcloud
 {
@@ -19,12 +19,14 @@ namespace toposens_pointcloud
  *  'base_link' frame). This can be used, for instance, to efficiently
  *  map an area using sensor or odometry data.
  */
-Cloud::Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh)
+Mapping::Mapping(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
   private_nh.param<std::string>("target_frame", target_frame, "toposens");
 
-	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Cloud::_convert, this);
+	_scans_sub = nh.subscribe(toposens_driver::kScansTopic, 100, &Mapping::_convert, this);
   _cloud_pub = nh.advertise<TsCloud>(kPointCloudTopic, 100);
+  _mesh_pub = nh.advertise<visualization_msgs::Marker>("ts_mesh", 100);
+  Mapping::_addSensorMesh();
 
   store = boost::make_shared<TsCloud>();
   pcl_conversions::toPCL(ros::Time::now(), store->header.stamp);
@@ -35,7 +37,7 @@ Cloud::Cloud(ros::NodeHandle nh, ros::NodeHandle private_nh)
 /** Filename should be provided without extension. File is saved
  *  as a .pcd (hard-coded).
  */
-void Cloud::save(std::string filename)
+void Mapping::save(std::string filename)
 {
   if (!store->width) {
     ROS_WARN("No pointcloud data to save.");
@@ -53,7 +55,7 @@ void Cloud::save(std::string filename)
  *  to two pointcloud structures simultaneously, one instantaneous
  *  for publishing and the other persistent for storing.
  */
-void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
+void Mapping::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
 {
   TsCloud::Ptr tc(new TsCloud);
   pcl_conversions::toPCL(msg->header.stamp, tc->header.stamp);
@@ -81,6 +83,7 @@ void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
   tc->width = tc->points.size();
   store->width += tc->width;
   _cloud_pub.publish(tc);
+
 }
 
 /** Converts TsPoint to an intermediary PointStamped message compatible
@@ -89,7 +92,7 @@ void Cloud::_convert(const toposens_msgs::TsScan::ConstPtr& msg)
  *  Transformation is skipped if #target_frame is same as the point's
  *  current frame, and a simple conversion to PointXYZI is returned.
  */
-toposens_msgs::TsPoint Cloud::_transform(toposens_msgs::TsPoint pt, std_msgs::Header h)
+toposens_msgs::TsPoint Mapping::_transform(toposens_msgs::TsPoint pt, std_msgs::Header h)
 {
   geometry_msgs::PointStamped ps;
   ps.point = pt.location;
@@ -113,6 +116,30 @@ toposens_msgs::TsPoint Cloud::_transform(toposens_msgs::TsPoint pt, std_msgs::He
 }
 
 
-/** @todo add sensor mesh to display */
+//@todo combine both STLs into one sensor mesh file
+void Mapping::_addSensorMesh()
+{
+  auto end = ros::Time::now() + ros::Duration(1.0);
+  while (ros::Time::now() < end) {
+    if(_mesh_pub.getNumSubscribers() > 0) break;
+    ros::Duration(0.1).sleep();
+  }
+
+  visualization_msgs::Marker body;
+  body.header.frame_id = target_frame;
+  body.header.stamp = ros::Time::now();
+  body.ns = "TS3";
+  body.id = 0;
+
+  body.type = visualization_msgs::Marker::MESH_RESOURCE;
+  // @todo this should come from toposens_description package
+  body.mesh_resource = "package://toposens_pointcloud/meshes/Body.stl";
+  body.scale.x = body.scale.y = body.scale.z = 0.001;
+  body.color.r = body.color.b = body.color.g = 0.2;
+  body.color.a = 1.0;
+
+  _mesh_pub.publish(body);
+}
+
 
 } // namespace toposens_pointcloud

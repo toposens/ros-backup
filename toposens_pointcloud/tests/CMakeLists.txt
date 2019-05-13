@@ -7,7 +7,7 @@
 #############
 
 set(TEST_MODULES
-	cloud
+	mapping
 )
 
 foreach(M ${TEST_MODULES})
@@ -25,7 +25,11 @@ foreach(M ${TEST_MODULES})
 
 endforeach()
 
-#add_rostest(
-#	hertz/ts_cloud.test
-#	DEPENDENCIES ${PROJECT_NAME}_node
-#)
+#############
+## Hz test ##
+#############
+
+add_rostest(
+	hertz/ts_cloud.test
+	DEPENDENCIES ${PROJECT_NAME}_node
+)

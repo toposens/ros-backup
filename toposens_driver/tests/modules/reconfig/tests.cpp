@@ -2,97 +2,125 @@
  *  @author   Adi Singh, Christopher Lang, Roua Mokchah
  *  @date     April 2019
  */
-#include <vector>
+
+#include <fcntl.h>
 #include <ros/ros.h>
 #include <gtest/gtest.h>
+#include <dynamic_reconfigure/server.h>
 
-#include <toposens_msgs/TsScan.h>
-#include <toposens_driver/TsDriverConfig.h>
-#include <toposens_driver/sensor.h>
-
-#include <toposens_driver/command.h>
-
-#include <termios.h>
-#include <fcntl.h>
 
 /**
  * Testing Sensor::_reconfig.
  */
-using namespace toposens_driver;
 
-class ReconfigTest : public ::testing::Test {
+char kReconfigTestBuff[100] = "";
 
-  protected:
-    ros::NodeHandle* private_nh;
-    int mock_sensor;
+class ReconfigTest : public ::testing::Test
+{
+public:
+  const std::string TAG = "\033[36m[DriverReconfigTest]\033[00m - ";
 
-    void SetUp()
+protected:
+  ros::NodeHandle* private_nh;
+  std::string mock_sensor;
+  int conn_handle;
+  char buff[100];
+
+  void SetUp()
+  {
+    memset(&buff, '\0', sizeof(buff));
+    private_nh = new ros::NodeHandle("~");
+    private_nh->getParam("mock_sensor", mock_sensor);
+    conn_handle = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
+
+    // Reads in initial commands sent by Sensor::_init
+    int n_bytes = 0;
+    while(!strlen(kReconfigTestBuff))
     {
-      char init_buff[100];
-      int n_bytes = 0;
-
-      private_nh = new ros::NodeHandle("~");
-      std::string mock_port;
-      private_nh->getParam("sensor_port", mock_port);
-
-      mock_sensor = open(mock_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-      // Flushes out initial commands sent by _init
-      // @todo maybe check this output as well?
-      while(n_bytes < 1) {
-        n_bytes = read(mock_sensor, &init_buff, sizeof(init_buff));
-      }
+      n_bytes = read(conn_handle, &kReconfigTestBuff, sizeof(kReconfigTestBuff));
+      if (n_bytes > 0) break;
+      ros::Duration(0.01).sleep();
     }
+  }
+
+  void TearDown()
+  {
+    close(conn_handle);
+    delete private_nh;
+  }
+
+  void updateCfg(std::string param_name, int param_value)
+  {
+    std::cerr << TAG << "\tUpdating parameter server with "
+      << param_name << " of " << param_value << "...";
+
+    dynamic_reconfigure::IntParameter int_param;
+    int_param.name = param_name;
+    int_param.value = param_value;
+
+    dynamic_reconfigure::Config conf;
+    conf.ints.push_back(int_param);
+
+    dynamic_reconfigure::ReconfigureRequest req;
+    req.config = conf;
+
+    dynamic_reconfigure::ReconfigureResponse res;
+    ros::service::call("/ts_driver_node/set_parameters", req, res);
+    ros::Duration(0.01).sleep();
+    ros::spinOnce();
+
+    std::cerr << "done\n";
+  }
 
 
-    void TearDown()
+  void listen()
+  {
+    std::cerr << TAG << "\tListening for commands on " << mock_sensor << "...";
+
+    int n_bytes = 0;
+    while(n_bytes < 1)
     {
-      close(mock_sensor);
-      delete private_nh;
-    }
-
- 
-    void updateCfg(std::string param_name, int param_value)
-    {
-      dynamic_reconfigure::IntParameter int_param;
-      int_param.name = param_name;
-      int_param.value = param_value;
-
-      dynamic_reconfigure::Config conf;
-      conf.ints.push_back(int_param);
-
-      dynamic_reconfigure::ReconfigureRequest req;
-      req.config = conf;
-
-      dynamic_reconfigure::ReconfigureResponse res;
-      ros::service::call("/ts_driver_node/set_parameters", req, res);
-    }
+      n_bytes = read(conn_handle, &buff, sizeof(buff));
+      ros::Duration(0.01).sleep();
+    } 
+    std::cerr << "done\n";
+  }
 };
 
-// Adding a second test fixture does not send init commands
-// again. Only sent on first init of node from launch.test file
-//TEST_F(ReconfigTest, checkInitConfig)
-//{
-//  EXPECT_EQ(std::string(init_buff), "CnWave00012\r");
-//}
 
 
 /**
- * Test data frame that is send to sensor for paramter updates.
+ * Tests that the Sensor settings are initialized.
  * Desired behavior: Message is well formed and output clipped to paramter value limits.
  */
+
+TEST_F(ReconfigTest, checkInitConfig)
+{
+  std::cerr << TAG << "<checkInitConfig>\n";
+
+  std::string exp = "CnWave00005\rCfiltr00020\rCdThre00005\rCboost00500\r";
+  std::cerr << TAG << "\tChecking initial command flush...";
+  EXPECT_STREQ(kReconfigTestBuff, exp.c_str());
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "</checkInitConfig>\n";
+} 
+
+
+/**
+ * Tests that changes in the sensor parameters are being updated.
+ * Desired behavior: Message is well formed and output clipped to paramter value limits.
+ */
+
 TEST_F(ReconfigTest, changeSigStrength)
 {
-  char buff[100];
-  int n_bytes = 0;
-  memset(&buff, '\0', sizeof(buff));
+  std::cerr << TAG << "<changeSigStrength>\n";
 
-  updateCfg("sig_strength", 12);
+  this->updateCfg("sig_strength", 12);
+  this->listen();
+  EXPECT_EQ(std::string(buff),"CnWave00012\r");
 
-  ros::Duration(0.01).sleep();
-  ros::spinOnce();
-  while(n_bytes < 1) n_bytes = read(mock_sensor, &buff, sizeof(buff));
-
-  EXPECT_EQ(std::string(buff), "CnWave00012\r");
+  std::cerr << TAG << "</changeSigStrength>\n";
 }
 
 
@@ -100,6 +128,7 @@ int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "ts_driver_reconfig_test");
+  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }
 

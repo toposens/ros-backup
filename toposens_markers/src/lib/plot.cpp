@@ -10,11 +10,11 @@ namespace toposens_markers
 Plot::Plot(ros::NodeHandle nh, ros::NodeHandle private_nh)
 {
 	private_nh.param<std::string>("frame_id", _frame_id, "toposens");		//Frame for tf
-  _rviz.reset(new rviz_visual_tools::RvizVisualTools(_frame_id,"/" + kMarkersTopic));
+  _rviz.reset(new rviz_visual_tools::RvizVisualTools(_frame_id, "/" + kMarkersTopic));
   _rviz->enableBatchPublishing();
 
   // Set up dynamic reconfigure to change marker settings
-  _srv = std::make_unique<Cfg>(private_nh);
+  _srv = std::make_shared<Cfg>(private_nh);
   Cfg::CallbackType f = boost::bind(&Plot::_reconfig, this, _1, _2);
   _srv->setCallback(f);
 
@@ -36,8 +36,9 @@ void Plot::_reconfig(TsMarkersConfig &cfg, uint32_t level)
     ROS_INFO("Update skipped: Parameter not recognized");
     return;
   }
-  _cfg = cfg;
-  _rviz->setGlobalScale(_cfg.scale);
+  
+  _lifetime = cfg.lifetime;
+  _rviz->setGlobalScale(cfg.scale);
   if (level == -1) ROS_INFO("Marker settings initialized");
   else ROS_INFO("Marker settings updated");
 }
@@ -55,7 +56,7 @@ void Plot::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
   do {
     ros::Time oldest = _scans.front().header.stamp;
     // break loop if oldest timestamp is within lifetime
-    if (ros::Time::now() - oldest < ros::Duration(_cfg.lifetime)) break;
+    if (ros::Time::now() - oldest < ros::Duration(_lifetime)) break;
     _scans.pop_front();
   } while(!_scans.empty());
 
@@ -90,7 +91,7 @@ void Plot::_plot(void) {
       std_msgs::ColorRGBA color = _rviz->getColorScale(pt.location.x/_sensingRange);
       geometry_msgs::Vector3 scale = _rviz->getScale(_baseScale, pt.intensity);
 
-      if (scale.x > 0) _rviz->publishSphere(location, color, scale, kPointsNs);
+      if (scale.x > 0) _rviz->publishSphere(location, color, scale, kMarkersNs);
     }
   }
   // have to add mesh everytime since rviz has no way of

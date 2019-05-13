@@ -7,6 +7,7 @@ find_package(rostest REQUIRED)
 
 set(TEST_MODULES
 	plot
+	reconfig
 )
 
 foreach(M ${TEST_MODULES})
@@ -17,12 +18,21 @@ foreach(M ${TEST_MODULES})
 		modules/${M}/tests.cpp
 	)
 
+	add_dependencies(
+		${PROJECT_NAME}_${M}_test
+		${PROJECT_NAME}_node
+	)
+
 	target_link_libraries(
 		${PROJECT_NAME}_${M}_test
     ${PROJECT_NAME}
 	)
 
 endforeach()
+
+#############
+## Hz test ##
+#############
 
 add_rostest(
 	hertz/ts_markers.test

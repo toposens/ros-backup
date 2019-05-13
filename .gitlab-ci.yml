@@ -1,16 +1,21 @@
-image: registry.gitlab.com/toposens/ros-projects/ts-ros:latest
+image: registry.gitlab.com/toposens/public/ts-ros:latest
 
 cache:
   paths:
     - ccache/
+    
+variables:
+  CCACHE_DIR: ${CI_PROJECT_DIR}/ccache
 
 before_script:
-   - source gitlab-ros.bash
-
+    - source /opt/ros/${ROS_DISTRO}/setup.bash
+    - rm -rf src && mkdir -p src/${CI_PROJECT_NAME}
+    - mv $(ls -a | grep -Ev '^.$|^..$|^ccache$|^src$') src/${CI_PROJECT_NAME}
+    
 lint:
   stage: build
   script:
-    - catkin_lint -W3 .
+    - catkin_lint -W2 .
 
 make:
   stage: build
@@ -20,5 +25,5 @@ make:
 test:
   stage: test
   script:
-    - catkin_make run_tests
+    - catkin_make run_tests -j1
     - catkin_test_results

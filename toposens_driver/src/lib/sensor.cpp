@@ -19,9 +19,11 @@ Sensor::Sensor(ros::NodeHandle nh, ros::NodeHandle private_nh)
   private_nh.getParam("port", port);
   private_nh.getParam("frame_id", _frame_id);
 
+//  private_nh.param<std::string>("port", port, "/dev/ttyUSB0"); 
+//  private_nh.param<std::string>("frame_id", _frame_id, "toposens");
+
   // Set up serial connection to sensor
   _serial = std::make_unique<Serial>(port);
-  if (!_serial->isAlive()) throw "Error opening serial port!";
 
   _calibTempC = NOT_CALIBRATED;
 
@@ -47,7 +49,6 @@ bool Sensor::poll(void)
   _scan.header.frame_id = _frame_id;
   _scan.points.clear();
 
-  if (!_serial->isAlive()) throw "Serial connection has died!";
   _serial->getFrame(_buffer);
   Sensor::_parse(_buffer.str());
 
@@ -89,6 +90,9 @@ void Sensor::_init(void) {
   Command cNoise(Command::NoiseThresh, _cfg.noise_thresh);
   if (!_serial->send(cNoise.getBytes())) success = false;
 
+  Command cBoost(Command::SNRBoost, _cfg.snr_boost);
+  if (!_serial->send(cBoost.getBytes())) success = false;
+
   if (success) ROS_INFO("Sensor settings initialized");
   else ROS_WARN("One or more settings failed to initialize");
 }
@@ -112,12 +116,10 @@ void Sensor::_reconfig(TsDriverConfig &cfg, uint32_t level)
   if (level == -1) return Sensor::_init();
 
   Command* cmd;
-  if     (level == 0) cmd = new Command(Command::SigStrength,  _cfg.sig_strength);
-  else if(level == 1) cmd = new Command(Command::FilterSize,   _cfg.filter_size);
-  else if(level == 2) cmd = new Command(Command::NoiseThresh,  _cfg.noise_thresh);
-  else if(level == 3) cmd = new Command(Command::SNRBoostNear, _cfg.boost_near);
-  else if(level == 4) cmd = new Command(Command::SNRBoostMid,  _cfg.boost_mid);
-  else if(level == 5) cmd = new Command(Command::SNRBoostFar,  _cfg.boost_far);
+  if     (level == 1) cmd = new Command(Command::SigStrength,  _cfg.sig_strength);
+  else if(level == 2) cmd = new Command(Command::FilterSize,   _cfg.filter_size);
+  else if(level == 3) cmd = new Command(Command::NoiseThresh,  _cfg.noise_thresh);
+  else if(level == 4) cmd = new Command(Command::SNRBoost,     _cfg.snr_boost);
 
   char* cmdString = cmd->getBytes();
   try

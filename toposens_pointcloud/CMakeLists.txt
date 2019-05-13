@@ -12,21 +12,24 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
     tf
+    rviz
     toposens_driver
     toposens_msgs
 )
 
 catkin_package(
-    INCLUDE_DIRS include
-    CATKIN_DEPENDS
-    message_runtime
-    pcl_ros
-    roscpp
-    rospy
-    tf
-    toposens_driver
-    toposens_msgs
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS
+  tf
+  message_runtime
+  pcl_ros
+  roscpp
+  rospy
+  rviz
+  toposens_driver
+  toposens_msgs
 )
+
 
 include_directories(
   include ${catkin_INCLUDE_DIRS}
