@@ -13,9 +13,8 @@ using namespace toposens_pointcloud;
 
 class MappingTest : public ::testing::Test
 {
-
 public:
-  const std::string TAG = "[POINTCLOUD_MAPPING_TEST] - ";
+  const std::string TAG = "\033[36m[PointcloudMappingTest]\033[00m - ";
 
 protected:
   // Defined in static tf broadcast in launch file
@@ -24,9 +23,7 @@ protected:
   const double tf_z = 0.0;
 
   const int kNumPoints = 10;
-//@todo rename cloud class to something else to not confuse with TsCloud
-  // ex, see Markers changed to Plot
-
+  const std::string filename = "pointcloud_test";
   ros::NodeHandle* priv_nh;
   Mapping* m;
 
@@ -44,9 +41,8 @@ protected:
     m = new Mapping(nh, *priv_nh);
 
     scans_pub = nh.advertise<toposens_msgs::TsScan>(
-                  toposens_driver::kScansTopic, 
-                  toposens_driver::kQueueSize
-                );
+      toposens_driver::kScansTopic, toposens_driver::kQueueSize);
+
     cloud_sub = nh.subscribe(kPointCloudTopic, 100, &MappingTest::store, this);
 
     scan.header.stamp = ros::Time::now();
@@ -66,30 +62,29 @@ protected:
   void store(const pcl::PointCloud<toposens_msgs::TsPoint>::ConstPtr &msg)
   {
     for (auto p : msg->points) rcvd_points.push_back(p);
+    std::cerr << TAG << "\033[33m" << "\tReceived "
+      << rcvd_points.size() << " PCL points\n" << "\033[00m";
   }
 
 
   void listen()
   {
-    std::cerr << TAG << "Listening for points...";
+    std::cerr << TAG << "\tListening for PCL points on " << kPointCloudTopic << "...\n";
     ros::Time end = ros::Time::now() + ros::Duration(1.0);
     while(ros::Time::now() < end)
     {
       ros::spinOnce();
       ros::Duration(0.1).sleep();
     }
-    std::cerr << "completed" << std::endl;
   }
 
 
-  void read(std::string filename)
+  void read()
   {
-    std::cerr << TAG << "Reading PCD data from " << filename << ".pcd...";
+    std::cerr << TAG << "\tReading PCD data from " << filename << ".pcd...";
     pcl::io::loadPCDFile<toposens_msgs::TsPoint>(
-      ros::package::getPath("toposens_pointcloud") + "/" + filename + ".pcd",
-      cloud
-    );
-    std::cerr << "done" << std::endl;
+      ros::package::getPath("toposens_pointcloud") + "/" + filename + ".pcd", cloud);
+    std::cerr << "done\n";
   }
 
 };
@@ -101,18 +96,23 @@ protected:
  */
 TEST_F(MappingTest, emptyScan)
 {
-  std::cerr << TAG << "Publishing empty scan...";
-  scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << TAG << "<emptyScan>\n";
+  std::cerr << TAG << "\tPublishing empty scan...";
 
-  listen();
-  EXPECT_EQ(rcvd_points.size(), 0) << "Empty scan produced pointcloud.";
+  scans_pub.publish(scan);
+  std::cerr << "done\n";
+
+  this->listen();
+  EXPECT_EQ(rcvd_points.size(), 0);
+  std::cerr << TAG << "</emptyScan>\n";
 }
+
 
 
 TEST_F(MappingTest, zeroIntensityScan)
 {
-  std::cerr << TAG << "Publishing scan with zero-intensity points...";
+  std::cerr << TAG << "<zeroIntensityScan>\n";
+  std::cerr << TAG << "\tPublishing scan with zero-intensity points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
@@ -123,10 +123,11 @@ TEST_F(MappingTest, zeroIntensityScan)
   }
 
   scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
 
-  listen();
-  EXPECT_EQ(rcvd_points.size(), 0) << "Zero-intensity points produced pointcloud.";
+  this->listen();
+  EXPECT_EQ(rcvd_points.size(), 0);
+  std::cerr << TAG << "</zeroIntensityScan>\n";
 }
 
 
@@ -135,9 +136,10 @@ TEST_F(MappingTest, zeroIntensityScan)
  *  Tests that each incoming scan is converted to a new PointCloud message of
  *  template XYZI.
  */
-TEST_F(MappingTest, validScan)
+TEST_F(MappingTest, validPoints)
 {
-  std::cerr << TAG << "Publishing scan with plottable points...";
+  std::cerr << TAG << "<validPoints>\n";
+  std::cerr << TAG << "\tPublishing scan with plottable points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
@@ -148,10 +150,10 @@ TEST_F(MappingTest, validScan)
   }
 
   scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
 
-  listen();
-  EXPECT_EQ(rcvd_points.size(), kNumPoints) << "Valid points omitted in pointcloud.";
+  this->listen();
+  EXPECT_EQ(rcvd_points.size(), kNumPoints);
 
   for (int i = 0; i < kNumPoints; i++)
   {
@@ -163,12 +165,14 @@ TEST_F(MappingTest, validScan)
     EXPECT_FLOAT_EQ(expc_pt.location.z + tf_z, rcvd_pt.location.z);
     EXPECT_FLOAT_EQ(expc_pt.intensity,         rcvd_pt.intensity );
   }
+  std::cerr << TAG << "</validPoints>\n";
 }
 
 
 TEST_F(MappingTest, saveData)
 {
-  std::cerr << TAG << "Publishing scan with mixed points...";
+  std::cerr << TAG << "<saveData>\n";
+  std::cerr << TAG << "\tPublishing scan with mixed points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
@@ -179,15 +183,18 @@ TEST_F(MappingTest, saveData)
   }
 
   scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
 
-  listen();
-  std::string filename = "pointcloud_test";
+  this->listen();
+  std::cerr << TAG << "\tMapping::save on " << filename << "...";
   m->save(filename);
+  std::cerr << "done\n";
 
-  read(filename);
-  EXPECT_EQ(cloud.width, kNumPoints/2) << "Valid points not found in PCD file.";
+  this->read();
+  EXPECT_EQ(cloud.width, kNumPoints/2);
 /*
+// checks for expected number of points and that the data in each point is correct
+
   for (int i = 0; i < cloud.width; i++)
   {
     int index = (2 * i) + 1;
@@ -200,6 +207,7 @@ TEST_F(MappingTest, saveData)
     EXPECT_FLOAT_EQ(pos, pt.intensity);
   }
 */
+  std::cerr << TAG << "</saveData>\n";
 }
 
 

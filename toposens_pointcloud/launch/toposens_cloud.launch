@@ -1,10 +1,7 @@
 <launch>
 	<node pkg="rviz" type="rviz" name="grid_visualization" output="screen" args="-d $(find toposens_pointcloud)/rviz/toposens_pointcloud.rviz" />
-
+	
 	<node pkg="toposens_pointcloud" type="toposens_pointcloud_node" name="ts_cloud_node" output="screen">
 		<param name="fixed_frame" value="toposens" />
 	</node>
-
-<!--	<node pkg="rviz" type="rviz" name="grid_visualization" output="screen" args="-d $(find toposens_pointcloud)/rviz/toposens_pointcloud.rviz" /> -->
-
 </launch>

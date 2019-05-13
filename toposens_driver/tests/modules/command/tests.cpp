@@ -3,7 +3,6 @@
  *  @date     March 2019
  */
  
-#include <ros/ros.h>
 #include <gtest/gtest.h>
 #include <toposens_driver/command.h>
 
@@ -11,19 +10,23 @@ using namespace toposens_driver;
 
 class CommandTest : public ::testing::Test
 {
+public:
+  const std::string TAG = "\033[36m[DriverCommandTest]\033[00m - ";
 
-  const std::string TAG = "[DRIVER_COMMAND_TEST] - ";
+protected:
+  void SetUp() {}
 
-  protected:
-    static const int CMD_LEN = 12;
+  void TearDown() {}
 
-    // @note keep test fixture, may be needed later
-    void SetUp() {
-    }
+  void matchCmd(const char* msg, Command::Parameter p, int val, const char* exp)
+  {
+    std::cerr << TAG << "\t" << msg << "...";
 
-    void TearDown() {
-    }
+    Command cmd(p, val);
+    EXPECT_STREQ(cmd.getBytes(), exp);
 
+    std::cerr << "done\n";
+  }
 };
 
 
@@ -36,54 +39,40 @@ class CommandTest : public ::testing::Test
 
 TEST_F(CommandTest, validValues)
 {
-  Command cmd_1(Command::SigStrength, 5);
-  EXPECT_STREQ(cmd_1.getBytes(), "CnWave00005\r");
+  std::cerr << TAG << "<validValues>\n";
 
-  Command cmd_2(Command::FilterSize, 42);
-  EXPECT_STREQ(cmd_2.getBytes(), "Cfiltr00042\r");
+  this->matchCmd("Signal strength with 5",   Command::SigStrength,  5,   "CnWave00005\r");
+  this->matchCmd("Filter size with 42",      Command::FilterSize,   42,  "Cfiltr00042\r");
+  this->matchCmd("Noise threshold with 15",  Command::NoiseThresh,  15,  "CdThre00015\r");
+  this-> matchCmd("SNR boost with 100",      Command::SNRBoost,     100, "Cboost00100\r");
+  this->matchCmd("Calibration temp with -3", Command::CalibTemp,    -3,  "CDTemp-0003\r");
 
-  Command cmd_3(Command::NoiseThresh, 15);
-  EXPECT_STREQ(cmd_3.getBytes(), "CdThre00015\r");
-
-  Command cmd_4(Command::SNRBoost, 100);
-  EXPECT_STREQ(cmd_4.getBytes(), "Cboost00100\r");
-
-  Command cmd_5(Command::CalibTemp, -3);
-  EXPECT_STREQ(cmd_5.getBytes(), "CDTemp-0003\r");
+  std::cerr << TAG << "</validValues>\n";
 }
 
 
 // @todo extend command interface for other new commands
-// @todo remove glim
-// @todo consider what new commands to include in ROS api
-// @todo Sensor::reconfig should be tested too!
 /**
  * Testing the behavior of the Command constructor with invalid Inputs.
  * Desired behavior: Generated command bytes should consist of a fixed length and a valid param name.
  */
-TEST_F(CommandTest, invalidValues)
+TEST_F(CommandTest, outOfRangeValues)
 {
-  Command cmd_1(Command::SigStrength, -4678);
-  EXPECT_STREQ(cmd_1.getBytes(), "CnWave-4678\r");
+  std::cerr << TAG << "<outOfRangeValues>\n";
 
-  Command cmd_2(Command::FilterSize, NULL);
-  EXPECT_STREQ(cmd_2.getBytes(), "Cfiltr00000\r");
+  this->matchCmd("Signal strength with -4678",   Command::SigStrength, -4678,   "CnWave-4678\r");
+  this->matchCmd("Filter size with NULL",        Command::FilterSize,  NULL,    "Cfiltr00000\r");
+  this->matchCmd("Noise threshold with 000000",  Command::NoiseThresh, 000000,  "CdThre00000\r");
+  this->matchCmd("SNR boost with 00604",         Command::SNRBoost,    00604,   "Cboost00388\r");
+  this->matchCmd("Noise threshold with INT_MAX", Command::CalibTemp,   INT_MAX, "CDTemp09999\r");
 
-  Command cmd_3(Command::NoiseThresh, 000000);
-  EXPECT_STREQ(cmd_3.getBytes(), "CdThre00000\r");
-
-  // Test conversions between number system representations.
-  Command cmd_4(Command::SNRBoost, 00604);
-  EXPECT_STREQ(cmd_4.getBytes(), "Cboost00388\r");
-
-  Command cmd_5(Command::CalibTemp, INT_MAX);
-  EXPECT_STREQ(cmd_5.getBytes(), "CDTemp09999\r");
+  std::cerr << TAG << "</outOfRangeValues>\n";
 }
 
 
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ts_driver_test");
+  ros::init(argc, argv, "ts_driver_command_test");
   return RUN_ALL_TESTS();
 }

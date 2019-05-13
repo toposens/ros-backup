@@ -2,77 +2,89 @@
  *  @author   Adi Singh, Christopher Lang, Roua Mokchah
  *  @date     April 2019
  */
-#include <vector>
+
+#include <fcntl.h>
 #include <ros/ros.h>
 #include <gtest/gtest.h>
-
 #include <dynamic_reconfigure/server.h>
-#include <toposens_driver/TsDriverConfig.h>
 
-#include <termios.h>
-#include <fcntl.h>
 
 /**
  * Testing Sensor::_reconfig.
  */
-using namespace toposens_driver;
 
-char kReconfigTestInitBuff[100] = "";
+char kReconfigTestBuff[100] = "";
 
 class ReconfigTest : public ::testing::Test
 {
-
 public:
-  const std::string TAG = "[DRIVER_RECONFIG_TEST] - ";
+  const std::string TAG = "\033[36m[DriverReconfigTest]\033[00m - ";
 
 protected:
-    ros::NodeHandle* private_nh;
-    int conn_handle;
+  ros::NodeHandle* private_nh;
+  std::string mock_sensor;
+  int conn_handle;
+  char buff[100];
 
+  void SetUp()
+  {
+    memset(&buff, '\0', sizeof(buff));
+    private_nh = new ros::NodeHandle("~");
+    private_nh->getParam("mock_sensor", mock_sensor);
+    conn_handle = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
 
-    void SetUp()
+    // Reads in initial commands sent by Sensor::_init
+    int n_bytes = 0;
+    while(!strlen(kReconfigTestBuff))
     {
-      private_nh = new ros::NodeHandle("~");
-      std::string mock_sensor;
-      private_nh->getParam("mock_sensor", mock_sensor);
-      conn_handle = open(mock_sensor.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);
-
-      // Reads in initial commands sent by Sensor::_init
-      int n_bytes = 0;
-      while(!strlen(kReconfigTestInitBuff))
-      {
-        n_bytes = read(conn_handle,
-                    &kReconfigTestInitBuff,
-                    sizeof(kReconfigTestInitBuff)
-                  );
-        if (n_bytes > 0) break;
-        ros::Duration(0.01).sleep();
-      }
-    }
-
-    void TearDown()
-    {
-      close(conn_handle);
-      delete private_nh;
-    }
-
-    void updateCfg(std::string param_name, int param_value)
-    {
-      dynamic_reconfigure::IntParameter int_param;
-      int_param.name = param_name;
-      int_param.value = param_value;
-
-      dynamic_reconfigure::Config conf;
-      conf.ints.push_back(int_param);
-
-      dynamic_reconfigure::ReconfigureRequest req;
-      req.config = conf;
-
-      dynamic_reconfigure::ReconfigureResponse res;
-      ros::service::call("/ts_driver_node/set_parameters", req, res);
+      n_bytes = read(conn_handle, &kReconfigTestBuff, sizeof(kReconfigTestBuff));
+      if (n_bytes > 0) break;
       ros::Duration(0.01).sleep();
-      ros::spinOnce();
     }
+  }
+
+  void TearDown()
+  {
+    close(conn_handle);
+    delete private_nh;
+  }
+
+  void updateCfg(std::string param_name, int param_value)
+  {
+    std::cerr << TAG << "\tUpdating parameter server with "
+      << param_name << " of " << param_value << "...";
+
+    dynamic_reconfigure::IntParameter int_param;
+    int_param.name = param_name;
+    int_param.value = param_value;
+
+    dynamic_reconfigure::Config conf;
+    conf.ints.push_back(int_param);
+
+    dynamic_reconfigure::ReconfigureRequest req;
+    req.config = conf;
+
+    dynamic_reconfigure::ReconfigureResponse res;
+    ros::service::call("/ts_driver_node/set_parameters", req, res);
+    ros::Duration(0.01).sleep();
+    ros::spinOnce();
+
+    std::cerr << "done\n";
+  }
+
+
+  void listen()
+  {
+    std::cerr << TAG << "\tListening for commands on " << mock_sensor << "...";
+
+    int n_bytes = 0;
+    while(n_bytes < 1)
+    {
+      n_bytes = read(conn_handle, &buff, sizeof(buff));
+      ros::Duration(0.01).sleep();
+    } 
+    std::cerr << "done\n";
+  }
 };
 
 
@@ -84,7 +96,14 @@ protected:
 
 TEST_F(ReconfigTest, checkInitConfig)
 {
-  EXPECT_STREQ(kReconfigTestInitBuff, "CnWave00005\rCfiltr00020\rCdThre00005\rCboost00500\r");
+  std::cerr << TAG << "<checkInitConfig>\n";
+
+  std::string exp = "CnWave00005\rCfiltr00020\rCdThre00005\rCboost00500\r";
+  std::cerr << TAG << "\tChecking initial command flush...";
+  EXPECT_STREQ(kReconfigTestBuff, exp.c_str());
+  std::cerr << "done\n";
+
+  std::cerr << TAG << "</checkInitConfig>\n";
 } 
 
 
@@ -95,14 +114,13 @@ TEST_F(ReconfigTest, checkInitConfig)
 
 TEST_F(ReconfigTest, changeSigStrength)
 {
-  char buff[100];
-  int n_bytes = 0;
-  memset(&buff, '\0', sizeof(buff));
+  std::cerr << TAG << "<changeSigStrength>\n";
 
-  updateCfg("sig_strength", 12);
-
-  while((n_bytes < 1))n_bytes = read(conn_handle, &buff, sizeof(buff));
+  this->updateCfg("sig_strength", 12);
+  this->listen();
   EXPECT_EQ(std::string(buff),"CnWave00012\r");
+
+  std::cerr << TAG << "</changeSigStrength>\n";
 }
 
 

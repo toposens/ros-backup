@@ -27,7 +27,7 @@ namespace toposens_markers
 
 static const std::string kMarkersTopic  = "ts_markers";
 /**< Rviz namespace for plotted points.*/
-static const std::string kPointsNs      = "TsPoints";
+static const std::string kMarkersNs     = "TsMarkers";
 /**< Rviz namespace for sensor mesh.*/
 static const std::string kMeshNs        = "TsSensor";
   

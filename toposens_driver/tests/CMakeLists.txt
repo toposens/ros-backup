@@ -1,6 +1,10 @@
 find_package(roslaunch REQUIRED)
 find_package(rostest REQUIRED)
 
+set(TEST_DATA_LOCATION
+	http://85.214.248.206/ros
+)
+
 add_definitions(
 	-Wall
 	-O2
@@ -57,16 +61,17 @@ endif()
 ## Download Test Data ##
 ########################
 
+
 catkin_download_test_data(
   ${PROJECT_NAME}_raw_stream
-  http://85.214.248.206/ros/raw_stream
+  ${TEST_DATA_LOCATION}/raw_stream
   DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
 	MD5 3ec2f56b1cf5372cc98499c4458d37ff
 )
 
 catkin_download_test_data(
   ${PROJECT_NAME}_ts_scans.bag
-  http://85.214.248.206/ros/ts_scans.bag
+  ${TEST_DATA_LOCATION}/ts_scans.bag
   DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/tests
 	MD5 4abee53fddcf902bab3ca02511ea861b
 )
@@ -107,7 +112,10 @@ endforeach()
 ## Hz test ##
 #############
 
-add_rostest(hertz/ts_scans.test DEPENDENCIES ${PROJECT_NAME}_node)
+add_rostest(
+	hertz/ts_scans.test
+	DEPENDENCIES ${PROJECT_NAME}_node ${PROJECT_NAME}_mock
+)
 
 ###################
 ## Code Coverage ##

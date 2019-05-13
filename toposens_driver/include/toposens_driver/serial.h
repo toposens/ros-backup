@@ -8,6 +8,7 @@
 
 #include <termios.h>
 #include <sstream>
+
 namespace toposens_driver
 {
 /** @brief  Provides low-level I/O access to TS data stream using

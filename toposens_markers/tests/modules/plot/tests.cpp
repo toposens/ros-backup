@@ -11,9 +11,8 @@ using namespace toposens_markers;
 
 class PlotTest : public ::testing::Test
 {
-
 public:
-  const std::string TAG = "[MARKERS_PLOT_TEST] - ";
+  const std::string TAG = "\033[36m[MarkersPlotTest]\033[00m - ";
 
 protected:
   const int kNumPoints = 10;
@@ -32,9 +31,7 @@ protected:
     p = new Plot(nh, *priv_nh);
 
     scans_pub = nh.advertise<toposens_msgs::TsScan>(
-                  toposens_driver::kScansTopic, 
-                  toposens_driver::kQueueSize
-                );
+      toposens_driver::kScansTopic, toposens_driver::kQueueSize);
   
     markers_sub = nh.subscribe(kMarkersTopic, 100, &PlotTest::store, this);
 
@@ -53,22 +50,25 @@ protected:
 
   void listen()
   {
-    std::cerr << TAG << "Listening for markers...";
+    std::cerr << TAG << "\tListening for markers on " << kMarkersTopic << "...\n";
+
     ros::Time end = ros::Time::now() + ros::Duration(1.0);
     while(ros::Time::now() < end)
     {
       ros::spinOnce();
       ros::Duration(0.1).sleep();
     }
-    std::cerr << "completed" << std::endl;
   }
 
 
   void store(const visualization_msgs::MarkerArray::ConstPtr &msg)
   {
-    for (auto &m : msg->markers) {
-      if (m.ns == kPointsNs) markers.push_back(m);
+    for (auto &m : msg->markers)
+    {
+      if (m.ns == kMarkersNs) markers.push_back(m);
     }
+    std::cerr << TAG << "\033[33m" << "\tReceived "
+      << markers.size() << " markers\n" << "\033[00m";
   }
 };
 
@@ -79,20 +79,25 @@ protected:
 */
 TEST_F(PlotTest, emptyScan)
 {
-  std::cerr << TAG << "Publishing empty scan...";
+  std::cerr << TAG << "<emptyScan>\n";
+  std::cerr << TAG << "\tPublishing empty scan...";
+
   scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
 
-  listen();
-  EXPECT_EQ(markers.size(), 0) << "Empty scan produced markers.";
+  this->listen();
+  EXPECT_EQ(markers.size(), 0);
+
+  std::cerr << TAG << "</emptyScan>\n";
 }
-
 
 
 
 TEST_F(PlotTest, zeroIntensityScan)
 {
-  std::cerr << TAG << "Publishing scan with zero-intensity points...";
+  std::cerr << TAG << "<zeroIntensityScan>\n";
+  std::cerr << TAG << "\tPublishing scan with zero-intensity points...";
+
   for(int i = 0; i < kNumPoints; i++)
   {
     toposens_msgs::TsPoint pt;
@@ -102,10 +107,12 @@ TEST_F(PlotTest, zeroIntensityScan)
   }
 
   scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
 
-  listen();
-  EXPECT_EQ(markers.size(), 0) << "Zero-intensity points produced markers.";
+  this->listen();
+  EXPECT_EQ(markers.size(), 0);
+
+  std::cerr << TAG << "</zeroIntensityScan>\n";
 }
 
 
@@ -114,9 +121,10 @@ TEST_F(PlotTest, zeroIntensityScan)
  *  Tests that all the received points/scans are plotted.
  *  Desired behavior: All valid points/scans are plotted in the same order with which they were published.
  */
-TEST_F(PlotTest, validScans)
+TEST_F(PlotTest, validPoints)
 {
-  std::cerr << TAG << "Publishing scan with plottable points...";
+  std::cerr << TAG << "<validPoints>\n";
+  std::cerr << TAG << "\tPublishing scan with plottable points...";
 
   for(int i = 0; i < kNumPoints; i++)
   {
@@ -127,10 +135,10 @@ TEST_F(PlotTest, validScans)
   }
 
   scans_pub.publish(scan);
-  std::cerr << "done" << std::endl;
+  std::cerr << "done\n";
 
-  listen();
-  EXPECT_EQ(markers.size(), kNumPoints) << "Valid points omitted in plot.";
+  this->listen();
+  ASSERT_EQ(markers.size(), kNumPoints);
 
   for (int i = 0; i < kNumPoints; i++)
   {
@@ -141,8 +149,14 @@ TEST_F(PlotTest, validScans)
     EXPECT_FLOAT_EQ(exp_pt.location.y, rec_pt.pose.position.y);
     EXPECT_FLOAT_EQ(exp_pt.location.z, rec_pt.pose.position.z);
 
+    // marker scale is directly proportional (but not equal) to
+    // point intenstiy. since point intensities are added in increasing
+    // order (i+1), we can at least expect that their corresponding
+    // markers will be arranged in order of increasing scale
     if (i > 0) EXPECT_GT(rec_pt.scale.x, markers.at(i - 1).scale.x);
   }
+
+  std::cerr << TAG << "</validPoints>\n";
 }
 
 
@@ -150,7 +164,7 @@ TEST_F(PlotTest, validScans)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "ts_markers_test");
+  ros::init(argc, argv, "ts_markers_plot_test");
   ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }
