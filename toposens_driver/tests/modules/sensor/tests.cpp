@@ -117,8 +117,6 @@ TEST_F(SensorTest, pollValidFrame)
                         "P0000X00142Y00360Z01555V00052"
                       "E";
   this->pollMockTx(frame);
-  //std::cerr << "!!!" << pollMockTx(frame) << "!!!";
-  //std::cerr << "---" << scan.points.size() << "---";
 
   ASSERT_EQ(scan.points.size(), (uint)4) << "Not enough points in scan: " << scan.points.size();
   EXPECT_POINT(scan.points[0], {-0.415, 0.01,  0.257, 0.61}, "Valid point P1");
@@ -283,13 +281,12 @@ TEST_F(SensorTest, pollLargeFrame)
 
   // @note some points will invitably get dropped due to bad serial
   // stream characters but they will always be less than equal to tx points
-  // @todo use EXPECT_NEAR() to allow for only a certain margin
-  EXPECT_LE(scan.points.size(), numPoints);
+  // @todo confirm if EXPECT_GT is working and try to get more points: ~500
+  //EXPECT_LE(scan.points.size(), numPoints);
+  EXPECT_GT(scan.points.size(), (long unsigned int)350);
 
   std::cerr << TAG << "</pollLargeFrame>\n";
 }
-
-
 
 /**
  * Testing Sensor::poll with valid data frames from dump file.
@@ -316,10 +313,9 @@ TEST_F(SensorTest, pollStreamDump)
     EXPECT_NO_THROW(this->pollMockTx("S" + line));
   }
   infile.close();
-  
+
   std::cerr << TAG << "</pollStreamDump>\n";
 }
-
 
 
 /**
@@ -346,5 +342,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "ts_driver_sensor_test");
+  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }

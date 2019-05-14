@@ -18,7 +18,7 @@ class ReconfigTest : public ::testing::Test
 {
 public:
   const std::string TAG = "\033[36m[MarkersReconfigTest]\033[00m - ";
-
+  
 protected:
   const float listen_period = 1.0;
 

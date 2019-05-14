@@ -1,7 +1,4 @@
 <launch>
-  <arg name="sensor_port" default="tty7" />
-  <arg name="driver_port" default="tty8" />
-
   <node pkg="rosbag" type="play" name="player" output="screen"
         args="--clock --delay=3 $(find toposens_driver)/tests/ts_scans.bag" />
 

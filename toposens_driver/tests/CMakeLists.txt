@@ -82,14 +82,14 @@ catkin_download_test_data(
 #############
 
 set(TEST_MODULES
-#	command
-#	reconfig
+	command
+	reconfig
 	sensor
-#	serial
+	serial
 )
 
 foreach(M ${TEST_MODULES})
-	
+
 	add_rostest_gtest(
 		${PROJECT_NAME}_${M}_test
 		modules/${M}/launch.test
@@ -114,7 +114,7 @@ endforeach()
 
 add_rostest(
 	hertz/ts_scans.test
-	DEPENDENCIES ${PROJECT_NAME}_node ${PROJECT_NAME}_mock
+	DEPENDENCIES ${PROJECT_NAME}_node
 )
 
 ###################
