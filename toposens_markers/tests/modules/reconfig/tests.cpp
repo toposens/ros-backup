@@ -18,7 +18,7 @@ class ReconfigTest : public ::testing::Test
 {
 public:
   const std::string TAG = "\033[36m[MarkersReconfigTest]\033[00m - ";
-
+  
 protected:
   const float listen_period = 1.0;
 
@@ -85,7 +85,7 @@ protected:
   {
     std::cerr << TAG << "\tUpdating parameter server with "
       << param_name << " of " << param_value << "...";
-    
+
     dynamic_reconfigure::DoubleParameter double_param;
     double_param.name = param_name;
     double_param.value = param_value;
@@ -119,6 +119,8 @@ TEST_F(ReconfigTest, changeScale)
   this->updateCfg("scale", new_scale);
   this->publishAndListen();
 
+  EXPECT_EQ(markers.size(), (uint)2);
+
   double def_size = markers.at(0).scale.x;
   double new_size = markers.at(1).scale.x;
 
@@ -131,7 +133,7 @@ TEST_F(ReconfigTest, changeScale)
 // note... this is a complex function to test because of race conditions
 // @todo cleanup documenation here
 // @note spin() is being called by markers node. so you cannot wait to call callback
-// the first listen lapses a finite amount of time, so the slep duration we need is only 
+// the first listen lapses a finite amount of time, so the slep duration we need is only
 // the remainder of time
 // to see this fail, change min_sleep duration to a value between 0 and (new_lifetime - listen_period)
 TEST_F(ReconfigTest, changeLifetime)
@@ -176,4 +178,3 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }
-

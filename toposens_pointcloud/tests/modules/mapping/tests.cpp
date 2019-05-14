@@ -160,10 +160,11 @@ TEST_F(MappingTest, validPoints)
     auto expc_pt = scan.points.at(i);
     auto rcvd_pt = rcvd_points.at(i);
 
-    EXPECT_FLOAT_EQ(expc_pt.location.x + tf_x, rcvd_pt.location.x);
-    EXPECT_FLOAT_EQ(expc_pt.location.y + tf_y, rcvd_pt.location.y);
-    EXPECT_FLOAT_EQ(expc_pt.location.z + tf_z, rcvd_pt.location.z);
-    EXPECT_FLOAT_EQ(expc_pt.intensity,         rcvd_pt.intensity );
+    // @todo confirm if EXPECT_NEAR is working
+    EXPECT_NEAR(expc_pt.location.x + tf_x, rcvd_pt.location.x, 1.0e-15);
+    EXPECT_NEAR(expc_pt.location.y + tf_y, rcvd_pt.location.y, 1.0e-15);
+    EXPECT_NEAR(expc_pt.location.z + tf_z, rcvd_pt.location.z, 1.0e-15);
+    EXPECT_NEAR(expc_pt.intensity,         rcvd_pt.intensity,  1.0e-15);
   }
   std::cerr << TAG << "</validPoints>\n";
 }

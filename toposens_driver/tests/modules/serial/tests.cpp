@@ -22,14 +22,12 @@ protected:
   std::string mock_sensor, driver_port;
   ros::NodeHandle* private_nh;
 
-
   void SetUp()
   {
     private_nh = new ros::NodeHandle("~");
     private_nh->getParam("mock_sensor", mock_sensor);
     private_nh->getParam("port", driver_port);
   }
-
 
   void TearDown()
   {
@@ -139,7 +137,7 @@ TEST_F(SerialTest, sendValidBytes)
   std::cerr << "done\n";
 
   std::cerr << TAG << "\tBytes received: " << n_bytes << "\n";
-  EXPECT_EQ(n_bytes + 1, (int)sizeof(tx_data));   // Size of data is number of chars + null terminator 
+  EXPECT_EQ(n_bytes + 1, (int)sizeof(tx_data));   // Size of data is number of chars + null terminator
   close(conn_fd);
 
   std::cerr << TAG << "</sendValidBytes>\n";
@@ -150,5 +148,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "ts_driver_serial_test");
+  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }

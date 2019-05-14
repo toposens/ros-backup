@@ -100,6 +100,7 @@ protected:
   }
 };
 
+
 /**
  * Testing Sensor::poll with a valid data frame
  * Data frame consisting of 4 known points
@@ -117,7 +118,7 @@ TEST_F(SensorTest, pollValidFrame)
                       "E";
   this->pollMockTx(frame);
 
-  EXPECT_EQ(scan.points.size(), (uint)4);
+  ASSERT_EQ(scan.points.size(), (uint)4) << "Not enough points in scan: " << scan.points.size();
   EXPECT_POINT(scan.points[0], {-0.415, 0.01,  0.257, 0.61}, "Valid point P1");
   EXPECT_POINT(scan.points[1], {-0.235, 0.019, 0.718, 0.55}, "Valid point P2");
   EXPECT_POINT(scan.points[2], {-0.507, 0.043, 0.727, 0.75}, "Valid point P3");
@@ -125,6 +126,7 @@ TEST_F(SensorTest, pollValidFrame)
 
   std::cerr << TAG << "</pollValidFrame>\n";
 }
+
 
 /** Testing Sensor::poll with empty data frames
 *  Desired behavior: extract no points from empty data frame.
@@ -262,6 +264,7 @@ TEST_F(SensorTest, pollThreeMixedPoints)
   std::cerr << TAG << "</pollThreeMixedPoints>\n";
 }
 
+
 /**
  * Testing Sensor::poll with large data frame.
  * Desired behavior: Method does not raise any exception, even for large point clouds.
@@ -278,50 +281,41 @@ TEST_F(SensorTest, pollLargeFrame)
 
   // @note some points will invitably get dropped due to bad serial
   // stream characters but they will always be less than equal to tx points
-  // @todo use EXPECT_NEAR() to allow for only a certain margin
-  EXPECT_LE(scan.points.size(), numPoints);
+  // @todo confirm if EXPECT_GT is working and try to get more points: ~500
+  //EXPECT_LE(scan.points.size(), numPoints);
+  EXPECT_GT(scan.points.size(), (long unsigned int)350);
 
   std::cerr << TAG << "</pollLargeFrame>\n";
 }
 
-
-
 /**
  * Testing Sensor::poll with valid data frames from dump file.
-  
   read each single scan from the dump file : Example
   S000020P0000X-0104Y-0229Z00206V00036ES000025P0000X-0156Y-0229Z00206V00048E
   line 1 : empty -> continue
   line 2 : 000020P0000X-0104Y-0229Z00206V00036E
   line 3 : 000025P0000X-0156Y-0229Z00206V00048E
  */
-/*TEST_F(SensorTest, pollStreamDump)
+TEST_F(SensorTest, pollStreamDump)
 {
   std::cerr << TAG << "<pollStreamDump>\n";
 
-  std::string dumpfilename;
-  private_nh->getParam("file", dumpfilename);
+  std::string filename;
+  private_nh->getParam("file", filename);
 
   std::ifstream infile;
-  infile.open(dumpfilename);
+  infile.open(filename);
 
   std::string line;
-  while (std::getline(infile,line,'S'))
+  while (std::getline(infile, line, 'S'))
   {
     if (line.empty()) continue;
-
-    testing::internal::CaptureStderr();
-    EXPECT_NO_THROW(pollMockTx(line));
-    if(!testing::internal::GetCapturedStderr().empty())
-    {
-      ADD_FAILURE() << "Unintended behavior with dumped data frame" ;
-    }
+    EXPECT_NO_THROW(this->pollMockTx("S" + line));
   }
   infile.close();
 
-  std::cerr << TAG << "</pollLargeFrame>\n";
-}*/
-
+  std::cerr << TAG << "</pollStreamDump>\n";
+}
 
 
 /**
@@ -348,5 +342,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "ts_driver_sensor_test");
+  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }

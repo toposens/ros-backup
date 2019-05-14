@@ -3,7 +3,7 @@
 
 
 namespace toposens_markers
-{   
+{
 /** A dynamic reconfigure server is set up to change marker scale
  *  and lifetime during runtime.
  */
@@ -36,7 +36,7 @@ void Plot::_reconfig(TsMarkersConfig &cfg, uint32_t level)
     ROS_INFO("Update skipped: Parameter not recognized");
     return;
   }
-  
+
   _lifetime = cfg.lifetime;
   _rviz->setGlobalScale(cfg.scale);
   if (level == -1) ROS_INFO("Marker settings initialized");
@@ -51,12 +51,13 @@ void Plot::_reconfig(TsMarkersConfig &cfg, uint32_t level)
  */
 void Plot::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
 {
-  _scans.push_back(*msg);
+	_scans.push_back(*msg);
 
   do {
     ros::Time oldest = _scans.front().header.stamp;
     // break loop if oldest timestamp is within lifetime
-    if (ros::Time::now() - oldest < ros::Duration(_lifetime)) break;
+		//ROS_INFO_STREAM("now: " << ros::Time::now() << "; oldest: " << oldest);
+		if (ros::Time::now() - oldest < ros::Duration(_lifetime)) break;
     _scans.pop_front();
   } while(!_scans.empty());
 
@@ -71,7 +72,7 @@ void Plot::_sanitize(const toposens_msgs::TsScan::ConstPtr& msg)
  *
  *  Sensing range is also updated to keep track of the furthest point
  *  detected by the sensor. This is used for color-coding the markers.
- *  
+ *
  *  RVT (Rviz Visual Tools) wrappers are used for efficient Rviz
  *  plotting. Since batch publishing is enabled, RVT collects all
  *  markers to be visualized in a given update and publishes them
@@ -81,10 +82,10 @@ void Plot::_plot(void) {
   _rviz->deleteAllMarkers();
 
   for (auto it1 = _scans.begin(); it1 != _scans.end(); ++it1) {
-    std::vector<toposens_msgs::TsPoint> points = it1->points;
+		std::vector<toposens_msgs::TsPoint> points = it1->points;
 
     for (auto it2 = points.begin(); it2 != points.end(); ++it2) {
-      toposens_msgs::TsPoint pt = *it2;
+			toposens_msgs::TsPoint pt = *it2;
       if (pt.location.x > _sensingRange) _sensingRange = pt.location.x;
 
       Eigen::Vector3d location = _rviz->convertPoint(pt.location);
@@ -102,11 +103,11 @@ void Plot::_plot(void) {
 
 /** Only adds the sensor mesh to RVT publishing queue. The actual
  *  publishing is done in the parent function which calls trigger().
- *  
+ *
  *  @todo scale the mesh to mm instead of scaling down from meters.
  *  @todo this orientation should be included in the stl files
  *  instead of being done here on each op.
- */ 
+ */
 void Plot::_addSensorMesh(void)
 {
   geometry_msgs::Pose og;
