@@ -37,15 +37,15 @@ catkin_package(
 ###########
 
 include_directories(
-    include
-    ${catkin_INCLUDE_DIRS}
+  include
+  ${catkin_INCLUDE_DIRS}
 )
 
 add_subdirectory(src)
 
 install(
-    DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
 
@@ -54,5 +54,5 @@ install(
 ##########
 
 if(CATKIN_ENABLE_TESTING)
-    add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()

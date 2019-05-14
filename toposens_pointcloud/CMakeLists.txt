@@ -1,33 +1,26 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(toposens_pointcloud)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
-
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-    pcl_ros
-    roscpp
-    rospy
-    tf
-    rviz
-    toposens_driver
-    toposens_msgs
-)
-
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS
-  tf
+set(${PROJECT_NAME}_DEPS
   message_runtime
   pcl_ros
   roscpp
   rospy
   rviz
+  tf
   toposens_driver
   toposens_msgs
+)
+
+find_package(
+  catkin REQUIRED
+  COMPONENTS ${${PROJECT_NAME}_DEPS}
+)
+
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS ${${PROJECT_NAME}_DEPS}
 )
 
 
@@ -38,13 +31,13 @@ include_directories(
 add_subdirectory(src)
 
 install(
-    DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
 ##########
 ## Test ##
 ##########
 if(CATKIN_ENABLE_TESTING)
-    add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()

@@ -21,9 +21,8 @@
   <depend>rviz</depend>
   <depend>pcl_ros</depend>
   <depend>toposens_msgs</depend>
-
   <depend>toposens_driver</depend>
-  <exec_depend>message_runtime</exec_depend>
+  <depend>message_runtime</depend>
 
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>

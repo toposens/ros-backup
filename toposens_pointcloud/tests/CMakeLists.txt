@@ -1,7 +1,6 @@
  find_package(roslaunch REQUIRED)
  find_package(rostest REQUIRED)
 
-
 #############
 ## Modules ##
 #############
