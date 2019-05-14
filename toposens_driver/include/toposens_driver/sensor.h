@@ -82,7 +82,7 @@ class Sensor
   	 *	 @returns True if sensor is calibrating.
   	 */
   	bool _isCalibrating();
-	
+
     /** Efficiently converts a char array representing a signed integer to
      *  its numerical value.
      *  @param i String iterator representing an integer value.

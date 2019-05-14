@@ -2,7 +2,7 @@
  *  @author   Christopher Lang, Roua Mokchah, Adi Singh
  *  @date     March 2019
  */
- 
+
 #include <gtest/gtest.h>
 #include <toposens_driver/command.h>
 
@@ -74,5 +74,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "ts_driver_command_test");
+  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }
