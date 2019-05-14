@@ -113,9 +113,7 @@ void Plot::_addSensorMesh(void)
   og.orientation.x = og.orientation.z = 1/sqrt(2);
   og.orientation.w = 0;
 
-  _rviz->publishMesh(og, "package://toposens_description/meshes/Body.stl",
-    rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
-  _rviz->publishMesh(og, "package://toposens_description/meshes/Cover.stl",
+  _rviz->publishMesh(og, "package://toposens_description/meshes/TS3.stl",
     rviz_visual_tools::colors::DARK_GREY, 0.001, kMeshNs);
 }
 
