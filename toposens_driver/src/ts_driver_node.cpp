@@ -58,7 +58,7 @@ int main(int argc, char** argv)
   } catch (const char *msg) {
     ROS_ERROR("%s", msg);
   }
-  
+
   ros::shutdown();
   return 0;
 }
